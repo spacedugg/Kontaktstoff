@@ -38,6 +38,7 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
   const temp=document.createElement('canvas');temp.width=Math.round(w*scale);temp.height=Math.round(h*scale);
   const ctx=temp.getContext('2d');ctx.scale(scale,scale);rect(ctx,0,0,w,h,'#ffffff');
   const background=campaign.sides[side].background;
+  if(background.kind==='blank'&&background.color)rect(ctx,0,0,w,h,background.color);
   if(background.kind==='template')template(ctx,side,w,h);
   if(background.kind==='image'){const img=await imageFrom(background.data);const ratio=Math.min(w/img.width,h/img.height);ctx.drawImage(img,(w-img.width*ratio)/2,(h-img.height*ratio)/2,img.width*ratio,img.height*ratio);}
   const overflow=[];

@@ -8,9 +8,9 @@ export const resolveText = (template,recipient={}) => String(template).replace(/
 export const missingKeys = (template,recipient={}) => [...String(template).matchAll(/\{\{\s*([\w-]+)\s*\}\}/g)].map(m=>m[1]).filter(key=>!String(recipient[key]??'').trim());
 export function createCampaign(blank=false) {
   const field=(type,text,x,y,w,h,color='#ffffff',fontSize=12)=>({id:uid(),type,text,x,y,w,h,color,fontSize,weight:'700',align:'left',background:'transparent',autoFit:true});
-  return { version:1,id:uid(),name:blank?'Neue Kampagne':'chattastic · Der erste Kontakt',format:'a5-landscape',updatedAt:Date.now(),sample:true,
+  return { version:1,id:uid(),name:blank?'Neue Kampagne':'chattastic · Der erste Kontakt',format:'a5-landscape',updatedAt:Date.now(),sample:!blank,...(blank?{brief:{sender:'',audience:'',goal:'chatbot',offer:''},onboarding:{active:true,step:0,personalizationSkipped:false}}:{}),
     sides:{front:{background:{kind:blank?'blank':'template'},fields:blank?[]:[field('text','{{company}}',126,17,70,12),field('text','{{chatbot_url}}',12,137,150,6,'#2563eb',9),field('qr','{{chatbot_url}}',178,119,24,24,'#0f172a')]},back:{background:{kind:blank?'blank':'template'},fields:blank?[]:[field('qr','{{chatbot_url}}',143,55,34,34,'#0f172a'),field('text','Für {{company}}',129,98,62,13,'#ffffff',10),field('text','{{chatbot_url}}',129,119,62,10,'#ffffff',8)]}},
-    recipients:[{id:uid(),company:'Nordlicht Immobilien',first_name:'Anna',salutation:'Hallo Anna,',website:'nordlicht.example',chatbot_url:'https://chattastic.de/'},{id:uid(),company:'Studio Hafenblick',first_name:'Jonas',salutation:'Hallo Jonas,',website:'hafenblick.example',chatbot_url:'https://chattastic.de/'},{id:uid(),company:'Bergmann Haustechnik',first_name:'Sarah',salutation:'Hallo Sarah,',website:'bergmann.example',chatbot_url:'https://chattastic.de/'}] };
+    recipients:blank?[]:[{id:uid(),company:'Nordlicht Immobilien',first_name:'Anna',salutation:'Hallo Anna,',website:'nordlicht.example',chatbot_url:'https://chattastic.de/'},{id:uid(),company:'Studio Hafenblick',first_name:'Jonas',salutation:'Hallo Jonas,',website:'hafenblick.example',chatbot_url:'https://chattastic.de/'},{id:uid(),company:'Bergmann Haustechnik',first_name:'Sarah',salutation:'Hallo Sarah,',website:'bergmann.example',chatbot_url:'https://chattastic.de/'}] };
 }
 export function parseCSV(input) {
   input=input.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
@@ -40,10 +40,13 @@ export function validateCampaign(value) {
   if(!value||value.version!==1||!/^[-a-zA-Z0-9_]{1,100}$/.test(value.id)||!FORMATS.some(f=>f.id===value.format)||typeof value.name!=='string'||!value.name.trim()||value.name.length>120) throw new Error('Dies ist keine unterstützte Kontaktstoff-Kampagne.');
   if(!Array.isArray(value.recipients)||value.recipients.length>1000)throw new Error('Ungültige Empfängerliste.');
   if(value.recipients.some(r=>!r||!/^[-a-zA-Z0-9_]{1,100}$/.test(r.id)||Object.keys(r).some(k=>['__proto__','prototype','constructor'].includes(k))||Object.values(r).some(v=>typeof v!=='string'||v.length>5000)))throw new Error('Ungültige Empfängerdaten.');
+  if(value.brief && (!['sender','audience','goal','offer'].every(key=>typeof value.brief[key]==='string'&&value.brief[key].length<=1000)))throw new Error('Ungültiges Kampagnenbriefing.');
+  if(value.onboarding && (!Number.isInteger(value.onboarding.step)||value.onboarding.step<0||value.onboarding.step>5||typeof value.onboarding.active!=='boolean'))throw new Error('Ungültiger Anleitungsstand.');
   const format=FORMATS.find(f=>f.id===value.format);
   for(const side of ['front','back']){
     const s=value.sides?.[side];
     if(!s||!['blank','template','image'].includes(s.background?.kind)||!Array.isArray(s.fields)||s.fields.length>40)throw new Error('Ungültige Designseite.');
+    if(s.background.color!==undefined&&!/^#[0-9a-f]{6}$/i.test(s.background.color))throw new Error('Ungültige Flächenfarbe.');
     if(s.background.kind==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s.background.data)||s.background.data.length>16000000||![s.background.width,s.background.height].every(n=>Number.isFinite(n)&&n>0)))throw new Error('Ungültige Bilddatei im Projekt.');
     for(const f of s.fields){
       if(!f||!/^[-a-zA-Z0-9_]{1,100}$/.test(f.id)||!['text','qr'].includes(f.type)||typeof f.text!=='string'||f.text.length>5000||![f.x,f.y,f.w,f.h,f.fontSize].every(Number.isFinite)||f.x<0||f.y<0||f.w<2||f.h<2||f.x+f.w>format.width+.1||f.y+f.h>format.height+.1||f.fontSize<6||f.fontSize>80||!/^#[0-9a-f]{6}$/i.test(f.color)||!['400','700'].includes(f.weight)||!['left','center','right'].includes(f.align)||!(f.background==='transparent'||/^#[0-9a-f]{6}$/i.test(f.background))) throw new Error('Ungültige Personalisierungsfelder.');
@@ -77,4 +80,9 @@ export function checks(campaign) {
     }
   }
   return issues;
+}
+
+export function setupProgress(campaign) {
+  const designed=s=>s.background.kind!=='blank'||s.fields.length>0;
+  return [Boolean(campaign.name.trim()),FORMATS.some(f=>f.id===campaign.format),designed(campaign.sides.front)&&designed(campaign.sides.back),Boolean(campaign.onboarding?.personalizationSkipped||Object.values(campaign.sides).some(s=>s.fields.some(f=>f.type==='qr'||/\{\{/.test(f.text)))),campaign.recipients.some(r=>Boolean(r.company?.trim())),campaign.onboarding?.active===false];
 }

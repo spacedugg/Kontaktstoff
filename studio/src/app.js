@@ -2,9 +2,13 @@ import {FORMATS,KEYS,uid,clone,clamp,validURL,resolveText,missingKeys,createCamp
 import {listCampaigns,saveCampaign,removeCampaign} from './storage.js';
 import {renderCanvas,imageFrom} from './render.js';
 import {icon,hydrateIcons} from './icons.js';
+import {Mailing3D} from './three-d.js';
+import {guideHTML,GUIDE_STEPS} from './guide.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let campaign=createCampaign(), side='front', selected=campaign.sides.front.fields[0]?.id, recipientIndex=0, view='design', guides=true;
+let previewMode='3d';
+const threeD=new Mailing3D(document.querySelector('#three-d-stage'));
 let history=[], future=[], saveTimer, toastTimer, renderVersion=0, drawingIssues=[], saveFailed=false, pendingSaves=Promise.resolve(), activeDrag=null;
 const format=()=>FORMATS.find(f=>f.id===campaign.format);
 const recipient=()=>campaign.recipients[recipientIndex]||{};
@@ -16,12 +20,12 @@ function saveState(text,failed=false){$('#save-state').innerHTML=`<span class="s
 function persist(){clearTimeout(saveTimer);saveState('Wird gespeichert …');saveTimer=setTimeout(flushSave,350);}
 async function flushSave(){clearTimeout(saveTimer);const snapshot=clone(campaign);pendingSaves=pendingSaves.catch(()=>{}).then(()=>saveCampaign(snapshot));try{await pendingSaves;saveState('Lokal gespeichert');saveFailed=false;}catch{saveState('Nicht gespeichert',true);if(!saveFailed)toast('Lokales Speichern nicht möglich. Bitte sichere dein Projekt als Datei.',true);saveFailed=true;}}
 function checkpoint(){history.push(clone(campaign));if(history.length>40)history.shift();future=[];}
-function changed({inspector=true,table=true}={}){campaign.updatedAt=Date.now();persist();renderUI(inspector,table);}
+function changed({inspector=true,table=true,guide=true}={}){campaign.updatedAt=Date.now();persist();renderUI(inspector,table,guide);}
 function commit(fn,options){checkpoint();fn();changed(options);}
 function undo(){if(!history.length)return;future.push(clone(campaign));campaign=history.pop();recipientIndex=clamp(recipientIndex,0,Math.max(0,campaign.recipients.length-1));selected=campaign.sides[side].fields.find(f=>f.id===selected)?.id;changed();}
 function redo(){if(!future.length)return;history.push(clone(campaign));campaign=future.pop();recipientIndex=clamp(recipientIndex,0,Math.max(0,campaign.recipients.length-1));changed();}
 function setSide(value){side=value;selected=campaign.sides[side].fields[0]?.id;renderUI();}
-function setView(value){view=value;renderUI();}
+function setView(value){view=value;renderUI();if(value==='preview')requestAnimationFrame(()=>threeD.paint());}
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),30000);}
 const filename=()=>campaign.name.replace(/[^\p{L}\p{N}]+/gu,'-').slice(0,80).replace(/^-|-$/g,'').toLowerCase()||'kampagne';
 async function busy(label,fn){$('#busy-label').textContent=label;$('#busy').hidden=false;try{return await fn();}catch(e){console.error(e);toast(e.message||'Das hat nicht funktioniert. Bitte erneut versuchen.',true);}finally{$('#busy').hidden=true;}}
@@ -31,11 +35,16 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
  return new Promise(resolve=>{const handler=e=>{const b=e.target.closest('[data-result]');if(b)dlg.close(b.dataset.result);};dlg.addEventListener('click',handler);dlg.addEventListener('close',()=>{dlg.removeEventListener('click',handler);resolve(dlg.returnValue);},{once:true});dlg.showModal();});
 }
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
-function renderUI(inspector=true,table=true){
+function renderUI(inspector=true,table=true,guide=true){
  $('#rename-campaign').textContent=campaign.name;$('#recipient-count').textContent=campaign.recipients.length;
  $$('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===view);b.setAttribute('aria-current',b.dataset.tab===view?'step':'false');});
- for(const name of ['design','recipients','preview'])$('#'+name+'-view').hidden=name!==view;
+ for(const name of ['setup','design','recipients','preview'])$('#'+name+'-view').hidden=name!==view;
  $$('[data-side]').forEach(b=>{b.classList.toggle('active',b.dataset.side===side);b.setAttribute('aria-pressed',String(b.dataset.side===side));});
+ $('#setup-tab').hidden=!campaign.onboarding;
+ $('#guide-return').hidden=!campaign.onboarding?.active||view==='setup';
+ if(view==='setup'&&guide)$('#setup-view').innerHTML=guideHTML(campaign);
+ $('#three-d-view').hidden=previewMode!=='3d';$('#proof-spread').hidden=previewMode!=='2d';
+ for(const mode of ['2d','3d']){const b=$('#preview-mode-'+mode);b.classList.toggle('active',previewMode===mode);b.setAttribute('aria-pressed',String(previewMode===mode));}
  $('#side-title').textContent=side==='front'?'Vorderseite':'Rückseite';$('#format-select').value=campaign.format;
  $('#dimensions').textContent=`${format().width} × ${format().height} mm`;$('#width-label').textContent=`${format().width} mm`;$('#design-scale').textContent=format().name;
  $('#artboard').style.aspectRatio=`${format().width}/${format().height}`;
@@ -45,6 +54,8 @@ function renderUI(inspector=true,table=true){
  const bg=campaign.sides[side].background;
  $('#background-info').textContent=bg.kind==='template'?'chattastic-Vorlage · bearbeitbar':bg.kind==='blank'?'Leere Seite · bereit für dein Design':bg.name;
  $('#background-remove').hidden=bg.kind==='blank';
+ $('#empty-artboard').hidden=bg.kind!=='blank'||campaign.sides[side].fields.length>0;
+ $('#page-color-control').hidden=bg.kind!=='blank';$('#page-color').value=bg.color||'#ffffff';
  $('#field-count').textContent=campaign.sides[side].fields.length;
  $('#layer-list').innerHTML=campaign.sides[side].fields.map(f=>`<button class="layer ${f.id===selected?'active':''}" data-layer="${f.id}" aria-pressed="${f.id===selected}">${icon(f.type==='qr'?'qr':'type')}<span class="layer-name">${escape(fieldName(f))}</span><span class="layer-kind">${f.type==='qr'?'QR':'Aa'}</span></button>`).join('')||'<p class="panel-copy">Dein erstes Feld wartet links oben.</p>';
  for(const select of [$('#active-recipient'),$('#preview-recipient')]){
@@ -92,17 +103,18 @@ function renderOverlays(){
 }
 async function requestRender(){
  const version=++renderVersion;const snapshot=clone(campaign),person=clone(recipient());
- const targets=view==='preview'?[['front','#proof-front'],['back','#proof-back']]:[[side,'#design-canvas'],['front','#thumb-front'],['back','#thumb-back']];
+ const targets=view==='setup'?(campaign.onboarding?.step===2?[['front','#guide-front'],['back','#guide-back']]:[]):view==='preview'?[['front','#proof-front'],['back','#proof-back'],['front','#three-d-front'],['back','#three-d-back']]:[[side,'#design-canvas'],['front','#thumb-front'],['back','#thumb-back']];
  try{
    const results=await Promise.all(targets.map(async([s,target])=>{const cvs=document.createElement('canvas');const overflow=await renderCanvas(cvs,snapshot,s,person,{scale:target.includes('thumb')?1.2:5});return{cvs,target,overflow,side:s};}));
    if(version!==renderVersion)return;
    drawingIssues=[];
-   for(const{cvs,target,overflow,side:s}of results){const dest=$(target);dest.width=cvs.width;dest.height=cvs.height;dest.getContext('2d').drawImage(cvs,0,0);if(!target.includes('thumb')&&overflow.length)drawingIssues.push({level:'error',text:`${s==='front'?'Vorderseite':'Rückseite'}: ${overflow.length} Textfeld(er) zu klein für diesen Empfänger. Bitte größer ziehen.`});}
+   for(const{cvs,target,overflow,side:s}of results){const dest=$(target);dest.width=cvs.width;dest.height=cvs.height;dest.getContext('2d').drawImage(cvs,0,0);if(!target.includes('thumb')&&!target.includes('three-d')&&overflow.length)drawingIssues.push({level:'error',text:`${s==='front'?'Vorderseite':'Rückseite'}: ${overflow.length} Textfeld(er) zu klein für diesen Empfänger. Bitte größer ziehen.`});}
    if(view==='preview')renderChecks();
  }catch(e){if(version===renderVersion)toast(e.message,true);}
 }
 function renderChecks(){const issues=[...checks(campaign),...drawingIssues];const errors=issues.filter(i=>i.level==='error');$('#check-count').textContent=errors.length?`${errors.length} offene Punkte`:'Keine blockierenden Fehler';$('#check-list').innerHTML=[{level:'success',text:`${format().width} × ${format().height} mm · Vorder- und Rückseite`},{level:'success',text:`${campaign.recipients.length} Empfänger · ${campaign.sides.front.fields.length+campaign.sides.back.fields.length} Personalisierungsfelder`},...issues].map(i=>`<div class="check-item ${i.level}">${icon(i.level==='success'?'check':i.level==='info'?'info':'warning')}<span>${escape(i.text)}</span></div>`).join('');$('#pdf-export').disabled=!!errors.length;$('#png-export').disabled=!!errors.length;}
-function addField(type){if(campaign.sides[side].fields.length>=40)return toast('Maximal 40 Felder pro Seite.',true);commit(()=>{const f={id:uid(),type:type==='qr'?'qr':'text',text:type==='qr'?'{{chatbot_url}}':type==='company'?'{{company}}':type==='salutation'?'{{salutation}}':'Ihr persönlicher Text',x:15,y:30,w:type==='qr'?28:75,h:type==='qr'?28:15,fontSize:16,weight:'700',align:'left',color:campaign.sides[side].background.kind==='template'&&side==='front'?'#ffffff':'#202321',background:type==='qr'?'#ffffff':'transparent',autoFit:true};campaign.sides[side].fields.push(f);selected=f.id;});toast(type==='qr'?'QR-Code hinzugefügt. Ziehe ihn an die passende Stelle.':'Feld hinzugefügt. Du kannst es direkt im Design verschieben.');}
+function defaultTextColor(){const bg=campaign.sides[side].background;if(bg.kind==='template'&&side==='front')return '#ffffff';if(bg.kind==='blank'&&bg.color){const rgb=bg.color.slice(1).match(/../g).map(v=>parseInt(v,16));return rgb[0]*.299+rgb[1]*.587+rgb[2]*.114<145?'#ffffff':'#202321';}return '#202321';}
+function addField(type){if(campaign.sides[side].fields.length>=40)return toast('Maximal 40 Felder pro Seite.',true);commit(()=>{const f={id:uid(),type:type==='qr'?'qr':'text',text:type==='qr'?'{{chatbot_url}}':type==='company'?'{{company}}':type==='salutation'?'{{salutation}}':'Ihr persönlicher Text',x:type==='qr'?160:15,y:type==='qr'?100:20+Math.min(campaign.sides[side].fields.filter(f=>f.type==='text').length,5)*20,w:type==='qr'?28:75,h:type==='qr'?28:15,fontSize:16,weight:'700',align:'left',color:defaultTextColor(),background:type==='qr'?'#ffffff':'transparent',autoFit:true};campaign.sides[side].fields.push(f);selected=f.id;});toast(type==='qr'?'QR-Code hinzugefügt. Ziehe ihn an die passende Stelle.':'Feld hinzugefügt. Du kannst es direkt im Design verschieben.');}
 function renderRecipients(){
  const cols=keys();$('#data-count').textContent=`${campaign.recipients.length} Empfänger`;$('#sample-label').hidden=!campaign.sample;$('#sample-notice').hidden=!campaign.sample;
  $('#recipients-head').innerHTML='<tr>'+cols.map(k=>`<th scope="col">${escape(KEYS[k]||k)}</th>`).join('')+'<th scope="col"><span class="sr-only">Aktionen</span></th></tr>';
@@ -184,12 +196,12 @@ $('#project-export').onclick=()=>{download(new Blob([JSON.stringify(campaign,nul
 $('#project-file').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.size>40*1024*1024)return toast('Projektdateien dürfen maximal 40 MB groß sein.',true);await busy('Projekt wird geöffnet …',async()=>{let imported;try{imported=validateCampaign(JSON.parse(await file.text()));}catch(e){throw new Error('Projekt konnte nicht importiert werden: '+e.message);}await flushSave();imported.id=uid();imported.name=(imported.name+' · Import').slice(0,120);campaign=imported;history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view='design';changed();toast('Projekt als eigenständige Kampagne geöffnet.');});};
 async function campaignList(){await flushSave();let campaigns;try{campaigns=await listCampaigns();}catch{toast('Lokale Kampagnen sind nicht verfügbar. Du kannst eine Projektdatei importieren.',true);campaigns=[];}campaigns.sort((a,b)=>b.updatedAt-a.updatedAt);
  const promise=modal('Deine Kampagnen',`<p>Hier liegen deine Entwürfe in diesem Browser. Sichere Projekte als Datei, um sie zu teilen oder auf einem anderen Gerät zu öffnen.</p><div class="campaign-list">${campaigns.map(c=>`<div class="campaign-item"><button data-open-campaign="${escape(c.id)}"><strong>${escape(c.name)}</strong><small>${c.recipients.length} Empfänger · ${new Date(c.updatedAt).toLocaleDateString('de-DE')}${c.id===campaign.id?' · Gerade geöffnet':''}</small></button><button class="icon-button" data-delete-campaign="${escape(c.id)}" aria-label="${escape(c.name)} löschen">${icon('trash')}</button></div>`).join('')||'<p>Noch keine gespeicherten Kampagnen.</p>'}</div>`,[{id:'import',label:'Projekt importieren'},{id:'new',label:'Neue Kampagne',primary:true}]);
- $$('[data-open-campaign]').forEach(b=>b.onclick=()=>{const c=campaigns.find(c=>c.id===b.dataset.openCampaign);try{campaign=validateCampaign(c);history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view='design';$('#modal').close('opened');renderUI();toast('Kampagne geöffnet.');}catch(e){toast(e.message,true);}});
+ $$('[data-open-campaign]').forEach(b=>b.onclick=()=>{const c=campaigns.find(c=>c.id===b.dataset.openCampaign);try{campaign=validateCampaign(c);history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view=campaign.onboarding?.active?'setup':'design';$('#modal').close('opened');renderUI();toast('Kampagne geöffnet.');}catch(e){toast(e.message,true);}});
  $$('[data-delete-campaign]').forEach(b=>b.onclick=async()=>{const id=b.dataset.deleteCampaign;const item=campaigns.find(c=>c.id===id);$('#modal').close('delete');if(await confirm('Kampagne löschen?',`„${item.name}“ wird aus diesem Browser entfernt. Eine zuvor heruntergeladene Projektdatei bleibt erhalten.`,'Löschen')){try{await removeCampaign(id);if(campaign.id===id){campaign=createCampaign();history=[];future=[];side='front';recipientIndex=0;selected=campaign.sides.front.fields[0]?.id;changed();}toast('Kampagne gelöscht.');}catch{toast('Die Kampagne konnte nicht gelöscht werden.',true);}}});
  const result=await promise;if(result==='import')$('#project-file').click();if(result==='new')newCampaign();
 }
-async function newCampaign(){const result=await modal('Womit möchtest du starten?',`<p>Nutze die chattastic-Kampagne als Ausgangspunkt oder starte mit zwei leeren A5-Seiten für dein eigenes Design.</p>`,[{id:'cancel',label:'Abbrechen'},{id:'blank',label:'Leere Kampagne'},{id:'template',label:'chattastic-Vorlage',primary:true}]);if(!['blank','template'].includes(result))return;await flushSave();campaign=createCampaign(result==='blank');if(result==='blank'){campaign.recipients=[];campaign.sample=false;}history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view='design';changed();toast('Neue Kampagne angelegt.');}
-$('#campaigns-button').onclick=campaignList;$('#breadcrumb-campaigns').onclick=campaignList;$('#new-campaign').onclick=newCampaign;
+async function newCampaign(){const result=await modal('Dein Mailing beginnt hier.',`<p><strong>Von null starten:</strong> Eine eigene Kampagne mit zwei leeren Seiten. Wir erklären dir Schritt für Schritt, wie daraus ein persönliches Mailing wird.</p><div class="help-step" style="margin-top:22px"><b>1</b><div><h3>Deine Idee festhalten</h3><p>Was bietest du an, für wen und mit welchem Ziel?</p></div></div><div class="help-step"><b>2</b><div><h3>Design und persönliche Felder</h3><p>Eigene Designs hochladen oder mit Farbe und Text beginnen.</p></div></div><div class="help-step"><b>3</b><div><h3>Empfänger hinzufügen und in 3D prüfen</h3><p>Dein Mailing mit echten Daten von beiden Seiten ansehen.</p></div></div><p>Oder öffne die chattastic-Vorlage, um den Editor erst einmal kennenzulernen.</p>`,[{id:'cancel',label:'Abbrechen'},{id:'template',label:'Beispiel ausprobieren'},{id:'blank',label:'Von null starten',primary:true}]);if(!['blank','template'].includes(result))return;await flushSave();campaign=createCampaign(result==='blank');history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view=result==='blank'?'setup':'design';changed();toast(result==='blank'?'Deine eigene Kampagne. Wir starten mit deiner Idee.':'Beispielkampagne geöffnet.');}
+$('#campaigns-button').onclick=campaignList;$('#breadcrumb-campaigns').onclick=campaignList;$('#new-campaign').onclick=newCampaign;$('#new-campaign-top').onclick=newCampaign;
 $('#help-button').onclick=()=>modal('Vom Design zum persönlichen Mailing',`<div class="help-step"><b>1</b><div><h3>Dein Design, auf beiden Seiten.</h3><p>Nutze die Vorlage oder lade deine Designs hoch. Bei einer zweiseitigen PDF kannst du beide Seiten gleichzeitig übernehmen. Bilder werden vollständig eingepasst.</p></div></div><div class="help-step"><b>2</b><div><h3>Platz für Persönlichkeit.</h3><p>Lege Text- und QR-Felder über das Design. Ziehe sie an ihren Platz und verbinde sie mit Spalten aus deiner Empfängerliste. Ein Hintergrund in der passenden Farbe kann alte Platzhalter abdecken.</p></div></div><div class="help-step"><b>3</b><div><h3>Für jeden Kontakt einmal prüfen.</h3><p>Importiere eine CSV oder bearbeite Empfänger direkt. Wechsle in der Vorschau zwischen ihnen und exportiere ein Ansichts-PDF. Ein Scan öffnet den vollständigen Link aus der jeweiligen Zeile.</p></div></div><p><strong>Deine Daten bleiben hier.</strong> Designs, Empfänger und Kampagnen werden nur in diesem Browser gespeichert. Mit „Projekt sichern“ erhältst du eine Datei für Backups und zum Weiterarbeiten auf anderen Geräten. Es gibt noch keine Cloud-Synchronisierung oder Versandfunktion.</p><p style="margin-top:12px">Tastatur: ⌘/Strg Z rückgängig · ⌘/Strg Umschalt Z wiederholen · Pfeiltasten zum Verschieben eines ausgewählten Felds. Der Export ist eine RGB-Ansicht ohne Druckbeschnitt.</p>`);
 async function exportProof(type){
  await busy(type==='pdf'?'Dein PDF wird erstellt …':'Dein Bild wird erstellt …',async()=>{
@@ -203,8 +215,43 @@ async function exportProof(type){
 }
 $('#pdf-export').onclick=()=>exportProof('pdf');$('#png-export').onclick=()=>exportProof('png');
 window.addEventListener('keydown',e=>{if($('#modal').open)return;const editing=e.target.matches('input,textarea,select,[contenteditable=true]');if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!editing){e.preventDefault();e.shiftKey?redo():undo();}if((e.key==='Delete'||e.key==='Backspace')&&!editing&&e.target.closest('[data-field]')){e.preventDefault();deleteField();}});
+// 3D controls only change the viewing angle, never the actual mailing geometry.
+for(const mode of ['2d','3d'])$('#preview-mode-'+mode).onclick=()=>{previewMode=mode;renderUI();requestAnimationFrame(()=>threeD.paint());};
+for(const mode of ['rotate','pan'])$('#three-d-'+mode).onclick=()=>{threeD.setMode(mode);for(const m of ['rotate','pan']){const b=$('#three-d-'+m);b.classList.toggle('active',mode===m);b.setAttribute('aria-pressed',String(mode===m));}};
+$('#three-d-plus').onclick=()=>threeD.zoom(1.15);$('#three-d-minus').onclick=()=>threeD.zoom(1/1.15);
+$('#three-d-reset').onclick=()=>threeD.reset();$('#three-d-front-button').onclick=()=>threeD.front();$('#three-d-back-button').onclick=()=>threeD.back();$('#three-d-flip').onclick=()=>threeD.flip();
+$('#empty-add-text').onclick=()=>addField('text');$('#empty-upload').onclick=()=>$('#design-file').click();
+$('#page-color').oninput=e=>commit(()=>campaign.sides[side].background={kind:'blank',color:e.target.value},{inspector:false,guide:false});
+$('#back-to-guide').onclick=()=>setView('setup');
+function guideStep(step){commit(()=>{campaign.onboarding.step=clamp(step,0,5);});$('#setup-view').scrollIntoView({block:'start',behavior:'smooth'});}
+$('#setup-view').addEventListener('input',e=>{
+ const key=e.target.dataset.brief;if(!key)return;
+ if(key==='name'){if(e.target.value.trim())commit(()=>campaign.name=e.target.value.trim().slice(0,120),{inspector:false,table:false,guide:false});}
+ else commit(()=>campaign.brief[key]=e.target.value.slice(0,1000),{inspector:false,table:false,guide:false});
+});
+$('#setup-view').addEventListener('change',e=>{if(e.target.id==='skip-personalization')commit(()=>campaign.onboarding.personalizationSkipped=e.target.checked);});
+$('#setup-view').addEventListener('submit',e=>{
+ if(e.target.id!=='guide-recipient-form')return;e.preventDefault();const data=new FormData(e.target),company=String(data.get('company')||'').trim(),first=String(data.get('first_name')||'').trim(),url=String(data.get('chatbot_url')||'').trim();
+ if(!company)return toast('Bitte den Firmennamen ergänzen.',true);if(url&&!validURL(url))return toast('Bitte einen vollständigen Link mit https:// eintragen.',true);
+ if(campaign.recipients.length>=1000)return toast('Maximal 1.000 Empfänger pro Kampagne.',true);
+ commit(()=>{campaign.recipients.push({id:uid(),company,first_name:first,salutation:first?'Hallo '+first+',':'Guten Tag,',chatbot_url:url,website:''});recipientIndex=campaign.recipients.length-1;});toast('Empfänger hinzugefügt. Deine Felder verwenden jetzt diese Daten.');
+});
+$('#setup-view').addEventListener('click',e=>{
+ const step=e.target.closest('[data-guide-step]');if(step){guideStep(Number(step.dataset.guideStep));return;}
+ const control=e.target.closest('[data-guide-action]');if(!control)return;const action=control.dataset.guideAction;
+ if(action==='next'){if(campaign.onboarding.step===0&&!$('#setup-name').value.trim()){$('#setup-name').focus();toast('Gib deiner Kampagne bitte einen Namen.',true);return;}guideStep(campaign.onboarding.step+1);}
+ if(action==='previous')guideStep(campaign.onboarding.step-1);
+ if(action==='finish'){commit(()=>campaign.onboarding.active=false);previewMode='3d';setView('preview');toast('Dein Einstieg ist abgeschlossen. Alle Schritte bleiben über die Anleitung erreichbar.');}
+ if(action.startsWith('upload-')){side=action.slice(7);$('#design-file').click();}
+ if(action==='edit-front'||action==='edit-back'){side=action.slice(5);selected=campaign.sides[side].fields[0]?.id;setView('design');}
+ if(action.startsWith('field-')){const target=$('#guide-field-side').value;side=target;addField(action.slice(6));const select=$('#guide-field-side');if(select)select.value=target;}
+ if(action==='edit-fields'){side=$('#guide-field-side').value;selected=campaign.sides[side].fields.at(-1)?.id;setView('design');}
+ if(action==='recipients')setView('recipients');
+ if(action==='csv')$('#csv-file').click();
+ if(action==='three-d'||action==='proof'){previewMode=action==='three-d'?'3d':'2d';setView('preview');}
+});
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
 hydrateIcons();
-try{const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];if(latest){campaign=validateCampaign(latest);selected=campaign.sides.front.fields[0]?.id;}else await saveCampaign(campaign);}catch{saveFailed=true;saveState('Speichern nicht verfügbar',true);toast('Lokaler Speicher ist nicht verfügbar. Sichere dein Projekt als Datei.',true);}
+try{const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];if(latest){campaign=validateCampaign(latest);selected=campaign.sides.front.fields[0]?.id;if(campaign.onboarding?.active)view='setup';}else await saveCampaign(campaign);}catch{saveFailed=true;saveState('Speichern nicht verfügbar',true);toast('Lokaler Speicher ist nicht verfügbar. Sichere dein Projekt als Datei.',true);}
 await document.fonts.ready;renderUI();

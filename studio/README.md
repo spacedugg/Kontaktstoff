@@ -63,3 +63,13 @@ Die automatisierten Browserprüfungen decken den vollständigen Arbeitsablauf ab
 - `vendor/`: lokal ausgelieferte PDF-Bibliotheksressourcen und Lizenzen.
 
 Für eine spätere Veröffentlichung nur nach bewusster Freigabe die Unterseite samt lokalen Ressourcen und den bestehenden `assets/fonts/` ausliefern. Ein Git-Branch ist keine Zugangskontrolle; vertrauliche Empfängerdaten gehören nicht ins Repository.
+
+## 3D-Vorschau und geführter Einstieg
+
+Unter **Neue Kampagne → Von null starten** beginnt ein eigener Entwurf ohne Vorlage, Personalisierungsfelder oder Beispielkontakte. Die sechs erklärten Schritte sind: Idee und Ziel, DIN-A5-Format, beide Designseiten, persönliche Felder, Empfänger und abschließende Vorschau. Briefing und Anleitungsfortschritt werden mit der Kampagne gespeichert; beim Wiederöffnen wird eine noch aktive Anleitung fortgesetzt. Die bestehenden Kampagnen bleiben erhalten.
+
+Im Editor können leere Seiten eine eigene Flächenfarbe bekommen. Eine leere Zeichenfläche bietet einen direkten Einstieg zum ersten Text oder zum Design-Upload. Neue Texte erhalten auf dunklen, einfarbigen Flächen automatisch eine helle Ausgangsfarbe. Die Einträge des Briefings werden nicht automatisch als Werbetext verwendet.
+
+Die Vorschau startet in der **3D-Ansicht** mit tatsächlichen Canvas-Texturen beider Mailingseiten. Ziehen dreht die Karte; „Verschieben“ oder Umschalt + Ziehen bewegt sie. Die Schaltflächen wenden die Karte, zeigen gezielt Vorder-/Rückseite, zoomen und setzen den Blickwinkel zurück. Nach Fokussieren funktionieren Pfeiltasten und Plus/Minus; mit zwei Fingern sind Zoom und Verschieben möglich. „Beide Seiten“ wechselt zur flachen Prüfung. Das 3D-Modell ist eine visuelle Darstellung einer flachen Karte, keine verbindliche Simulation von Papierstärke, Material oder Druckfarben. Die Ansichtsbewegung verändert weder Feldpositionen noch Exportdateien.
+
+Zusätzliche Browserprüfung: `npm run test:guide`. Sie prüft 3D-Texturen, Drehen/Wenden, Verschieben, Zoom, Tastaturbedienung sowie den kompletten Neuaufbau einer Kampagne, die Wiederaufnahme nach einem Reload und die Mobilansicht.
