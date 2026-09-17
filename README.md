@@ -25,7 +25,8 @@ Ein frischer Browser öffnet eine leere Kampagnenübersicht. Es werden keine Bei
 
 ## Was funktioniert
 
-- Homepage mit drei fertigen Foto-Promotionen. Galerie, Studio, 3D und Export verwenden dieselben bearbeitbaren Designdaten aus `studio/src/promotions.js`.
+- Homepage erklärt den Weg von der Karte über den QR-Scan zur Anfrage, den Nutzen eines angebundenen Chatbots und den enthaltenen Studio-Funktionen. Ein interaktiver Szenariorechner zeigt Karten × Scanrate × Anfragequote anhand ausdrücklich frei gewählter Annahmen. Er enthält keine gemessenen Erfolgszahlen und kein Tracking.
+- Drei fertige Foto-Promotionen. Galerie, Studio, 3D und Export verwenden dieselben bearbeitbaren Designdaten aus `studio/src/promotions.js`.
 - „Meine erste Kampagne“ startet direkt im Tutorial. Überspringen legt einen unabhängigen leeren Entwurf im Editor an; die Übung bleibt erhalten.
 - Kampagnenübersicht mit Vorschauen, Suche, Duplizieren, Löschen und Projektimport.
 - Kurzer Einstieg in vier Schritten: Karte ansehen, Namen ändern, QR-Link einsetzen, Design für eine eigene Kampagne übernehmen. Pro Seite eine Hauptaktion; zusätzliche Erklärungen bleiben eingeklappt. Die Designübernahme erstellt einen unabhängigen Entwurf ohne Beispielkontakte und führt direkt zum ersten eigenen Empfänger. Fortschritt bleibt beim Reload erhalten; alte achtstufige Tutorials werden unter Erhalt ihrer Änderungen migriert.
@@ -62,6 +63,7 @@ npm run test:handoff
 npm run test:example
 npm run test:tutorial
 npm run test:promotions
+npm run test:homepage
 ```
 
 Die Tests prüfen unter anderem echte QR-Pixel, PDF-Maße und Seitenzahl, Uploads, Rundlauf von Projektdateien, 3D-Eingaben, Anleitung, lokale Speicherung, alle neuen Produktabläufe und mobile Ansichten. Screenshots liegen unter `test-results/` und werden nicht eingecheckt.
