@@ -11,7 +11,7 @@ async function project(){const event=page.waitForEvent('download');await page.lo
 try{
  await page.goto(base);await expect(page.locator('#hero-stage')).toHaveAttribute('aria-busy','false');
  await page.screenshot({path:'test-results/promotions-home.png'});
- const fronts=[];
+ await page.locator('[data-preview-example="chattastic"]').click();const fronts=[];
  for(const id of ['chattastic','raumwerk','morgen']){
   await page.locator(`.promotion-tabs [data-promotion="${id}"]`).click();await expect(page.locator('#hero-stage')).toHaveAttribute('aria-busy','false');
   await expect(page.locator('#gallery-open')).toHaveAttribute('href','studio/?example='+id);await expect(page.locator('#gallery-error')).toBeHidden();
@@ -26,7 +26,7 @@ try{
  await page.locator('#demo-company').fill('Mein persönliches Teststudio');await expect(page.locator('#hero-front')).toHaveAttribute('aria-label','Vorderseite für Mein persönliches Teststudio');
  assert.notEqual(await page.locator('#hero-front').evaluate(c=>c.toDataURL()),fronts[2]);
  for(const width of [1024,768,390]){await page.setViewportSize({width,height:950});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await page.screenshot({path:`test-results/promotions-home-${width}.png`,fullPage:true});}
- await page.setViewportSize({width:1512,height:1080});await page.locator('.hero-actions a').click();await expect(page.locator('#tutorial-view')).toBeVisible();
+ await page.setViewportSize({width:1512,height:1080});await page.locator('#example-close').click();await page.locator('[data-start-campaign]').click();await expect(page.locator('#tutorial-view')).toBeVisible();
  const tutorial=await project();await page.locator('[data-tutorial-action="skip"]').click();await expect(page.locator('#design-view')).toBeVisible();
  const blank=await project();assert.notEqual(blank.id,tutorial.id);assert.equal(blank.sample,false);assert.equal(blank.recipients.length,0);assert.equal(blank.sides.front.fields.length,0);assert.equal(blank.sides.back.fields.length,0);assert.equal(blank.onboarding.active,false);
  await page.reload();await expect(page.locator('#design-view')).toBeVisible();await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(2);

@@ -12,9 +12,9 @@ async function download(selector){const event=page.waitForEvent('download');awai
 async function project(){return JSON.parse((await download('#project-export')).toString());}
 async function shot(name){await page.waitForTimeout(180);await page.locator('#toast').evaluateAll(nodes=>nodes.forEach(n=>n.classList.remove('show')));await page.screenshot({path:`test-results/product-${name}.png`,fullPage:true});}
 try{
- await page.goto(base);await page.locator('#demo-company').fill('Hotel Nordlicht');await expect(page.locator('#hero-front')).toHaveAttribute('aria-label','Vorderseite für Hotel Nordlicht');
+ await page.goto(base);await page.locator('[data-preview-example="chattastic"]').click();await page.locator('#demo-company').fill('Hotel Nordlicht');await expect(page.locator('#hero-front')).toHaveAttribute('aria-label','Vorderseite für Hotel Nordlicht');
  const original=await page.locator('#hero-card').getAttribute('style');await page.locator('#hero-flip').click();assert.notEqual(await page.locator('#hero-card').getAttribute('style'),original);await expect(page.locator('#hero-flip')).toContainText('Vorderseite');await page.locator('#hero-reset').click();
- await shot('homepage');
+ await page.locator('#example-close').click();await shot('homepage');
  for(const width of [1024,768,390]){await page.setViewportSize({width,height:900});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Home overflow '+width);if(width===390)await shot('homepage-mobile');}
  await page.setViewportSize({width:1512,height:1080});await page.goto(base+'/studio/');await expect(page.locator('#dashboard-empty')).toBeVisible();await expect(page.locator('.dashboard-card')).toHaveCount(0);await shot('dashboard-empty');
  await page.locator('[data-dashboard-template="dialog"]').click();await expect(page.locator('#setup-view')).toBeVisible();let c=await project();assert.equal(c.recipients.length,0);assert.equal(c.sample,false);assert.ok(c.sides.front.fields.every(f=>['text','shape'].includes(f.type)));assert.ok(c.sides.back.fields.some(f=>f.type==='qr'));

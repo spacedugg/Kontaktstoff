@@ -26,7 +26,7 @@ Ein frischer Browser öffnet eine leere Kampagnenübersicht. Es werden keine Bei
 ## Was funktioniert
 
 - Homepage erklärt den Weg von der Karte über den QR-Scan zur Anfrage, den Nutzen eines angebundenen Chatbots und den enthaltenen Studio-Funktionen. Ein interaktiver Szenariorechner zeigt Karten × Scanrate × Anfragequote anhand ausdrücklich frei gewählter Annahmen. Er enthält keine gemessenen Erfolgszahlen und kein Tracking.
-- Drei fertige Foto-Promotionen. Galerie, Studio, 3D und Export verwenden dieselben bearbeitbaren Designdaten aus `studio/src/promotions.js`.
+- Drei fertige Foto-Promotionen stehen direkt am Anfang. Ein Klick öffnet die 3D-Vorschau in einem fokussierten Dialog mit Escape-/Schließen-Funktion; „Meine erste Kampagne“ ist die Hauptaktion. Nutzen, Zahlenrechner, Leistungsumfang und FAQ sind aufklappbar. Direkte Links auf diese Abschnitte öffnen sie automatisch. Galerie, Studio, 3D und Export verwenden dieselben bearbeitbaren Designdaten aus `studio/src/promotions.js`.
 - „Meine erste Kampagne“ startet direkt im Tutorial. Überspringen legt einen unabhängigen leeren Entwurf im Editor an; die Übung bleibt erhalten.
 - Kampagnenübersicht mit Vorschauen, Suche, Duplizieren, Löschen und Projektimport.
 - Kurzer Einstieg in vier Schritten: Karte ansehen, Namen ändern, QR-Link einsetzen, Design für eine eigene Kampagne übernehmen. Pro Seite eine Hauptaktion; zusätzliche Erklärungen bleiben eingeklappt. Die Designübernahme erstellt einen unabhängigen Entwurf ohne Beispielkontakte und führt direkt zum ersten eigenen Empfänger. Fortschritt bleibt beim Reload erhalten; alte achtstufige Tutorials werden unter Erhalt ihrer Änderungen migriert.

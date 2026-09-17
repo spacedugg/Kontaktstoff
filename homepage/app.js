@@ -39,5 +39,20 @@ function select(id){
 }
 document.querySelectorAll('.promotion-tabs button').forEach(b=>b.onclick=()=>select(b.dataset.promotion));
 document.querySelector('#demo-company').oninput=render;
+
+const exampleDialog=document.querySelector('#example-dialog');
+let exampleOpener=null;
+document.querySelectorAll('[data-preview-example]').forEach(link=>link.addEventListener('click',event=>{
+ if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+ event.preventDefault();exampleOpener=link;select(link.dataset.previewExample);exampleDialog.showModal();document.body.classList.add('example-dialog-open');
+}));
+document.querySelector('#example-close').onclick=()=>exampleDialog.close();
+exampleDialog.addEventListener('close',()=>{document.body.classList.remove('example-dialog-open');exampleOpener?.focus({preventScroll:true});});
+exampleDialog.addEventListener('click',event=>{if(event.target===exampleDialog){const box=exampleDialog.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)exampleDialog.close();}});
+// Anchor links to optional information should reveal the requested section, including deep links.
+function revealSection(){const target=document.getElementById(location.hash.slice(1));if(target?.matches('details.learn-more'))target.open=true;}
+window.addEventListener('hashchange',revealSection);revealSection();
+document.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener('click',()=>{const target=document.getElementById(link.hash.slice(1));if(target?.matches('details.learn-more'))target.open=true;}));
+
 await document.fonts.ready;select(active);
 await Promise.all([...document.querySelectorAll('[data-example-canvas]')].map(async canvas=>{const c=campaigns.get(canvas.dataset.exampleCanvas);try{await renderCanvas(canvas,c,'front',c.recipients[0],{scale:4});}catch{canvas.setAttribute('aria-label','Vorschau nicht verfügbar. Beispiel im Studio öffnen.');}}));
