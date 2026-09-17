@@ -14,7 +14,8 @@
     "test:example": "node tests/example.mjs",
     "test:tutorial": "node tests/tutorial.mjs",
     "test:promotions": "node tests/promotions.mjs",
-    "test:homepage": "node tests/homepage.mjs"
+    "test:homepage": "node tests/homepage.mjs",
+    "test:onboarding": "node tests/onboarding.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

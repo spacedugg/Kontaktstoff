@@ -1,6 +1,7 @@
+import {startHTML} from './start.js';
 import {CLIENT_CAMPAIGNS,createClientCampaign} from './client-campaigns.js';
 import {FORMATS,KEYS,uid,clone,clamp,validURL,resolveText,missingKeys,createCampaign,parseCSV,csvString,validateCampaign,checks} from './core.js';
-import {listCampaigns,saveCampaign,removeCampaign} from './storage.js';
+import {listCampaigns,listDeletedCampaigns,saveCampaign,trashCampaign,restoreCampaign} from './storage.js';
 import {renderCanvas,imageFrom} from './render.js';
 import {icon,hydrateIcons} from './icons.js';
 import {Mailing3D} from './three-d.js';
@@ -45,12 +46,16 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
 function renderUI(inspector=true,table=true,guide=true){
  if(view==='setup'&&campaign.tutorial)view='tutorial';
- document.body.classList.toggle('focused-entry',view==='tutorial'||view==='setup');
+ document.body.classList.toggle('focused-entry',view==='tutorial'||view==='setup'||view==='start');
+ document.body.classList.toggle('starting-campaign',view==='start');
+ $('#start-view').hidden=view!=='start';
+ $('#workflow-hint').hidden=!['design','recipients','preview'].includes(view);
+ if(!$('#workflow-hint').hidden){const hints={design:['1. Gestalte deine Karte','Bearbeite Vorder- und Rückseite. Du kannst dein Design hochladen oder Texte, Bilder und persönliche Felder einsetzen.','recipients','Weiter zu den Empfängern →'],recipients:['2. Für wen ist dein Mailing?','Füge deine Kontakte hinzu oder importiere eine CSV. Die Spalten verbinden Namen, Firmen und Links mit deinen Karten.','preview','Mailing ansehen →'],preview:['3. Prüfe dein fertiges Mailing','Wechsle zwischen deinen Empfängern, prüfe beide Seiten und lade anschließend dein PDF oder Kampagnenpaket herunter.','design','Design weiter bearbeiten']},hint=hints[view];$('#workflow-hint').innerHTML=`<div><strong>${hint[0]}</strong><p>${hint[1]}</p></div><button class="button" data-workflow-next="${hint[2]}">${hint[3]}</button>`;}
  document.body.classList.toggle('tutorial-excursion',!!campaign.tutorial?.active&&view!=='tutorial'&&view!=='dashboard');
  document.body.classList.toggle('dashboard-active',view==='dashboard');
- $('.breadcrumb strong').textContent=view==='dashboard'?'Dein Arbeitsplatz':view==='tutorial'?'Beispiel ausprobieren':view==='setup'?'Deine Kampagne':'Designstudio';
+ $('.breadcrumb strong').textContent=view==='start'?'Neue Kampagne':view==='dashboard'?'Dein Arbeitsplatz':view==='tutorial'?'Beispiel ausprobieren':view==='setup'?'Deine Kampagne':'Designstudio';
  $('#dashboard-view').hidden=view!=='dashboard';
- if(view==='dashboard')return;
+ if(view==='dashboard'||view==='start'){for(const name of ['tutorial','setup','design','recipients','preview'])$('#'+name+'-view').hidden=true;return;}
  $('#example-preview-note').hidden=!campaign.sample||!!campaign.tutorial?.active;
  const client=CLIENT_CAMPAIGNS.find(p=>p.id===campaign.templateId);
  const promotion=PROMOTIONS.find(p=>p.id===campaign.templateId)||PROMOTIONS[0];
@@ -64,8 +69,8 @@ function renderUI(inspector=true,table=true,guide=true){
  $$('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===view);b.setAttribute('aria-current',b.dataset.tab===view?'step':'false');});
  for(const name of ['tutorial','setup','design','recipients','preview'])$('#'+name+'-view').hidden=name!==view;
  $$('[data-side]').forEach(b=>{b.classList.toggle('active',b.dataset.side===side);b.setAttribute('aria-pressed',String(b.dataset.side===side));});
- $('#start-tutorial').textContent=campaign.tutorial?'Tutorial öffnen':'Tutorial starten';
- $('#tutorial-tab').hidden=!campaign.tutorial;
+ $('#start-tutorial').textContent='So geht’s';
+ $('#tutorial-tab').hidden=true;
  $('#tutorial-return').hidden=!campaign.tutorial?.active||view==='tutorial';
  if(view==='tutorial'&&guide)$('#tutorial-view').innerHTML=tutorialHTML(campaign,recipientIndex);
  if(view==='tutorial')updateTutorialLive();
@@ -229,15 +234,15 @@ $('#csv-upload').onclick=()=>$('#csv-file').click();
 $('#csv-file').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.size>5*1024*1024)return toast('Bitte eine CSV mit maximal 5 MB verwenden.',true);try{const rows=parseCSV(await file.text());const result=await modal('Empfänger importieren',`<p>${rows.length} Empfänger erkannt. Firmenname und Chatbot-Link werden automatisch deinen Personalisierungsfeldern zugeordnet.</p><p style="margin-top:12px">${escape(Object.keys(rows[0]).filter(k=>k!=='id').join(' · '))}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'append',label:'Hinzufügen'},{id:'replace',label:'Liste ersetzen',primary:true}]);if(!['append','replace'].includes(result))return;if(result==='append'&&campaign.recipients.length+rows.length>1000)throw new Error('Insgesamt sind maximal 1.000 Empfänger möglich.');commit(()=>{campaign.recipients=result==='replace'?rows:[...campaign.recipients,...rows];campaign.sample=result==='append'?campaign.sample:false;recipientIndex=0;});toast(`${rows.length} Empfänger importiert.`);}catch(e){toast(e.message,true);}};
 $('#rename-campaign').onclick=async()=>{const promise=modal('Kampagne umbenennen',`<label for="campaign-name">Name deiner Kampagne</label><input id="campaign-name" maxlength="120" value="${escape(campaign.name)}">`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:'Speichern',primary:true}]);$('#campaign-name').focus();$('#campaign-name').select();if(await promise==='ok'){const name=$('#campaign-name').value.trim();if(name)commit(()=>campaign.name=name);}};
 $('#project-export').onclick=()=>{download(new Blob([JSON.stringify(campaign,null,2)],{type:'application/json'}),filename()+'.kontaktstoff.json');toast('Projekt inklusive Designs und Empfängern gesichert.');};
-$('#project-file').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.size>40*1024*1024)return toast('Projektdateien dürfen maximal 40 MB groß sein.',true);await busy('Projekt wird geöffnet …',async()=>{let imported;try{imported=validateCampaign(JSON.parse(await file.text()));}catch(e){throw new Error('Projekt konnte nicht importiert werden: '+e.message);}await flushSave();imported.id=uid();imported.name=(imported.name+' · Import').slice(0,120);campaign=imported;hasActive=true;history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view='design';changed();toast('Projekt als eigenständige Kampagne geöffnet.');});};
+$('#project-file').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.size>40*1024*1024)return toast('Projektdateien dürfen maximal 40 MB groß sein.',true);await busy('Projekt wird geöffnet …',async()=>{let imported;try{imported=validateCampaign(JSON.parse(await file.text()));}catch(e){throw new Error('Projekt konnte nicht importiert werden: '+e.message);}await flushSave();imported.id=uid();imported.name=(imported.name+' · Import').slice(0,120);campaign=imported;if(campaign.tutorial)campaign.tutorial.active=false;if(campaign.onboarding)campaign.onboarding.active=false;hasActive=true;history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view='design';changed();toast('Projekt als eigenständige Kampagne geöffnet.');});};
 async function activateCampaign(next,initialView){
- await flushSave();try{campaign=validateCampaign(next);}catch(e){toast('Die Kampagne konnte nicht geöffnet werden: '+e.message,true);return;}hasActive=true;history=[];future=[];side='front';recipientIndex=0;selected=campaign.sides.front.fields[0]?.id;view=initialView||(campaign.tutorial?.active?'tutorial':campaign.onboarding?.active?'setup':'design');clearAudit();changed();
+ await flushSave();try{campaign=validateCampaign(next);}catch(e){toast('Die Kampagne konnte nicht geöffnet werden: '+e.message,true);return;}hasActive=true;history=[];future=[];side='front';recipientIndex=0;selected=campaign.sides.front.fields[0]?.id;if(campaign.tutorial)campaign.tutorial.active=false;if(campaign.onboarding)campaign.onboarding.active=false;view=initialView||'design';clearAudit();campaign.updatedAt=Date.now();await flushSave();changed();
 }
 async function showDashboard(){
  await flushSave();try{sessionStorage.removeItem('kontaktstoff-active');}catch{}view='dashboard';renderVersion++;renderUI();const version=++dashboardVersion;
- try{dashboardCampaigns=(await listCampaigns()).sort((a,b)=>b.updatedAt-a.updatedAt);}catch{dashboardCampaigns=[];toast('Lokaler Speicher ist nicht verfügbar. Du kannst trotzdem mit einer Projektdatei arbeiten.',true);}
+ let deleted=[];try{dashboardCampaigns=(await listCampaigns()).sort((a,b)=>b.updatedAt-a.updatedAt);deleted=await listDeletedCampaigns();}catch{dashboardCampaigns=[];toast('Lokaler Speicher ist nicht verfügbar. Du kannst trotzdem mit einer Projektdatei arbeiten.',true);}
  if(view!=='dashboard'||version!==dashboardVersion)return;
- $('#dashboard-view').innerHTML=dashboardHTML(dashboardCampaigns);
+ $('#dashboard-view').innerHTML=dashboardHTML(dashboardCampaigns,deleted);
  $('#campaign-search').oninput=e=>{const query=e.target.value.toLowerCase().trim();let visible=0;$$('[data-campaign-card]').forEach(card=>{card.hidden=!card.dataset.name.includes(query);if(!card.hidden)visible++;});$('#search-empty').hidden=visible>0||!dashboardCampaigns.length;};
  for(const p of PROMOTIONS){
   if(view!=='dashboard'||version!==dashboardVersion)return;
@@ -252,16 +257,31 @@ $('#dashboard-view').onclick=async e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-dashboard-tutorial'))return startTutorial(true);
  if(b.hasAttribute('data-dashboard-example'))return loadExample(b.dataset.dashboardExample||'chattastic');
- if(b.hasAttribute('data-dashboard-new'))return startTutorial(true);
+ if(b.hasAttribute('data-dashboard-new'))return newCampaign();
+ if(b.dataset.dashboardRestore){try{await restoreCampaign(b.dataset.dashboardRestore);await showDashboard();toast('Kreation wiederhergestellt.');}catch{toast('Wiederherstellen war nicht möglich.',true);}return;}
  if(b.hasAttribute('data-dashboard-import'))return $('#project-file').click();
- if(b.dataset.dashboardTemplate)return activateCampaign(createTemplate(b.dataset.dashboardTemplate));
+ if(b.dataset.dashboardTemplate){const next=createTemplate(b.dataset.dashboardTemplate);next.onboarding.active=false;return activateCampaign(next,'design');}
  const id=b.dataset.dashboardOpen||b.dataset.dashboardCopy||b.dataset.dashboardDelete,c=dashboardCampaigns.find(c=>c.id===id);if(!c)return;
  if(b.dataset.dashboardOpen)return activateCampaign(c);
  if(b.dataset.dashboardCopy){const copy=clone(c);copy.id=uid();copy.name=(c.name+' · Kopie').slice(0,120);copy.updatedAt=Date.now();try{await saveCampaign(copy);toast('Eine unabhängige Kopie wurde erstellt.');return showDashboard();}catch{toast('Die Kopie konnte nicht gespeichert werden. Bitte sichere dein Projekt als Datei.',true);return;}}
- if(b.dataset.dashboardDelete&&await confirm('Kampagne löschen?',`„${c.name}“ wird aus diesem Browser entfernt. Sichere bei Bedarf vorher eine Projektdatei.`,'Löschen')){try{await pendingSaves;if(campaign.id===id){clearTimeout(saveTimer);hasActive=false;}await removeCampaign(id);toast('Kampagne gelöscht.');await showDashboard();}catch{toast('Löschen war nicht möglich.',true);}}
+ if(b.dataset.dashboardDelete)return deleteCreation(c);
 };
 async function loadExample(id='chattastic'){previewMode='3d';threeD.reset();await activateCampaign(createExampleCampaign(id),'preview');window.scrollTo({top:0,behavior:'instant'});toast('Fertiges Beispiel geladen. Dein vorheriger Entwurf bleibt in deinen Kampagnen.');}
-async function newCampaign(){const result=await modal('Dein Mailing beginnt hier.',`<p><strong>Von null starten:</strong> Eine eigene Kampagne mit zwei leeren Seiten. Wir erklären dir Schritt für Schritt, wie daraus ein persönliches Mailing wird.</p><div class="help-step" style="margin-top:22px"><b>1</b><div><h3>Deine Idee festhalten</h3><p>Was bietest du an, für wen und mit welchem Ziel?</p></div></div><div class="help-step"><b>2</b><div><h3>Design und persönliche Felder</h3><p>Eigene Designs hochladen oder mit Farbe und Text beginnen.</p></div></div><div class="help-step"><b>3</b><div><h3>Empfänger hinzufügen und in 3D prüfen</h3><p>Dein Mailing mit echten Daten von beiden Seiten ansehen.</p></div></div><p><strong>Erst einmal alles sehen?</strong> Lade eine fertige Beispielkampagne mit beiden Designseiten, drei fiktiven Kontakten und persönlichen QR-Codes. Sie öffnet sich direkt in 3D.</p>`,[{id:'cancel',label:'Abbrechen'},{id:'template',label:'Beispielkampagne laden'},{id:'blank',label:'Von null starten',primary:true}]);if(!['blank','template'].includes(result))return;if(result==='template')return loadExample();await flushSave();campaign=createCampaign(result==='blank');hasActive=true;history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view=result==='blank'?'setup':'design';changed();toast(result==='blank'?'Deine eigene Kampagne. Wir starten mit deiner Idee.':'Beispielkampagne geöffnet.');}
+async function deleteCreation(item){
+ if(!await confirm('Kreation löschen?',`„${item.name}“ wird in den Papierkorb verschoben. Du kannst sie dort jederzeit wiederherstellen.`,'In den Papierkorb'))return;
+ try{await flushSave();await pendingSaves;await trashCampaign(item.id);if(campaign.id===item.id){clearTimeout(saveTimer);hasActive=false;history=[];future=[];try{sessionStorage.removeItem('kontaktstoff-active');}catch{}}await showDashboard();toast('Kreation im Papierkorb. Du kannst sie wiederherstellen.');}catch{toast('Löschen war nicht möglich. Deine Kreation bleibt erhalten.',true);}
+}
+async function newCampaign(){await flushSave();view='start';renderVersion++;$('#start-view').innerHTML=startHTML();renderUI();window.scrollTo({top:0,behavior:'instant'});}
+$('#start-view').addEventListener('click',e=>{if(e.target.closest('[data-start-back]'))showDashboard();});
+$('#start-view').addEventListener('change',()=>{$('.start-template').hidden=$('#campaign-start-form input[name="mode"]:checked').value!=='template';});
+$('#start-view').addEventListener('submit',async e=>{
+ if(e.target.id!=='campaign-start-form')return;e.preventDefault();const data=new FormData(e.target),name=String(data.get('name')||'').trim();if(!name){$('#start-name').focus();return;}
+ const button=e.target.querySelector('[type="submit"]');button.disabled=true;
+ try{const next=data.get('mode')==='template'?createTemplate(data.get('template')):createCampaign(true);next.name=name.slice(0,120);next.onboarding.active=false;next.startMode=data.get('mode');await activateCampaign(next,'design');if(data.get('mode')==='upload'){$('#upload-button').focus();toast('Lade jetzt dein Design über „Eigenes Design hochladen“ hoch.');}}
+ finally{button.disabled=false;}
+});
+$('#workflow-hint').onclick=e=>{const button=e.target.closest('[data-workflow-next]');if(button)setView(button.dataset.workflowNext);};
+$('#delete-campaign').onclick=()=>deleteCreation(campaign);
 $('#campaigns-button').onclick=campaignList;$('#breadcrumb-campaigns').onclick=campaignList;$('#new-campaign').onclick=newCampaign;$('#new-campaign-top').onclick=newCampaign;
 $('#help-button').onclick=()=>modal('Vom Design zum persönlichen Mailing',`<div class="help-step"><b>1</b><div><h3>Dein Design, auf beiden Seiten.</h3><p>Nutze die Vorlage oder lade deine Designs hoch. Bei einer zweiseitigen PDF kannst du beide Seiten gleichzeitig übernehmen. Bilder werden vollständig eingepasst.</p></div></div><div class="help-step"><b>2</b><div><h3>Platz für Persönlichkeit.</h3><p>Lege Text- und QR-Felder über das Design. Ziehe sie an ihren Platz und verbinde sie mit Spalten aus deiner Empfängerliste. Ein Hintergrund in der passenden Farbe kann alte Platzhalter abdecken.</p></div></div><div class="help-step"><b>3</b><div><h3>Für jeden Kontakt einmal prüfen.</h3><p>Importiere eine CSV oder bearbeite Empfänger direkt. Wechsle in der Vorschau zwischen ihnen und exportiere ein Ansichts-PDF. Ein Scan öffnet den vollständigen Link aus der jeweiligen Zeile.</p></div></div><p><strong>Deine Daten bleiben hier.</strong> Designs, Empfänger und Kampagnen werden nur in diesem Browser gespeichert. Mit „Projekt sichern“ erhältst du eine Datei für Backups und zum Weiterarbeiten auf anderen Geräten. Es gibt noch keine Cloud-Synchronisierung oder Versandfunktion.</p><p style="margin-top:12px">Tastatur: ⌘/Strg Z rückgängig · ⌘/Strg Umschalt Z wiederholen · Pfeiltasten zum Verschieben eines ausgewählten Felds. Der Export ist eine RGB-Ansicht ohne Druckbeschnitt.</p>`);
 async function exportProof(type){
@@ -365,11 +385,7 @@ function makeTutorialCampaign(){
  const field=c.sides.back.fields.find(f=>f.text==='{{salutation}}');field.text='Hallo {{first_name}},';
  delete c.onboarding;c.tutorial={version:2,active:true,step:0,fieldId:field.id};return c;
 }
-async function startTutorial(fresh=false){
- if(campaign.tutorial&&!fresh){campaign=validateCampaign(campaign);setView('tutorial');return;}
- await activateCampaign(makeTutorialCampaign(),'tutorial');window.scrollTo({top:0,behavior:'instant'});
- toast('Dein Tutorial hat eine eigene Beispielkampagne. Vorherige Entwürfe bleiben erhalten.');
-}
+async function startTutorial(){return newCampaign();}
 function tutorialStep(step){commit(()=>{campaign.tutorial.step=clamp(step,0,TUTORIAL_STEPS.length-1);campaign.tutorial.active=true;});$('#tutorial-title')?.focus({preventScroll:true});$('#tutorial-view').scrollIntoView({block:'start',behavior:'instant'});}
 function updateTutorialLive(){
  const f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial?.fieldId),r=recipient();
@@ -379,7 +395,7 @@ function updateTutorialLive(){
  if(view==='tutorial'&&campaign.tutorial?.step===2){const next=$('[data-tutorial-action="next"]');if(next)next.disabled=!validURL(r.chatbot_url)||r.chatbot_url.length>1000;}
  if($('#tutorial-qr-status'))$('#tutorial-qr-status').textContent=validURL(r.chatbot_url)&&r.chatbot_url.length<=1000?'Der Code enthält genau den Link aus dieser Empfängerzeile.':'Bitte einen vollständigen HTTP(S)-Link mit maximal 1.000 Zeichen eingeben.';
 }
-$('#start-tutorial').onclick=()=>startTutorial();$('#example-tutorial').onclick=()=>startTutorial();$('#back-to-tutorial').onclick=()=>setView('tutorial');
+$('#start-tutorial').onclick=()=>$('#help-button').click();$('#example-tutorial').onclick=()=>startTutorial();$('#back-to-tutorial').onclick=()=>setView('tutorial');
 $('#tutorial-view').addEventListener('input',e=>{
  if(e.target.dataset.tutorialData){const key=e.target.dataset.tutorialData,value=e.target.value;commit(()=>{recipient()[key]=value;if(key==='first_name')recipient().salutation=value?'Hallo '+value+',':'Guten Tag,';},{guide:false});return;}
  if(e.target.id==='tutorial-url'){commit(()=>recipient().chatbot_url=e.target.value.trim(),{guide:false});return;}
@@ -432,16 +448,17 @@ $('#example-data').onclick=()=>setView('recipients');
 const params=new URLSearchParams(location.search);
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
- if(params.has('tutorial')){campaign=makeTutorialCampaign();hasActive=true;view='tutorial';await saveCampaign(campaign);}
+ if(params.has('tutorial')||params.get('start')==='1'){view='start';}
  else if(CLIENT_CAMPAIGNS.some(c=>c.id===params.get('client'))){campaign=createClientCampaign(params.get('client'));hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.has('example')){campaign=createExampleCampaign(params.get('example'));hasActive=true;view='preview';await saveCampaign(campaign);}
- else if(params.get('start')==='blank'){campaign=createCampaign(true);hasActive=true;view='setup';await saveCampaign(campaign);}
- else if(params.has('template')){campaign=createTemplate(params.get('template'));hasActive=true;view='setup';await saveCampaign(campaign);}
- else if(params.has('demo')){hasActive=true;if(latest)campaign=validateCampaign(latest);else await saveCampaign(campaign);view=campaign.tutorial?.active?'tutorial':campaign.onboarding?.active?'setup':'design';}
- else if(latest&&sessionStorage.getItem('kontaktstoff-active')===latest.id){campaign=validateCampaign(latest);hasActive=true;view=campaign.tutorial?.active?'tutorial':campaign.onboarding?.active?'setup':'design';}
+ else if(params.get('start')==='blank'){view='start';}
+ else if(params.has('template')){campaign=createTemplate(params.get('template'));campaign.onboarding.active=false;hasActive=true;view='design';await saveCampaign(campaign);}
+ else if(params.has('demo')){hasActive=true;if(latest)campaign=validateCampaign(latest);else await saveCampaign(campaign);view='design';}
+ else if(latest&&sessionStorage.getItem('kontaktstoff-active')===latest.id){campaign=validateCampaign(latest);hasActive=true;view='design';}
  else view='dashboard';
  selected=campaign.sides.front.fields[0]?.id;
 }catch{saveFailed=true;saveState('Speichern nicht verfügbar',true);toast('Lokaler Speicher ist nicht verfügbar. Sichere dein Projekt als Datei.',true);view='dashboard';}
 if(params.has('client')||params.has('start')||params.has('template')||params.has('example')||params.has('tutorial'))window.history.replaceState({},'',location.pathname);
 if(hasActive)try{sessionStorage.setItem('kontaktstoff-active',campaign.id);}catch{}
-await document.fonts.ready;if(view==='dashboard')await showDashboard();else renderUI();
+if(campaign.tutorial)campaign.tutorial.active=false;if(campaign.onboarding)campaign.onboarding.active=false;
+await document.fonts.ready;if(view==='dashboard')await showDashboard();else if(view==='start')await newCampaign();else renderUI();

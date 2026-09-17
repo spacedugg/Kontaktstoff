@@ -26,11 +26,11 @@ try{
  await page.locator('#demo-company').fill('Mein persönliches Teststudio');await expect(page.locator('#hero-front')).toHaveAttribute('aria-label','Vorderseite für Mein persönliches Teststudio');
  assert.notEqual(await page.locator('#hero-front').evaluate(c=>c.toDataURL()),fronts[2]);
  for(const width of [1024,768,390]){await page.setViewportSize({width,height:950});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await page.screenshot({path:`test-results/promotions-home-${width}.png`,fullPage:true});}
- await page.setViewportSize({width:1512,height:1080});await page.locator('#example-close').click();await page.locator('[data-start-campaign]').click();await expect(page.locator('#tutorial-view')).toBeVisible();
- const tutorial=await project();await page.locator('[data-tutorial-action="skip"]').click();await expect(page.locator('#design-view')).toBeVisible();
- const blank=await project();assert.notEqual(blank.id,tutorial.id);assert.equal(blank.sample,false);assert.equal(blank.recipients.length,0);assert.equal(blank.sides.front.fields.length,0);assert.equal(blank.sides.back.fields.length,0);assert.equal(blank.onboarding.active,false);
- await page.reload();await expect(page.locator('#design-view')).toBeVisible();await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(2);
- await page.locator('[data-dashboard-new]').first().click();await expect(page.locator('#tutorial-view')).toBeVisible();
+ await page.setViewportSize({width:1512,height:1080});await page.locator('#example-close').click();await page.locator('[data-start-campaign]').click();await expect(page.locator('#start-view')).toBeVisible();
+ await page.locator('#start-name').fill('Meine neue Kampagne');await page.locator('[name="mode"][value="blank"]').check();await page.locator('#campaign-start-form [type="submit"]').click();await expect(page.locator('#design-view')).toBeVisible();
+ const blank=await project();assert.equal(blank.sample,false);assert.equal(blank.recipients.length,0);assert.equal(blank.sides.front.fields.length,0);assert.equal(blank.sides.back.fields.length,0);assert.equal(blank.onboarding.active,false);
+ await page.reload();await expect(page.locator('#design-view')).toBeVisible();await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(1);
+ await page.locator('[data-dashboard-new]').first().click();await expect(page.locator('#start-view')).toBeVisible();
  for(const id of ['chattastic','raumwerk','morgen']){
   await page.goto(base+'/studio/?example='+id);await expect(page.locator('#three-d-view')).toBeVisible();await page.waitForFunction(()=>document.querySelector('#three-d-back').width>500);
   const c=await project();assert.equal(c.templateId,id);assert.equal(c.recipients.length,3);assert.ok(c.sides.front.fields.some(f=>f.type==='image'));assert.ok(c.sides.front.fields.some(f=>f.text==='{{company}}'));
@@ -38,7 +38,7 @@ try{
   await page.locator('#preview-mode-2d').click();await page.locator('#toast').evaluate(e=>e.classList.remove('show'));await page.locator('#proof-spread').screenshot({path:`test-results/promotions-${id}-spread.png`});
   if(id!=='chattastic')await expect(page.locator('#example-preview-note')).toContainText('example.org');
  }
- await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(6);await expect(page.locator('[data-dashboard-example]')).toHaveCount(3);
+ await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(4);await expect(page.locator('[data-dashboard-example]')).toHaveCount(3);
  await page.screenshot({path:'test-results/promotions-dashboard.png',fullPage:true});
- assert.deepEqual(errors,[]);console.log('Promotions passed: three distinct designs, decoded QR destinations, personalization, responsive layouts, tutorial entry + skip into empty independent campaign, persistence, complete samples and audits.');
+ assert.deepEqual(errors,[]);console.log('Promotions passed: three distinct designs, decoded QR destinations, personalization, responsive layouts, direct entry into empty independent campaign, persistence, complete samples and audits.');
 }finally{await browser.close();}

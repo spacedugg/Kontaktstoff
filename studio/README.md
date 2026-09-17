@@ -4,9 +4,11 @@ Eigenständige Anwendung unter `/studio/`, direkt mit der Homepage verbunden. De
 
 ## Bedienung
 
-**Von null starten** erstellt zwei leere DIN-A5-Seiten ohne Beispielkontakte. Die Anleitung erklärt Briefing, Format, Gestaltung, persönliche Felder, Empfänger und Prüfung. Sie speichert den Fortschritt und bleibt später erreichbar.
+**Neue Kampagne starten** öffnet eine kurze Auswahl: Kampagnenname, Vorlage / eigener Upload / leere Karte. Erst beim Absenden wird eine eigene Kampagne angelegt, ohne Beispielkontakte. Danach geht es direkt in den Editor. Ein kurzer Hinweis führt durch Gestaltung → Empfänger → Vorschau. Alte Tutorial-Links führen ebenfalls zu diesem Einstieg; bestehende Tutorial-Projekte bleiben als bearbeitbare Entwürfe erhalten.
 
-**Vorlagen** sind native, vollständig bearbeitbare Elemente: chattastic, Ein guter Anfang und Ein neuer Impuls. Name, Text, Farbe, Flächen und QR-Code lassen sich bearbeiten. Empfänger ergänzt der Nutzer. „Beispielkampagne laden“ ist von der Übersicht, jeder Anleitung und dem Dialog „Neue Kampagne“ erreichbar. Sie erstellt eine unabhängige, vollständig bearbeitbare Fotokampagne mit drei fiktiven Empfängern und öffnet sie in 3D. Über „Nächster Beispielkontakt“ wechseln die personalisierten Inhalte sichtbar mit. Das frühere Muster bleibt nur unter `?demo=1` verfügbar.
+**Meine Kreationen** zeigt eigene Projekte zuerst, mit Suche, Duplizieren und Löschen. Auch im geöffneten Entwurf ist „Kreation löschen“ verfügbar. Nach Bestätigung landet der Entwurf im Papierkorb der Übersicht und kann dort wiederhergestellt werden. Die Speicherung prüft innerhalb einer IndexedDB-Transaktion, dass verzögerte Speichervorgänge gelöschte Entwürfe nicht erneut aktivieren. Der Papierkorb bleibt ebenfalls nur in diesem Browser gespeichert.
+
+**Vorlagen & Beispiele** sind in der Übersicht eingeklappt. Vorlagen sind native, vollständig bearbeitbare Elemente ohne Beispielkontakte. Die drei fertigen Fotokampagnen öffnen sich als unabhängige Beispiele mit fiktiven Empfängern in 3D. Über „Nächster Beispielkontakt“ wechseln die personalisierten Inhalte sichtbar mit. Das frühere Muster bleibt unter `?demo=1` verfügbar.
 
 **Gestaltung:** PDF, PNG, JPG oder WebP als Hintergrund hochladen, maximal 20 MB. Eine PDF kann beide Seiten beliefern. Pro Seite sind bis zu 40 Elemente möglich: Text, QR-Code, Bild oder Farbfläche. Logos als PNG behalten ihre Transparenz. Bildelemente können vollständig eingepasst oder rahmenfüllend zugeschnitten werden. „Eigenes Bild einsetzen“ ersetzt das ausgewählte Bild und behält Rahmen und Position bei. Elemente lassen sich ziehen, skalieren, duplizieren, löschen und nach vorn/hinten ordnen. Text unterstützt Schriftgröße, Farbe, Ausrichtung und automatisches Einpassen. Positionen und Größen sind in Millimetern. Pfeiltasten verschieben um 0,5 mm, mit Umschalt um 5 mm. Rückgängig/Wiederholen: Strg/⌘ Z bzw. Strg/⌘ Umschalt Z.
 
@@ -40,7 +42,7 @@ npm run test:guide
 npm run test:product
 npm run test:handoff
 npm run test:example
-npm run test:tutorial
+npm run test:onboarding
 ```
 
 Browserprüfungen erwarten einen laufenden Server auf Port 4177 und Google Chrome. Die ursprünglichen Editor-/Anleitungstests unterstützen `STUDIO_URL` und `BROWSER_CHANNEL`. `build` erzeugt `studio/app.js` samt lokalen Bibliotheksressourcen und `dist/` für Vercel.
@@ -53,11 +55,12 @@ Browserprüfungen erwarten einen laufenden Server auf Port 4177 und Google Chrom
 | `src/core.js` | v1-Projektschema, Validierung, CSV, Personalisierung |
 | `src/templates.js` | Drei native, bearbeitbare Vorlagen |
 | `src/dashboard.js` | Kampagnenübersicht und Vorlagenkatalog |
-| `src/guide.js` | Sechs erklärende Einstiegsschritte |
+| `src/start.js` | Auswahl des Startpunkts für die eigene Kampagne |
+| `src/guide.js` | Frühere Anleitung, für bestehende Projektdaten beibehalten |
 | `src/render.js` | Canvas, Textlayout, lokale QR-Codes, begrenzte Bildcaches |
 | `src/three-d.js` | Maus, Touch und Tastatur für die 3D-Darstellung |
 | `src/handoff.js` | Gesamtaudit, personalisierte PDF-Serie, ZIP-Paket |
-| `src/storage.js` | IndexedDB-Kampagnen |
+| `src/storage.js` | IndexedDB-Kampagnen, Papierkorb und Wiederherstellen |
 | `src/icons.js` | Lokale SVG-Icons |
 
 Die Testdaten sind fiktiv. Empfängerdaten und exportierte Pakete gehören nicht ins Repository.
