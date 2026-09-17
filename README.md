@@ -28,8 +28,8 @@ Ein frischer Browser öffnet eine leere Kampagnenübersicht. Es werden keine Bei
 - Homepage mit drei fertigen Foto-Promotionen. Galerie, Studio, 3D und Export verwenden dieselben bearbeitbaren Designdaten aus `studio/src/promotions.js`.
 - „Meine erste Kampagne“ startet direkt im Tutorial. Überspringen legt einen unabhängigen leeren Entwurf im Editor an; die Übung bleibt erhalten.
 - Kampagnenübersicht mit Vorschauen, Suche, Duplizieren, Löschen und Projektimport.
-- Eigenes Mitmach-Tutorial in acht Schritten: fiktive Kontakte, direkte Platzhalter/Wert-Zuordnung, bearbeitbare Ansprache, Namensänderungen, QR-Links, 3D und Export. Fortschritt bleibt beim Reload erhalten. Bestehende Entwürfe werden nicht verändert.
-- Anleitung in sechs Schritten: Briefing, Format, Design, persönliche Felder, Empfänger, Prüfung.
+- Kurzer Einstieg in vier Schritten: Karte ansehen, Namen ändern, QR-Link einsetzen, Design für eine eigene Kampagne übernehmen. Pro Seite eine Hauptaktion; zusätzliche Erklärungen bleiben eingeklappt. Die Designübernahme erstellt einen unabhängigen Entwurf ohne Beispielkontakte und führt direkt zum ersten eigenen Empfänger. Fortschritt bleibt beim Reload erhalten; alte achtstufige Tutorials werden unter Erhalt ihrer Änderungen migriert.
+- Eine separate Anleitung für komplett leere Projekte: Briefing, Format, Design, persönliche Felder, Empfänger, Prüfung. Während einer Anleitung sind Editor-Navigation und doppelte Einstiegshilfen ausgeblendet. Eine abgeschlossene Anleitung erscheint nicht weiter als zusätzlicher Haupttab.
 - DIN A5 quer, Vorder- und Rückseite. Drei vollständig bearbeitbare Vorlagen.
 - PDF-/Bild-Uploads, eigene Logos mit Transparenz, Text, Farbflächen und echte QR-Codes.
 - Positionierung in Millimetern, Maus/Touch/Tastatur, Größenänderung, Ebenenfolge, Undo/Redo.

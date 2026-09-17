@@ -32,7 +32,7 @@ function commit(fn,options){checkpoint();fn();changed(options);}
 function undo(){if(!history.length)return;future.push(clone(campaign));campaign=history.pop();recipientIndex=clamp(recipientIndex,0,Math.max(0,campaign.recipients.length-1));selected=campaign.sides[side].fields.find(f=>f.id===selected)?.id;changed();}
 function redo(){if(!future.length)return;history.push(clone(campaign));campaign=future.pop();recipientIndex=clamp(recipientIndex,0,Math.max(0,campaign.recipients.length-1));changed();}
 function setSide(value){side=value;selected=campaign.sides[side].fields[0]?.id;renderUI();}
-function setView(value){if(value==='dashboard'){showDashboard();return;}view=value;renderUI();if(value==='preview')requestAnimationFrame(()=>threeD.paint());}
+function setView(value){if(value==='setup'&&campaign.tutorial)value='tutorial';if(value==='tutorial'&&campaign.tutorial&&!campaign.tutorial.active){campaign.tutorial.active=true;campaign.updatedAt=Date.now();persist();}if(value==='dashboard'){showDashboard();return;}view=value;renderUI();if(value==='preview')requestAnimationFrame(()=>threeD.paint());}
 function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),30000);}
 const filename=()=>campaign.name.replace(/[^\p{L}\p{N}]+/gu,'-').slice(0,80).replace(/^-|-$/g,'').toLowerCase()||'kampagne';
 async function busy(label,fn){$('#busy-label').textContent=label;$('#busy').hidden=false;try{return await fn();}catch(e){console.error(e);toast(e.message||'Das hat nicht funktioniert. Bitte erneut versuchen.',true);}finally{$('#busy').hidden=true;}}
@@ -43,11 +43,14 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
 }
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
 function renderUI(inspector=true,table=true,guide=true){
+ if(view==='setup'&&campaign.tutorial)view='tutorial';
+ document.body.classList.toggle('focused-entry',view==='tutorial'||view==='setup');
+ document.body.classList.toggle('tutorial-excursion',!!campaign.tutorial?.active&&view!=='tutorial'&&view!=='dashboard');
  document.body.classList.toggle('dashboard-active',view==='dashboard');
- $('.breadcrumb strong').textContent=view==='dashboard'?'Dein Arbeitsplatz':'Designstudio';
+ $('.breadcrumb strong').textContent=view==='dashboard'?'Dein Arbeitsplatz':view==='tutorial'?'Beispiel ausprobieren':view==='setup'?'Deine Kampagne':'Designstudio';
  $('#dashboard-view').hidden=view!=='dashboard';
  if(view==='dashboard')return;
- $('#example-preview-note').hidden=!campaign.sample;
+ $('#example-preview-note').hidden=!campaign.sample||!!campaign.tutorial?.active;
  const promotion=PROMOTIONS.find(p=>p.id===campaign.templateId)||PROMOTIONS[0];
  const credit=$('.example-photo-credit');credit.href=promotion.source;credit.textContent='Stockfoto: '+promotion.credit+' / Unsplash ↗';
  const sampleCopy=promotion.id==='chattastic'?'Alle Empfänger und Anschriften sind fiktiv. Die Beispiellinks öffnen chattastic.de; ersetze sie für den Versand durch echte Chatbot-Links.':'Fiktive Beispielmarke, Empfänger und Anschriften. Die QR-Codes führen zu example.org als Demo-Ziel. Ersetze diese Links vor einer echten Kampagne.';
@@ -63,8 +66,8 @@ function renderUI(inspector=true,table=true,guide=true){
  $('#tutorial-return').hidden=!campaign.tutorial?.active||view==='tutorial';
  if(view==='tutorial'&&guide)$('#tutorial-view').innerHTML=tutorialHTML(campaign,recipientIndex);
  if(view==='tutorial')updateTutorialLive();
- $('#setup-tab').hidden=!campaign.onboarding;
- $('#guide-return').hidden=!campaign.onboarding?.active||view==='setup';
+ $('#setup-tab').hidden=!campaign.onboarding?.active||!!campaign.tutorial||campaign.sample;
+ $('#guide-return').hidden=!campaign.onboarding?.active||!!campaign.tutorial||view==='setup';
  if(view==='setup'&&guide)$('#setup-view').innerHTML=guideHTML(campaign);
  $('#three-d-view').hidden=previewMode!=='3d';$('#proof-spread').hidden=previewMode!=='2d';
  for(const mode of ['2d','3d']){const b=$('#preview-mode-'+mode);b.classList.toggle('active',previewMode===mode);b.setAttribute('aria-pressed',String(previewMode===mode));}
@@ -289,7 +292,7 @@ $('#setup-view').addEventListener('submit',e=>{
  if(e.target.id!=='guide-recipient-form')return;e.preventDefault();const data=new FormData(e.target),company=String(data.get('company')||'').trim(),first=String(data.get('first_name')||'').trim(),url=String(data.get('chatbot_url')||'').trim();
  if(!company)return toast('Bitte den Firmennamen ergänzen.',true);if(url&&!validURL(url))return toast('Bitte einen vollständigen Link mit https:// eintragen.',true);
  if(campaign.recipients.length>=1000)return toast('Maximal 1.000 Empfänger pro Kampagne.',true);
- commit(()=>{campaign.recipients.push({id:uid(),company,first_name:first,salutation:first?'Hallo '+first+',':'Guten Tag,',chatbot_url:url,website:''});recipientIndex=campaign.recipients.length-1;});toast('Empfänger hinzugefügt. Deine Felder verwenden jetzt diese Daten.');
+ commit(()=>{const data={company,first_name:first,salutation:first?'Hallo '+first+',':'Guten Tag,',chatbot_url:url,website:''};if(campaign.onboarding.designReady&&campaign.recipients.length){Object.assign(campaign.recipients[0],data);recipientIndex=0;}else{campaign.recipients.push({id:uid(),...data});recipientIndex=campaign.recipients.length-1;}if(campaign.onboarding.designReady)campaign.onboarding.step=5;});if(campaign.onboarding.designReady)window.scrollTo({top:0,behavior:'instant'});else toast('Empfänger hinzugefügt. Deine Felder verwenden jetzt diese Daten.');
 });
 $('#setup-view').addEventListener('click',e=>{
  const step=e.target.closest('[data-guide-step]');if(step){guideStep(Number(step.dataset.guideStep));return;}
@@ -298,7 +301,7 @@ $('#setup-view').addEventListener('click',e=>{
  if(action==='example'){loadExample();return;}
  if(action==='next'){if(campaign.onboarding.step===0&&!$('#setup-name').value.trim()){$('#setup-name').focus();toast('Gib deiner Kampagne bitte einen Namen.',true);return;}guideStep(campaign.onboarding.step+1);}
  if(action==='previous')guideStep(campaign.onboarding.step-1);
- if(action==='finish'){commit(()=>campaign.onboarding.active=false);previewMode='3d';setView('preview');toast('Dein Einstieg ist abgeschlossen. Alle Schritte bleiben über die Anleitung erreichbar.');}
+ if(action==='finish'){commit(()=>campaign.onboarding.active=false);previewMode='3d';setView('preview');toast('Dein Entwurf ist bereit. Prüfe jetzt die Karte für deinen Empfänger.');}
  if(action.startsWith('upload-')){side=action.slice(7);$('#design-file').click();}
  if(action==='edit-front'||action==='edit-back'){side=action.slice(5);selected=campaign.sides[side].fields[0]?.id;setView('design');}
  if(action.startsWith('field-')){const target=$('#guide-field-side').value;side=target;addField(action.slice(6));const select=$('#guide-field-side');if(select)select.value=target;}
@@ -357,29 +360,32 @@ $('#handoff-export').onclick=async()=>{
 function makeTutorialCampaign(){
  const c=createExampleCampaign();c.name='chattastic · Mein Mitmach-Tutorial';
  const field=c.sides.back.fields.find(f=>f.text==='{{salutation}}');field.text='Hallo {{first_name}},';
- c.tutorial={active:true,step:0,fieldId:field.id};return c;
+ delete c.onboarding;c.tutorial={version:2,active:true,step:0,fieldId:field.id};return c;
 }
 async function startTutorial(fresh=false){
- if(campaign.tutorial&&!fresh){setView('tutorial');return;}
+ if(campaign.tutorial&&!fresh){campaign=validateCampaign(campaign);setView('tutorial');return;}
  await activateCampaign(makeTutorialCampaign(),'tutorial');window.scrollTo({top:0,behavior:'instant'});
  toast('Dein Tutorial hat eine eigene Beispielkampagne. Vorherige Entwürfe bleiben erhalten.');
 }
 function tutorialStep(step){commit(()=>{campaign.tutorial.step=clamp(step,0,TUTORIAL_STEPS.length-1);campaign.tutorial.active=true;});$('#tutorial-title')?.focus({preventScroll:true});$('#tutorial-view').scrollIntoView({block:'start',behavior:'instant'});}
 function updateTutorialLive(){
  const f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial?.fieldId),r=recipient();
+ if($('#tutorial-pattern'))$('#tutorial-pattern').textContent=f?.text||'';
  if($('#tutorial-resolved'))$('#tutorial-resolved').textContent=resolveText(f?.text||'',r)||'Hier erscheint dein persönlicher Text.';
  if($('#tutorial-text-help')){const missing=missingKeys(f?.text||'',r);$('#tutorial-text-help').textContent=missing.length?'Für diese Platzhalter fehlt ein Wert: '+[...new Set(missing)].map(k=>'{{'+k+'}}').join(', '):'Dieser Text steht jetzt auch auf deiner Beispielkarte.';}
+ if(view==='tutorial'&&campaign.tutorial?.step===2){const next=$('[data-tutorial-action="next"]');if(next)next.disabled=!validURL(r.chatbot_url)||r.chatbot_url.length>1000;}
  if($('#tutorial-qr-status'))$('#tutorial-qr-status').textContent=validURL(r.chatbot_url)&&r.chatbot_url.length<=1000?'Der Code enthält genau den Link aus dieser Empfängerzeile.':'Bitte einen vollständigen HTTP(S)-Link mit maximal 1.000 Zeichen eingeben.';
 }
 $('#start-tutorial').onclick=()=>startTutorial();$('#example-tutorial').onclick=()=>startTutorial();$('#back-to-tutorial').onclick=()=>setView('tutorial');
 $('#tutorial-view').addEventListener('input',e=>{
+ if(e.target.dataset.tutorialData){const key=e.target.dataset.tutorialData,value=e.target.value;commit(()=>{recipient()[key]=value;if(key==='first_name')recipient().salutation=value?'Hallo '+value+',':'Guten Tag,';},{guide:false});return;}
+ if(e.target.id==='tutorial-url'){commit(()=>recipient().chatbot_url=e.target.value.trim(),{guide:false});return;}
  if(e.target.id!=='tutorial-text')return;
  const f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial.fieldId);if(f)commit(()=>f.text=e.target.value.slice(0,180),{guide:false});
 });
 $('#tutorial-view').addEventListener('change',e=>{
  if(e.target.id==='tutorial-person'){recipientIndex=Number(e.target.value)||0;renderUI();return;}
- if(e.target.dataset.tutorialData){const key=e.target.dataset.tutorialData,value=e.target.value.trim();commit(()=>{recipient()[key]=value;if(key==='first_name')recipient().salutation=value?'Hallo '+value+',':'Guten Tag,';});}
- if(e.target.id==='tutorial-url'){const value=e.target.value.trim();commit(()=>recipient().chatbot_url=value);}
+
 });
 $('#tutorial-view').addEventListener('click',async e=>{
  const step=e.target.closest('[data-tutorial-step]');if(step){tutorialStep(Number(step.dataset.tutorialStep));return;}
@@ -387,6 +393,13 @@ $('#tutorial-view').addEventListener('click',async e=>{
  const token=e.target.closest('[data-tutorial-token]');if(token){const input=$('#tutorial-text'),f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial.fieldId);if(!f)return;const start=input.selectionStart,end=input.selectionEnd,value=input.value.slice(0,start)+'{{'+token.dataset.tutorialToken+'}}'+input.value.slice(end);commit(()=>f.text=value.slice(0,180));$('#tutorial-text').focus();$('#tutorial-text').setSelectionRange(start+token.dataset.tutorialToken.length+4,start+token.dataset.tutorialToken.length+4);return;}
  const action=e.target.closest('[data-tutorial-action]')?.dataset.tutorialAction;if(!action)return;
  if(action==='fresh'){await startTutorial(true);return;}
+ if(action==='own'){
+  const own=clone(campaign);own.id=uid();own.name='Meine erste Kampagne';own.sample=false;own.recipients=[];const greeting=own.sides.back.fields.find(f=>f.id===own.tutorial.fieldId);if(greeting?.text==='Hallo {{first_name}},')greeting.text='{{salutation}}';delete own.tutorial;
+  own.onboarding={active:true,step:4,personalizationSkipped:false,designReady:true};
+  own.brief={...own.brief,audience:'',offer:''};
+  commit(()=>campaign.tutorial.active=false);
+  await activateCampaign(own,'setup');window.scrollTo({top:0,behavior:'instant'});return;
+ }
  if(action==='skip'||action==='blank'){
   commit(()=>campaign.tutorial.active=false);
   const blank=createCampaign(true);blank.onboarding.active=false;

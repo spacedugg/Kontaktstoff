@@ -43,6 +43,7 @@ export function validateCampaign(value) {
   if(value.brief && (!['sender','audience','goal','offer'].every(key=>typeof value.brief[key]==='string'&&value.brief[key].length<=1000)))throw new Error('Ungültiges Kampagnenbriefing.');
   if(value.onboarding && (!Number.isInteger(value.onboarding.step)||value.onboarding.step<0||value.onboarding.step>5||typeof value.onboarding.active!=='boolean'))throw new Error('Ungültiger Anleitungsstand.');
   if(value.tutorial&&(!Number.isInteger(value.tutorial.step)||value.tutorial.step<0||value.tutorial.step>7||typeof value.tutorial.active!=='boolean'||!/^[-a-zA-Z0-9_]{1,100}$/.test(value.tutorial.fieldId)))throw new Error('Ungültiger Tutorialstand.');
+  if(value.onboarding?.designReady!==undefined&&typeof value.onboarding.designReady!=='boolean')throw new Error('Ungültiger Anleitungsmodus.');
   const format=FORMATS.find(f=>f.id===value.format);
   for(const side of ['front','back']){
     const s=value.sides?.[side];
@@ -57,7 +58,14 @@ export function validateCampaign(value) {
     if(new Set(s.fields.map(f=>f.id)).size!==s.fields.length)throw new Error('Doppelte Feld-IDs.');
   }
   if(new Set(value.recipients.map(r=>r.id)).size!==value.recipients.length)throw new Error('Doppelte Empfänger-IDs.');
-  return clone(value);
+  const result=clone(value);
+  // Older tutorials also carried the six-step setup, creating two competing guides.
+  if(result.tutorial){
+    if(result.tutorial.version!==2){result.tutorial.step=[0,0,1,1,1,2,3,3][result.tutorial.step];result.tutorial.version=2;}
+    if(result.tutorial.step>3)throw new Error('Ungültiger Tutorialstand.');
+    delete result.onboarding;
+  }
+  return result;
 }
 export function checks(campaign) {
   const issues=[];const format=FORMATS.find(f=>f.id===campaign.format);

@@ -24,3 +24,12 @@ test('decorative image elements reject external and executable sources',()=>{
 test('postal CSV aliases retain postal codes as strings and reject oversized values',()=>{
  const rows=parseCSV('Firma;Straße;PLZ;Ort;Land\nStudio;Hauptstraße 4;01067;Dresden;Deutschland');assert.equal(rows[0].postal_code,'01067');assert.equal(rows[0].street,'Hauptstraße 4');assert.equal(rows[0].city,'Dresden');assert.equal(rows[0].country,'Deutschland');assert.throws(()=>parseCSV('Firma;Ansprache\nStudio;'+ 'x'.repeat(5001)));
 });
+
+test('legacy tutorials migrate without losing edited recipients or keeping a second guide',()=>{
+ const mapped=[0,0,1,1,1,2,3,3];
+ for(let step=0;step<8;step++){
+  const old=createCampaign();old.onboarding={active:true,step:5,personalizationSkipped:false};old.tutorial={active:true,step,fieldId:old.sides.back.fields[0].id};old.recipients[0].first_name='Bleibt erhalten';
+  const migrated=validateCampaign(old);assert.equal(migrated.tutorial.step,mapped[step]);assert.equal(migrated.tutorial.version,2);assert.ok(!migrated.onboarding);assert.equal(migrated.recipients[0].first_name,'Bleibt erhalten');assert.equal(old.tutorial.step,step);assert.ok(old.onboarding);assert.deepEqual(validateCampaign(migrated),migrated);
+ }
+ const bad=createCampaign();bad.tutorial={version:2,active:true,step:4,fieldId:bad.sides.back.fields[0].id};assert.throws(()=>validateCampaign(bad));
+});
