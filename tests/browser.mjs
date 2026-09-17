@@ -7,7 +7,7 @@ await mkdir('test-results',{recursive:true});
 const browser=await chromium.launch({channel:process.env.BROWSER_CHANNEL||'chrome',headless:true});
 const context=await browser.newContext({viewport:{width:1512,height:1050},acceptDownloads:true});
 const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
-const open=()=>page.goto(process.env.STUDIO_URL||'http://127.0.0.1:4177/studio/');
+const open=()=>page.goto(process.env.STUDIO_URL||'http://127.0.0.1:4177/studio/?demo=1');
 const waitCanvas=()=>page.waitForFunction(()=>document.querySelector('#design-canvas').width>500);
 async function snapshot(name){await page.screenshot({path:`test-results/${name}.png`,fullPage:true});}
 async function download(button){const promise=page.waitForEvent('download');await page.locator(button).click();const d=await promise;return {data:await readFile(await d.path()),name:d.suggestedFilename()};}
@@ -51,7 +51,7 @@ try{
  await page.locator('#open-preview').click();await expect(page.locator('#check-list')).toContainText('Bildauflösung');
  await page.locator('[data-tab="design"]').click();
  const saved=await project();await page.locator('#project-file').setInputFiles({name:'restore.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(saved))});await expect(page.locator('#rename-campaign')).toContainText('Import');
- await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.campaign-item')).toHaveCount(2);await page.locator('[data-result="cancel"]').click();
+ await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(2);await page.locator('.campaign-card-content [data-dashboard-open]').first().click();
  // A malicious import is rejected and the current campaign remains intact.
  const bad=structuredClone(saved);bad.sides.front.fields[0].id='x" onclick="alert(1)';await page.locator('#project-file').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(bad))});await expect(page.locator('#toast')).toContainText('nicht importiert');
  await page.locator('#new-campaign').click();await page.locator('[data-result="template"]').click();await waitCanvas();await page.waitForTimeout(300);await snapshot('studio-desktop-final');

@@ -1,6 +1,6 @@
 {
   "name": "kontaktstoff-studio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,9 +8,12 @@
     "build": "node scripts/build.mjs",
     "test": "node --test tests/core.test.mjs",
     "test:browser": "node tests/browser.mjs",
-    "test:guide": "node tests/guide-3d.mjs"
+    "test:guide": "node tests/guide-3d.mjs",
+    "test:product": "node tests/product.mjs",
+    "test:handoff": "node tests/handoff.mjs"
   },
   "dependencies": {
+    "fflate": "0.8.3",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.3.289",
     "qrcode": "1.5.4"

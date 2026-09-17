@@ -1,35 +1,64 @@
-# KONTAKTSTOFF | B2B-Outreach per Post
+# Kontaktstoff
 
-Statische, interaktive Landingpage für personalisierte B2B-Postkampagnen: vom Wunschkunden über Gestaltung, Produktion und Versand bis zum Gespräch und gepflegten Kampagnenergebnis.
+Ein vollständiger lokaler Arbeitsablauf für personalisierte B2B-Mailings: von der Homepage über Kampagnen und beidseitiges Design bis zur PDF-Serie und Übergabe.
 
-## Gestaltung
+Entwicklung auf **`codex/kampagnenstudio`**. Die vorhandene GitHub/Vercel-Anbindung erstellt Branch-Previews. Der Produktionsbranch wird nicht geändert.
 
-- Weiß, Graphit und Neongelb; Manrope in 400 und 700, lokal unter SIL Open Font License.
-- Direkter Hero ohne Eyebrow, klare Größenhierarchie, großzügige Software-UI und reduzierte Scroll-Reveals mit Reduced-Motion-Unterstützung.
-- Der Hero belegt den ersten Viewport und zeigt als Studienwerte nur 935 % ROAS und 2,8 % Conversion Rate. Danach erklärt ein Briefsymbol Kontaktstoff als physischen B2B-Erstkontakt.
-- Der Nutzen und der offen sichtbare Vergleich mit Kaltakquise per E-Mail, Anruf und LinkedIn stehen vor dem detaillierten Dashboard. Große vertikale Abstände trennen die Abschnitte.
-- Die ausgewählte Logoidee 02, das Material-K, steht links neben der Wortmarke. Alle zehn Richtungen bleiben unter `dist/logo-ideen/` vergleichbar.
+## Lokal starten
 
-## Leistung und Inhalte
+Node.js 22.19+ und npm:
 
-- Fünf manuell auswählbare Prozessschritte: Wunschkunden, Gestaltung, Druck und Versand, Reaktion, Ergebnis und ROI. Auf großen Viewports läuft der Prozess als Sticky-Scroll und wechselt seine animierten Ansichten beim Scrollen.
-- Vergrößerbares Beispiel-Dashboard mit lokaler Status- und ROI-Interaktion.
-- Ein tatsächlich geliefertes Selfmailer-Format wird gezeigt. Seine Außen- und Perforationskonturen sind aus `2402-00575 DH Selfmailer Ostern_Stanze.pdf` übernommen; die sichtbare Kontaktstoff-Gestaltung wurde neu erstellt. Eine interaktive Perspektive stellt das flache Format räumlich dar, ohne seine Kontur zu verändern.
-- Eine eigene Zielsektion zeigt WhatsApp, Kalender, Potenzialanalyse, Video und Kontaktformular als mögliche Rückwege.
-- Das Angebot geht von 20 Gestaltungsvorlagen aus. Im Formatdialog wird nur der vorliegende Selfmailer konkret gezeigt.
-- Fünf ausdrücklich fiktive Case-Study-Vorlagen mit synthetischen Porträts, eigenen Botschaften, vollständigen Abläufen und nachvollziehbaren ROI-Beispielen. Keine echten Kundenreferenzen.
-- Drei Creditpakete, Kosten- und Kostendeckungsrechner sowie ein lokales Kampagnenbriefing mit TXT-Download und Druckansicht.
+```sh
+npm ci
+npm run build
+npm run dev
+```
 
-## Zahlen und Grenzen
+- Homepage: http://127.0.0.1:4177/
+- Kampagnen: http://127.0.0.1:4177/studio/
+- Geführter Einstieg: http://127.0.0.1:4177/studio/?start=blank
+- Bearbeitbare chattastic-Vorlage: http://127.0.0.1:4177/studio/?template=chattastic
 
-Die CMC Print-Mailing-Studie 2025 betrifft B2B-Bestandskundenaktivierung. Gezeigt werden 2,8 % Conversion Rate und 935 % ROAS. ROAS ist Umsatz im Verhältnis zu Mailingkosten, kein Gewinn. Es werden keine Öffnungs-, Antwort- oder Neukundenquoten für Kontaktstoff erfunden.
+Ein frischer Browser öffnet eine leere Kampagnenübersicht. Es werden keine Beispielkontakte automatisch als echte Kampagne angelegt. `?demo=1` und „Beispiel ausprobieren“ bieten weiterhin das ausdrücklich fiktive ursprüngliche chattastic-Muster.
 
-Das Dashboard und die Case-Ergebnisse sind Beispiele. Der QR-Code führt zur lokalen Gesprächsdemo; ein echter WhatsApp-Unternehmenslink ist noch nicht hinterlegt. Es werden keine Nachrichten versendet, Termine gebucht oder Aufträge ausgelöst. Betreiber- und Live-Kontaktangaben müssen vor dem öffentlichen Marktstart ergänzt werden.
+## Was funktioniert
+
+- Homepage mit interaktiver, personalisierbarer 3D-Karte, Vorlagen und direktem Einstieg.
+- Kampagnenübersicht mit Vorschauen, Suche, Duplizieren, Löschen und Projektimport.
+- Anleitung in sechs Schritten: Briefing, Format, Design, persönliche Felder, Empfänger, Prüfung.
+- DIN A5 quer, Vorder- und Rückseite. Drei vollständig bearbeitbare Vorlagen.
+- PDF-/Bild-Uploads, eigene Logos mit Transparenz, Text, Farbflächen und echte QR-Codes.
+- Positionierung in Millimetern, Maus/Touch/Tastatur, Größenänderung, Ebenenfolge, Undo/Redo.
+- Empfänger als CSV oder per Eingabe; eigene Spalten, Postanschriften und Suche.
+- Tatsächliche Designs in drehbarer, verschiebbarer 3D-Ansicht sowie flachem Korrekturabzug.
+- Prüfung aller Empfänger auf fehlende Werte, ungültige QR-Ziele und Textüberläufe; Hinweise zu Bildauflösung, Postanschriften und möglichen Duplikaten.
+- PDF/PNG für einen Empfänger sowie ZIP-Pakete mit personalisierter PDF-Serie, CSV, Seitenzuordnung, Prüfbericht und vollständigem Projekt.
+- Lokale automatische Speicherung und portable Projektdateien.
+
+## Bewusste Grenzen
+
+Das ist ein funktionsfähiges **lokales Pilotwerkzeug**, kein gehostetes Mehrbenutzersystem. Keine Konten, Cloud-Synchronisierung, Chatbot-Erstellung, Scan-Analyse, Zahlung, Druck- oder Versandbestellung. Ziel-Links müssen bereits existieren. Die URL-Prüfung kontrolliert Format und Länge, nicht die Erreichbarkeit der fremden Website.
+
+Alle Exporte sind **RGB-Ansichten mit 300 dpi, ohne Beschnitt**, kein PDF/X. Finale Druckdaten, Farbprofil, Papier und Produktion müssen mit der Druckerei abgestimmt werden. Je ZIP-Paket werden maximal 50 Empfänger verarbeitet; eine Kampagne kann bis zu 1.000 Kontakte enthalten.
+
+Kampagnen liegen in IndexedDB unter dem jeweiligen Browser-Ursprung. Regelmäßig „Projekt sichern“ verwenden. Löschen der Browserdaten entfernt lokale Entwürfe. Uploads und Kontakte werden nicht an einen Server übertragen. Die Projektdatei im ZIP enthält die **gesamte** Kampagne, auch bei einem eingeschränkten PDF-Empfängerbereich.
+
+Die Homepage nennt den aktuellen Funktionsumfang. Betreiberangaben und vollständige Datenschutzerklärung sind vor einem öffentlichen Marktstart noch zu ergänzen.
 
 ## Prüfung
 
-Geprüft wurden JS-Syntax und Initialisierung, Personalisierung, beide Chatpfade, QR-Direkteinstieg, Statuswechsel und Rücknahme, fünf Case-Details, Credit-Aufrundung, ungültige Werte, Briefing, Dialogsteuerung und Auswahl des realen Selfmailers. Alle lokalen Seiten- und Asset-Referenzen werden vor dem Deployment validiert.
+Mit laufendem Entwicklungsserver und installiertem Google Chrome:
 
-## Kampagnenstudio (Entwicklungsbranch)
+```sh
+npm test
+npm run test:browser
+npm run test:guide
+npm run test:product
+npm run test:handoff
+```
 
-Unter [`studio/`](studio/README.md) liegt ein eigenständiger Editor für personalisierte A5-Mailings: beidseitige Design-Uploads, Text-/QR-Personalisierung, CSV-Empfänger, Live-Vorschau, lokales Speichern und Ansichts-PDFs. Lokal mit `npm run dev` unter `/studio/` öffnen. Der Editor ist nicht in die bestehende Landingpage verlinkt und dieser Branch wird nicht durch einen neu angelegten Workflow veröffentlicht.
+Die Tests prüfen unter anderem echte QR-Pixel, PDF-Maße und Seitenzahl, Uploads, Rundlauf von Projektdateien, 3D-Eingaben, Anleitung, lokale Speicherung, alle neuen Produktabläufe und mobile Ansichten. Screenshots liegen unter `test-results/` und werden nicht eingecheckt.
+
+`npm run build` bündelt das Studio, kopiert lokale PDF-Ressourcen und erstellt die vollständige Website unter `dist/`. `vercel.json` verwendet diesen Ordner. Die gebaute Studio-Datei ist außerdem im Repository enthalten; ein statischer HTTP-Server genügt zum Ausprobieren.
+
+Details: [Studio-Dokumentation](studio/README.md) · [Weiterentwicklung zum öffentlichen Produkt](docs/PRODUKTSTART.md)

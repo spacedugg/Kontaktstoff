@@ -8,7 +8,7 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message));
 async function project(){const event=page.waitForEvent('download');await page.locator('#project-export').click();return JSON.parse(await readFile(await(await event).path(),'utf8'));}
 async function shot(name){await page.locator('#toast').evaluate(e=>e.classList.remove('show'));await page.screenshot({path:`test-results/${name}.png`,fullPage:true});}
 try{
- await page.goto(process.env.STUDIO_URL||'http://127.0.0.1:4177/studio/');await page.waitForFunction(()=>document.querySelector('#design-canvas').width>500);
+ await page.goto(process.env.STUDIO_URL||'http://127.0.0.1:4177/studio/?demo=1');await page.waitForFunction(()=>document.querySelector('#design-canvas').width>500);
  await page.locator('#open-preview').click();await page.waitForFunction(()=>document.querySelector('#three-d-front').width>500);
  await expect(page.locator('#three-d-view')).toBeVisible();assert.equal(await page.locator('#three-d-front').evaluate(c=>c.toDataURL()),await page.locator('#proof-front').evaluate(c=>c.toDataURL()));
  await shot('3d-front');
@@ -32,7 +32,7 @@ try{
  await page.locator('[data-guide-action="next"]').click();await expect(page.locator('#setup-view')).toContainText('Einmal drehen');await shot('guide-step-6');await page.locator('[data-guide-action="three-d"]').click();await expect(page.locator('#three-d-view')).toBeVisible();await page.waitForTimeout(500);
  c=await project();assert.equal(c.brief.sender,'Meine Agentur');assert.equal(c.recipients[0].salutation,'Hallo Anna,');assert.equal(c.sides.front.background.color,'#203522');assert.equal(c.sides.back.fields.filter(f=>f.type==='qr').length,1);assert.equal(c.sides.front.fields.filter(f=>f.text==='{{company}}').length,1);
  await page.locator('#back-to-guide').click();await page.locator('[data-guide-action="finish"]').click();await expect(page.locator('#guide-return')).toBeHidden();assert.equal((await project()).onboarding.active,false);
- await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.campaign-item')).toHaveCount(2);await page.locator('[data-result="cancel"]').click();
+ await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(2);await page.locator('.campaign-card-content [data-dashboard-open]').first().click();
  // Persisted guide remains accessible even after completion.
  await page.locator('[data-tab="setup"]').click();await expect(page.locator('#setup-view')).toBeVisible();await page.locator('[data-guide-step="0"]').click();await expect(page.locator('#setup-name')).toHaveValue('Hotelkampagne Herbst');
  for(const width of [1024,768,390]){await page.setViewportSize({width,height:900});await page.waitForTimeout(150);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Guide overflow at ${width}`);await shot(`guide-${width}`);}

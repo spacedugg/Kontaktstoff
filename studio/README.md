@@ -1,75 +1,61 @@
 # Kontaktstoff Kampagnenstudio
 
-Eigenständige Unterseite unter `/studio/`. Die bestehende Landingpage bleibt unverändert. Entwicklung auf `codex/kampagnenstudio`; kein Produktionsdeployment und kein Merge in den bisherigen Standardbranch.
+Eigenständige Anwendung unter `/studio/`, direkt mit der Homepage verbunden. Der Einstieg zeigt eine Kampagnenübersicht mit lokal gespeicherten Projekten. Ein neuer Browser beginnt leer.
 
-## Ausprobieren
+## Bedienung
 
-Voraussetzung: Node.js 22.19+ und npm.
+**Von null starten** erstellt zwei leere DIN-A5-Seiten ohne Beispielkontakte. Die Anleitung erklärt Briefing, Format, Gestaltung, persönliche Felder, Empfänger und Prüfung. Sie speichert den Fortschritt und bleibt später erreichbar.
+
+**Vorlagen** sind native, vollständig bearbeitbare Elemente: chattastic, Ein guter Anfang und Ein neuer Impuls. Name, Text, Farbe, Flächen und QR-Code lassen sich bearbeiten. Empfänger ergänzt der Nutzer. Das alte ausdrücklich fiktive chattastic-Muster bleibt über „Beispiel ausprobieren“ verfügbar; dessen Hintergrund ist fest.
+
+**Gestaltung:** PDF, PNG, JPG oder WebP als Hintergrund hochladen, maximal 20 MB. Eine PDF kann beide Seiten beliefern. Pro Seite sind bis zu 40 Elemente möglich: Text, QR-Code, Bild oder Farbfläche. Logos als PNG behalten ihre Transparenz. Elemente lassen sich ziehen, skalieren, duplizieren, löschen und nach vorn/hinten ordnen. Text unterstützt Schriftgröße, Farbe, Ausrichtung und automatisches Einpassen. Positionen und Größen sind in Millimetern. Pfeiltasten verschieben um 0,5 mm, mit Umschalt um 5 mm. Rückgängig/Wiederholen: Strg/⌘ Z bzw. Strg/⌘ Umschalt Z.
+
+**Empfänger:** CSV mit Komma/Semikolon, BOM, mehrzeiligen und in Anführungszeichen gesetzten Werten. Deutsche Spaltennamen werden zugeordnet. Bis zu 1.000 Kontakte; Werte bis 5.000 Zeichen. Standardspalten: `company`, `first_name`, `salutation`, `website`, `chatbot_url`, `street`, `postal_code`, `city`, `country`. Eigene CSV-Spalten sind mit `{{spaltenname}}` im Design verwendbar. Die Tabelle erlaubt direkte Bearbeitung und Suche. Postleitzahlen bleiben Text, führende Nullen erhalten.
+
+**QR-Codes:** Lokal aus dem vollständigen HTTP(S)-Ziel erzeugt, weiße Ruhezone inklusive. Es gibt keine Weiterleitung oder Scan-Analyse. Die App erzeugt keine Chatbots. Der Nutzer trägt bestehende persönliche URLs ein. Das Ziel wird nicht auf Erreichbarkeit getestet. Unter 20 mm Größe erscheint ein Hinweis.
+
+**3D:** Tatsächliche Canvas-Texturen beider Seiten. Ziehen dreht; Verschieben-Modus oder Umschalt+Ziehen verschiebt. Wenden, Vorder-/Rückseite, Zoom, Zurücksetzen und Tastaturbedienung sind verfügbar. Auf Touch sind Zwei-Finger-Zoom und Verschieben möglich. Die Darstellung verändert keine Druckdaten und simuliert keine verbindlichen Materialeigenschaften. „Beide Seiten“ öffnet die flache Ansicht.
+
+**Prüfung:** Der Kampagnen-Check zeigt fehlende Designs/Werte, ungültige QR-Ziele, Bildauflösung und Sicherheitsabstände. „Alle Empfänger prüfen“ prüft zusätzlich sämtliche personalisierten Textlayouts, Firmennamen, Postanschriften und mögliche Duplikate. Hinweise können von Fehlern unterschieden werden. Fehler mit Empfängerbezug öffnen den passenden Kontakt im Editor. Bearbeitungen verwerfen veraltete Gesamtergebnisse.
+
+**Export:** PDF mit Vorder-/Rückseite oder PNG der aktuellen Seite für den ausgewählten Kontakt. Das ZIP-Kampagnenpaket enthält eine PDF-Serie für 1–50 Empfänger, CSV des Bereichs, `uebergabe.json` mit Seitenzuordnung und Prüfung, Anleitung und vollständige Projektdatei. Die Projektdatei enthält immer alle Kontakte. Größere Listen in mehreren Bereichen exportieren. Paketexport prüft die gesamte Kampagne erneut und ist abbrechbar.
+
+## Technische Grenzen
+
+- Ausschließlich DIN A5 quer, 210 × 148 mm. Weitere Formate bleiben deaktiviert.
+- RGB-Rasteransichten, 300 dpi, ohne Beschnitt; kein PDF/X oder Druckauftrag.
+- Hintergründe werden proportional vollständig eingepasst. PDF-Uploads: bis 300 dpi, maximal 3.500 px längste Seite. Logos/Bildelemente maximal 2.000 px. Keine automatische Texterkennung oder Bearbeitung eingebrannter PDF-Inhalte.
+- Speicherung in IndexedDB, browser- und ursprungsgebunden. Exportierte JSON-Projekte sind portabel. Kein Account, Backend, Cloud-Sync oder Versand.
+- Kamera-/Papierprüfung von QR-Codes und finale Druckfreigabe erfolgen außerhalb des Studios.
+
+## Entwicklung
 
 ```sh
 npm ci
-npm run dev
-```
-
-Dann http://127.0.0.1:4177/studio/ öffnen. Für die bereits mitgelieferte Browserfassung genügt auch ein statischer Webserver für das Repository. Nicht per `file://` öffnen: PDF-Worker, Schriften und lokaler Speicher brauchen einen HTTP-Ursprung.
-
-## Enthalten
-
-- Bearbeitbare chattastic-Beispielkampagne und neue, leere Kampagnen.
-- DIN A5 quer, 210 × 148 mm, mit Vorder- und Rückseite. Weitere Formate sind im Interface als kommende Optionen erkennbar. Größen stehen zentral in `src/core.js`.
-- Hintergrunddesigns als PDF, PNG, JPG oder WebP; Upload per Dateiauswahl oder Drag-and-drop. Bei PDFs Auswahl einer Seite oder der ersten beiden Seiten für Vorder-/Rückseite. Maximal 20 MB pro Upload. Bilder werden proportional vollständig eingepasst, nicht beschnitten.
-- Personalisierte Text- und QR-Felder, eigene Texte mit `{{spaltenname}}`, Position und Größe in Millimetern, Schriftgröße, Farbe, Hintergrund, Ausrichtung und automatisches Einpassen längerer Texte. Maximal 40 Felder pro Seite.
-- Verschieben und Skalieren mit Maus oder Touch; Pfeiltasten verschieben fokussierte Felder um 0,5 mm, mit Umschalt um 5 mm. Duplizieren, Löschen, Rückgängig und Wiederholen.
-- CSV mit Komma oder Semikolon, UTF-8-BOM, Anführungszeichen und mehrzeiligen Werten. Deutsche Spaltennamen werden zugeordnet. Maximal 1.000 Empfänger. Empfänger können direkt in der Tabelle bearbeitet werden.
-- Echte, lokal erzeugte QR-Codes je Empfänger. Der kodierte Link entspricht dem vollständigen `chatbot_url`-Wert; kein Tracking- oder Weiterleitungsdienst.
-- Live-Vorschau je Empfänger sowie nebeneinander angezeigte Vorder- und Rückseite.
-- Kampagnen-Check für fehlende Felder, ungültige Links, Textüberläufe beim ausgewählten Empfänger, niedrige Bildauflösung und Sicherheitsabstände.
-- Zweiseitiger PDF-Export und einseitiger PNG-Export in 300 dpi für den ausgewählten Empfänger.
-- Mehrere lokale Kampagnen in IndexedDB. Vollständige Projektdateien mit Designs, Feldern und Empfängern exportieren und als Kopie importieren.
-- Desktop-, Tablet- und Mobilansicht; keine externen CDN-Aufrufe oder Upload-Dienste.
-
-## Grenzen der ersten Version
-
-Die Kampagnen liegen nur im verwendeten Browser und Ursprung. Browserdaten löschen entfernt diese Entwürfe. `Projekt sichern` erstellt ein portables Backup. Noch keine Benutzerkonten, Team-Synchronisierung, Empfängerrecherche, Serien-PDFs, Versandaufträge oder echte Produktionsanbindung.
-
-PDF-Uploads werden lokal gerastert (bis 300 dpi, längste Seite maximal 3.500 px). Bestehende Inhalte im hochgeladenen Design werden nicht automatisch erkannt oder verändert; Personalisierungsfelder werden darübergelegt. Bereits aufgedruckte Platzhalter müssen vorher entfernt oder mit der passenden Hintergrundfarbe abgedeckt werden.
-
-Der Export ist ausdrücklich ein **RGB-Ansichts-PDF ohne Beschnitt**, kein PDF/X und keine Druckfreigabe. Vor tatsächlicher Produktion sind Beschnitt, Farbprofil, Schriften, Papier und Druckerei-Vorgaben abzustimmen. Die QR-Codes haben eine weiße Ruhezone. Unter 20 mm Größe wird gewarnt. Physisch ausgedruckte Codes sollten vor Versand zusätzlich mit Mobiltelefonen getestet werden.
-
-Die Beispielunternehmen sind fiktiv. Die Musterlinks führen auf die öffentliche chattastic-Startseite. Die App erstellt keine Chatbots und prüft keine fremden Zielseiten auf Erreichbarkeit. Echte individuelle Chatbot-Links werden vom Nutzer pro Empfänger eingetragen.
-
-## Entwicklung und Prüfung
-
-```sh
 npm run build
+npm run dev
 npm test
 npm run test:browser
+npm run test:guide
+npm run test:product
+npm run test:handoff
 ```
 
-`build` bündelt den modularen Quellcode nach `studio/app.js` und kopiert PDF-Worker sowie Ressourcen nach `studio/vendor`. Die gebaute Version ist bewusst eingecheckt, damit die Unterseite ohne Build-Server statisch auslieferbar ist. Zusätzlich entsteht unter `dist/` eine vollständige statische Website mit unveränderter Landingpage und neuer Studio-Unterseite. `vercel.json` legt diesen Ausgabeordner explizit fest. Die vorhandene Vercel-GitHub-Anbindung erzeugt eine separate Branch-Vorschau; der Produktionsbranch wird nicht geändert.
+Browserprüfungen erwarten einen laufenden Server auf Port 4177 und Google Chrome. Die ursprünglichen Editor-/Anleitungstests unterstützen `STUDIO_URL` und `BROWSER_CHANNEL`. `build` erzeugt `studio/app.js` samt lokalen Bibliotheksressourcen und `dist/` für Vercel.
 
-Die Browserprüfung erwartet den laufenden lokalen Server und installiertes Google Chrome. Alternativ `BROWSER_CHANNEL` und `STUDIO_URL` setzen. Testbilder bleiben unter dem ignorierten `test-results/`.
+## Quellen
 
-Die automatisierten Browserprüfungen decken den vollständigen Arbeitsablauf ab: Personalisierung, Drag/Keyboard, Undo/Redo, CSV-Import, Dekodieren der tatsächlichen QR-Pixel für zwei Empfänger, PDF-Seitenmaße, ungültige URLs, PDF- und PNG-Uploads, Speicherung nach Reload, Projekt-Roundtrip, fehlerhafte Projektdateien, Textüberläufe und responsive Ansichten.
+| Datei | Verantwortung |
+| --- | --- |
+| `src/app.js` | Navigation, Editor, Uploads, UI-Zustand und Aktionen |
+| `src/core.js` | v1-Projektschema, Validierung, CSV, Personalisierung |
+| `src/templates.js` | Drei native, bearbeitbare Vorlagen |
+| `src/dashboard.js` | Kampagnenübersicht und Vorlagenkatalog |
+| `src/guide.js` | Sechs erklärende Einstiegsschritte |
+| `src/render.js` | Canvas, Textlayout, lokale QR-Codes, begrenzte Bildcaches |
+| `src/three-d.js` | Maus, Touch und Tastatur für die 3D-Darstellung |
+| `src/handoff.js` | Gesamtaudit, personalisierte PDF-Serie, ZIP-Paket |
+| `src/storage.js` | IndexedDB-Kampagnen |
+| `src/icons.js` | Lokale SVG-Icons |
 
-### Dateistruktur
-
-- `index.html` / `styles.css`: Oberfläche im Kontaktstoff-Erscheinungsbild.
-- `src/app.js`: Editor, Uploads, Navigation, Import/Export.
-- `src/core.js`: Kampagnenschema, Formate, CSV, Personalisierung und Validierung.
-- `src/render.js`: Mailingvorlagen, Canvas-Rendering, Textlayout und QR-Codes.
-- `src/storage.js`: lokaler Kampagnenspeicher.
-- `src/icons.js`: lokale SVG-Icons.
-- `vendor/`: lokal ausgelieferte PDF-Bibliotheksressourcen und Lizenzen.
-
-Für eine spätere Veröffentlichung nur nach bewusster Freigabe die Unterseite samt lokalen Ressourcen und den bestehenden `assets/fonts/` ausliefern. Ein Git-Branch ist keine Zugangskontrolle; vertrauliche Empfängerdaten gehören nicht ins Repository.
-
-## 3D-Vorschau und geführter Einstieg
-
-Unter **Neue Kampagne → Von null starten** beginnt ein eigener Entwurf ohne Vorlage, Personalisierungsfelder oder Beispielkontakte. Die sechs erklärten Schritte sind: Idee und Ziel, DIN-A5-Format, beide Designseiten, persönliche Felder, Empfänger und abschließende Vorschau. Briefing und Anleitungsfortschritt werden mit der Kampagne gespeichert; beim Wiederöffnen wird eine noch aktive Anleitung fortgesetzt. Die bestehenden Kampagnen bleiben erhalten.
-
-Im Editor können leere Seiten eine eigene Flächenfarbe bekommen. Eine leere Zeichenfläche bietet einen direkten Einstieg zum ersten Text oder zum Design-Upload. Neue Texte erhalten auf dunklen, einfarbigen Flächen automatisch eine helle Ausgangsfarbe. Die Einträge des Briefings werden nicht automatisch als Werbetext verwendet.
-
-Die Vorschau startet in der **3D-Ansicht** mit tatsächlichen Canvas-Texturen beider Mailingseiten. Ziehen dreht die Karte; „Verschieben“ oder Umschalt + Ziehen bewegt sie. Die Schaltflächen wenden die Karte, zeigen gezielt Vorder-/Rückseite, zoomen und setzen den Blickwinkel zurück. Nach Fokussieren funktionieren Pfeiltasten und Plus/Minus; mit zwei Fingern sind Zoom und Verschieben möglich. „Beide Seiten“ wechselt zur flachen Prüfung. Das 3D-Modell ist eine visuelle Darstellung einer flachen Karte, keine verbindliche Simulation von Papierstärke, Material oder Druckfarben. Die Ansichtsbewegung verändert weder Feldpositionen noch Exportdateien.
-
-Zusätzliche Browserprüfung: `npm run test:guide`. Sie prüft 3D-Texturen, Drehen/Wenden, Verschieben, Zoom, Tastaturbedienung sowie den kompletten Neuaufbau einer Kampagne, die Wiederaufnahme nach einem Reload und die Mobilansicht.
+Die Testdaten sind fiktiv. Empfängerdaten und exportierte Pakete gehören nicht ins Repository.

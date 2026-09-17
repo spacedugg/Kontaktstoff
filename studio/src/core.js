@@ -1,5 +1,5 @@
 export const FORMATS = [{ id:'a5-landscape', name:'DIN A5 · Querformat', width:210, height:148 }];
-export const KEYS = { company:'Firmenname', first_name:'Vorname', salutation:'Ansprache', website:'Website', chatbot_url:'Chatbot-Link' };
+export const KEYS = { company:'Firmenname', first_name:'Vorname', salutation:'Ansprache', website:'Website', chatbot_url:'Chatbot-Link',street:'Straße & Hausnummer',postal_code:'PLZ',city:'Ort',country:'Land' };
 export const uid = () => crypto.randomUUID();
 export const clone = value => structuredClone(value);
 export const clamp = (n,min,max) => Math.min(max,Math.max(min,n));
@@ -27,13 +27,13 @@ export function parseCSV(input) {
   if(quoted) throw new Error('Ein Anführungszeichen in der CSV-Datei ist nicht geschlossen.');
   row.push(cell.trim());if(row.some(Boolean))rows.push(row);
   if(rows.length<2) throw new Error('Die CSV braucht eine Kopfzeile und mindestens einen Empfänger.');
-  const aliases={firma:'company',firmenname:'company',unternehmen:'company',vorname:'first_name',ansprache:'salutation',anrede:'salutation',url:'chatbot_url',link:'chatbot_url',chatbot_link:'chatbot_url',chatbot:'chatbot_url',webseite:'website'};
+  const aliases={firma:'company',firmenname:'company',unternehmen:'company',vorname:'first_name',ansprache:'salutation',anrede:'salutation',url:'chatbot_url',link:'chatbot_url',chatbot_link:'chatbot_url',chatbot:'chatbot_url',webseite:'website',strasse:'street',straße:'street',strasse_hausnummer:'street',plz:'postal_code',postleitzahl:'postal_code',ort:'city',stadt:'city',land:'country'};
   const headers=rows.shift().map(h=>{const key=h.toLowerCase().replace(/[\s-]+/g,'_');return aliases[key]||key;});
   if(headers.some(h=>!/^\w+$/.test(h)||['__proto__','constructor','prototype','id'].includes(h)))throw new Error('Bitte einfache Spaltennamen verwenden: company, first_name, salutation, website, chatbot_url.');
   if(new Set(headers).size!==headers.length)throw new Error('Spaltennamen dürfen nicht doppelt vorkommen.');
   if(!headers.includes('company'))throw new Error('Eine Spalte „company“ oder „Firmenname“ fehlt.');
   if(rows.length>1000)throw new Error('Bitte maximal 1.000 Empfänger pro Kampagne importieren.');
-  return rows.map((r,i)=>{if(r.length!==headers.length)throw new Error(`Zeile ${i+2}: Anzahl der Spalten stimmt nicht.`);return Object.fromEntries([['id',uid()],...headers.map((h,j)=>[h,r[j]])]);});
+  return rows.map((r,i)=>{if(r.some(cell=>cell.length>5000))throw new Error(`Zeile ${i+2}: Ein Wert ist länger als 5.000 Zeichen.`);if(r.length!==headers.length)throw new Error(`Zeile ${i+2}: Anzahl der Spalten stimmt nicht.`);return Object.fromEntries([['id',uid()],...headers.map((h,j)=>[h,r[j]])]);});
 }
 export function csvString(rows,keys) { return '\uFEFF'+[keys,...rows.map(r=>keys.map(k=>String(r[k]??'')))].map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\r\n'); }
 export function validateCampaign(value) {
@@ -49,7 +49,8 @@ export function validateCampaign(value) {
     if(s.background.color!==undefined&&!/^#[0-9a-f]{6}$/i.test(s.background.color))throw new Error('Ungültige Flächenfarbe.');
     if(s.background.kind==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s.background.data)||s.background.data.length>16000000||![s.background.width,s.background.height].every(n=>Number.isFinite(n)&&n>0)))throw new Error('Ungültige Bilddatei im Projekt.');
     for(const f of s.fields){
-      if(!f||!/^[-a-zA-Z0-9_]{1,100}$/.test(f.id)||!['text','qr'].includes(f.type)||typeof f.text!=='string'||f.text.length>5000||![f.x,f.y,f.w,f.h,f.fontSize].every(Number.isFinite)||f.x<0||f.y<0||f.w<2||f.h<2||f.x+f.w>format.width+.1||f.y+f.h>format.height+.1||f.fontSize<6||f.fontSize>80||!/^#[0-9a-f]{6}$/i.test(f.color)||!['400','700'].includes(f.weight)||!['left','center','right'].includes(f.align)||!(f.background==='transparent'||/^#[0-9a-f]{6}$/i.test(f.background))) throw new Error('Ungültige Personalisierungsfelder.');
+      if(f.type==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f.data)||f.data.length>16000000))throw new Error('Ungültiges Bildelement.');
+      if(!f||!/^[-a-zA-Z0-9_]{1,100}$/.test(f.id)||!['text','qr','image','shape'].includes(f.type)||typeof f.text!=='string'||f.text.length>5000||![f.x,f.y,f.w,f.h,f.fontSize].every(Number.isFinite)||f.x<0||f.y<0||f.w<2||f.h<2||f.x+f.w>format.width+.1||f.y+f.h>format.height+.1||f.fontSize<6||f.fontSize>80||!/^#[0-9a-f]{6}$/i.test(f.color)||!['400','700'].includes(f.weight)||!['left','center','right'].includes(f.align)||!(f.background==='transparent'||/^#[0-9a-f]{6}$/i.test(f.background))) throw new Error('Ungültige Personalisierungsfelder.');
     }
     if(new Set(s.fields.map(f=>f.id)).size!==s.fields.length)throw new Error('Doppelte Feld-IDs.');
   }
@@ -69,8 +70,10 @@ export function checks(campaign) {
       if(Math.abs(s.background.width/s.background.height-format.width/format.height)>.035)issues.push({level:'warning',text:`${label}: Das Bildformat weicht ab. Das Design wird vollständig mit weißen Rändern eingepasst.`});
     }
     for(const f of s.fields){
-      if(f.x<5||f.y<5||f.x+f.w>format.width-5||f.y+f.h>format.height-5)issues.push({level:'warning',text:`${label}: Ein Feld liegt außerhalb des 5-mm-Sicherheitsabstands.`});
+      if(f.type==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f.data)||f.data.length>16000000))throw new Error('Ungültiges Bildelement.');
+      if(f.type!=='shape'&&(f.x<5||f.y<5||f.x+f.w>format.width-5||f.y+f.h>format.height-5))issues.push({level:'warning',text:`${label}: Ein Feld liegt außerhalb des 5-mm-Sicherheitsabstands.`});
       if(f.type==='qr'&&Math.min(f.w,f.h)<20)issues.push({level:'warning',text:`${label}: Ein QR-Code ist kleiner als 20 mm.`});
+      if(f.type==='shape'||f.type==='image')continue;
       const missing=campaign.recipients.filter(r=>missingKeys(f.text,r).length);
       if(missing.length)issues.push({level:'error',text:`${label}: ${missing.length} Empfänger ohne Wert für „${f.text}“.`});
       if(f.type==='qr'){
