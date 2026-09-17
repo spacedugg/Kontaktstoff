@@ -1,0 +1,3 @@
+studio/app.js linguist-generated=true -whitespace
+studio/app.js.LEGAL.txt linguist-generated=true -whitespace
+studio/vendor/** linguist-vendored=true -whitespace

@@ -29,3 +29,7 @@ Das Dashboard und die Case-Ergebnisse sind Beispiele. Der QR-Code führt zur lok
 ## Prüfung
 
 Geprüft wurden JS-Syntax und Initialisierung, Personalisierung, beide Chatpfade, QR-Direkteinstieg, Statuswechsel und Rücknahme, fünf Case-Details, Credit-Aufrundung, ungültige Werte, Briefing, Dialogsteuerung und Auswahl des realen Selfmailers. Alle lokalen Seiten- und Asset-Referenzen werden vor dem Deployment validiert.
+
+## Kampagnenstudio (Entwicklungsbranch)
+
+Unter [`studio/`](studio/README.md) liegt ein eigenständiger Editor für personalisierte A5-Mailings: beidseitige Design-Uploads, Text-/QR-Personalisierung, CSV-Empfänger, Live-Vorschau, lokales Speichern und Ansichts-PDFs. Lokal mit `npm run dev` unter `/studio/` öffnen. Der Editor ist nicht in die bestehende Landingpage verlinkt und dieser Branch wird nicht durch einen neu angelegten Workflow veröffentlicht.
