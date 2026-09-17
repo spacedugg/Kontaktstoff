@@ -30,3 +30,59 @@ body.dashboard-active .campaign-heading,body.dashboard-active .steps,body.dashbo
 @media(max-width:760px){#dashboard-view{padding:25px 0}.dashboard-welcome{grid-template-columns:1fr;gap:28px;margin-bottom:35px}.dashboard-welcome h1{font-size:40px}.dashboard-start{padding:27px}.dashboard-cards,.template-grid{grid-template-columns:1fr 1fr}.dashboard-heading{align-items:flex-start;flex-direction:column}.dashboard-heading h2{font-size:22px}.dashboard-tools{align-items:flex-start;flex-direction:column}.dashboard-tools input{width:100%}.dashboard-tools label{width:100%}.dashboard-storage{align-items:flex-start}.dashboard-storage a{display:none}.handoff-card{flex-direction:column;align-items:flex-start;padding:25px}.audit-toolbar{align-items:flex-start;flex-direction:column}.recipient-filter{flex-wrap:wrap}.audit-summary{font-size:12px;flex-direction:column;gap:5px}}
 @media(max-width:480px){.dashboard-cards,.template-grid{grid-template-columns:1fr}.campaign-visual{height:215px;padding:26px}.template-art{height:185px}.template-art>strong{font-size:32px}.template-card p{min-height:0}.dashboard-storage{gap:12px}.recipient-filter input{max-width:none;width:100%}.audit-issues{padding:12px}.audit-issues .check-item{flex-wrap:wrap}.audit-issues .check-item span{flex:1}}
 .button.primary{color:#202321}.dashboard-start p{color:#d0dad3!important}.dashboard-start .button{color:#202321}.handoff-card .button{color:#202321}.dashboard-start small{max-width:85%}.dashboard-active .breadcrumb>span:not(.beta){display:none}.dashboard-active .breadcrumb>button{display:none}
+
+/* Comfortable reading sizes. These affect the interface, never printed artwork. */
+body{font-size:15px;--muted:#626e61}
+.button{font-size:14px;min-height:44px;padding:11px 17px}
+.button.quiet,.top-actions .button,.breadcrumb,.save-state{font-size:13px}
+.eyebrow,.section-label,.inspector-heading .eyebrow,.setup-progress{font-size:11px;color:#68765d}
+.campaign-heading p,.steps>button{font-size:14px}
+.steps-note,.guide-return,.guide-return button,.app-footer{font-size:12px}
+.title-row h1{font-size:30px}.draft-pill{font-size:12px}
+.setup-shell{max-width:1340px;grid-template-columns:280px minmax(0,1fr)}
+.setup-rail>p,.setup-rail nav strong{font-size:14px;color:#657655}
+.setup-rail nav small,.setup-rail-note{font-size:12px;color:#6c7c5f}
+.setup-rail nav button{min-height:65px;gap:14px}.setup-rail nav button>span{width:34px;height:34px;font-size:12px}
+.setup-rail h2{font-size:29px}.setup-content{padding:38px 42px}
+.guide-intro{max-width:740px}.guide-intro h2{font-size:34px}.guide-intro>p{font-size:16px;max-width:700px;line-height:1.8;color:#607052}
+.brief-grid label,.guide-side-select,.guide-side-select select,.guide-field-status,.guide-optional{font-size:14px;color:#5c704b}
+.brief-grid input,.brief-grid textarea,.brief-grid select{font-size:16px}
+.brief-grid label>span,.brief-grid label>small,.guide-bottom>span,.guide-tip p{font-size:13px;color:#677957}
+.guide-field-card strong{font-size:15px}.guide-field-card p{font-size:14px;color:#657954}.guide-field-card>span{font-size:13px}
+.guide-field-card{padding:22px 18px}.guide-field-card>svg{width:25px;height:25px}
+.guide-field-status .button,.guide-recipient-ready>.button,.guide-finish-grid .button,.guide-design-actions .button{font-size:14px;min-height:44px}
+.personalization-example span{font-size:12px;color:#697f50}.personalization-example strong,.personalization-example code{font-size:18px}
+.format-explainer p,.format-explainer ul,.future-formats{font-size:14px;color:#657754}.selected-format,.format-model>div>span,.format-measure,.format-model>small{font-size:12px}
+.guide-design-caption b,.empty-design-label strong,.guide-recipient-ready strong{font-size:15px}
+.guide-design-caption>span,.empty-design-label span,.guide-recipient-ready p,.guide-summary>div{font-size:13px;color:#657754}.guide-summary b{font-size:12px;color:#687856}
+.panel-copy,.background-info,.small-tip,.inspector-help{font-size:12px;color:#68775d;line-height:1.75}
+.panel-section select,.field-buttons button,.layer,.inspector-group label,.inspector-group select,.inspector-group textarea,.resolved-value,.page-color-control{font-size:13px}
+.page-card>span,.side-title span,.workspace-note,.artboard-caption,.recipient-index{font-size:12px}
+.side-title strong,.inspector-heading p,.inspector-actions .button{font-size:13px}.inspector-heading h3{font-size:17px}
+.layer-order .button{font-size:12px}.inspector-group .field-label{font-size:11px}.layer .layer-kind{font-size:10px}
+.upload-zone strong{font-size:13px}.upload-zone span{font-size:11px}.panel-section>.text-button{font-size:12px}
+.canvas-actions select,.coordinate-grid input,.unit-input input,.recipient-switcher select{font-size:13px}
+.preview-heading p,.view-heading p,.export-card p,.check-item,.audit-toolbar p,.handoff-card p,.data-bottom,.sample-notice,.modal-body p{font-size:14px}
+.preview-mode-bar>span,.three-d-toolbar>span,.three-d-footer p,.export-note,.data-toolbar strong{font-size:12px}
+.segmented button,.three-d-toolbar .segmented button,.three-d-zoom>.button,.three-d-footer .button{font-size:13px}
+.three-d-footer .button{min-height:42px}.mailing-3d-stage{height:500px}.mailing-3d-card{width:min(72%,620px)}
+td input{font-size:14px;min-height:42px}th{font-size:13px}.modal-footer{flex-wrap:wrap}
+.dashboard-heading p,.template-card p,.dashboard-tools>span,.campaign-card-content p,.dashboard-storage p{font-size:14px}.dashboard-start small,.campaign-card-actions,.template-card>div>span:last-child:not(:first-child){font-size:13px}
+.example-invite{display:flex;align-items:center;gap:24px;padding:23px 25px;border:1px solid #d7e1c8;background:#f6f9ef;border-radius:12px;margin-top:30px}
+.example-invite>div:not(.example-miniature){flex:1;min-width:0}.example-invite strong{font-size:16px;display:block;line-height:1.45}.example-invite p{font-size:14px;line-height:1.75;color:#647552;margin-top:7px}.example-invite .button{flex-shrink:0}.dashboard-example{margin:-20px 0 42px;background:#fff}.dashboard-example .eyebrow{display:block;margin-bottom:7px}
+.example-miniature{width:155px;aspect-ratio:210/148;background:#2563eb;color:#fff;padding:14px;transform:rotate(-5deg);box-shadow:0 6px 14px #1f30231a;flex-shrink:0;border-bottom:12px solid #ff987d}.example-miniature span{font-size:12px;display:block}.example-miniature b{font-size:15px;display:block;line-height:1.1;margin-top:10px;letter-spacing:-.5px}
+.example-preview-note{display:flex;justify-content:space-between;gap:35px;align-items:center;padding:25px 28px;background:#eef5dc;border:1px solid #dae5c5;border-radius:13px;margin-bottom:30px}.example-preview-note h2{font-size:24px;letter-spacing:-.7px;margin:9px 0}.example-preview-note p{max-width:690px;font-size:14px;line-height:1.75;color:#60734e}.example-actions{display:flex;gap:8px;flex-wrap:wrap;max-width:310px}.example-actions .button{flex:1;white-space:nowrap}.example-actions .button:first-child{flex-basis:100%}
+@media(min-width:1251px){.editor-layout{grid-template-columns:250px minmax(320px,1fr) 290px}}
+@media(max-width:1100px){.setup-shell{grid-template-columns:230px minmax(0,1fr)}.setup-content{padding:30px}.setup-rail nav strong{font-size:13px}.setup-rail nav small{font-size:11px}.guide-field-grid{grid-template-columns:1fr}.guide-field-card{padding:18px}.guide-field-card p{margin-bottom:14px}.example-invite{flex-wrap:wrap}.example-preview-note{align-items:flex-start;flex-direction:column}.example-actions{max-width:none}.example-actions .button:first-child{flex-basis:auto}.dashboard-example .button{margin-left:auto}.top-actions{gap:12px}.steps-note{display:none}}
+@media(max-width:900px){.setup-shell{display:block}.setup-rail nav button{min-height:48px}.setup-rail nav button>span{width:29px;height:29px}.guide-field-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.guide-field-card{padding:18px 14px}.mailing-3d-stage{height:420px}.steps{overflow:auto}.steps>button{flex-shrink:0}.dashboard-example{margin-top:0}}
+@media(max-width:620px){
+ .topbar{height:auto;min-height:66px;padding:12px 16px;flex-wrap:wrap}.top-actions{margin-left:auto;gap:10px}.top-actions .button,.breadcrumb{font-size:12px}.new-campaign-visible>span{max-width:none}.top-actions .button svg{width:16px}.top-actions .button{min-height:38px}
+ .campaign-heading{padding:24px 18px;flex-wrap:wrap}.title-row h1{font-size:27px}.steps{height:58px;padding-inline:18px;gap:20px}.steps>button,.steps>#setup-tab{font-size:13px}.guide-return{font-size:12px;flex-wrap:wrap}.guide-return button{font-size:12px}.guide-return>span{max-width:none}
+ .setup-content{padding:27px 20px}.guide-intro h2{font-size:29px}.guide-intro>p{font-size:15px}.setup-progress{font-size:10px}.setup-progress b{width:13px}.setup-rail nav button>div{max-width:110px}.setup-rail nav strong{font-size:13px}
+ .guide-field-grid{grid-template-columns:1fr}.guide-field-card{padding:20px;gap:7px 13px}.guide-field-card strong{font-size:15px}.guide-field-card p{font-size:14px;margin:3px 0 8px}.guide-field-card>span{font-size:13px}
+ .personalization-example{gap:10px;flex-wrap:wrap}.personalization-example code,.personalization-example strong{font-size:15px}.personalization-example>div{min-width:100px}.brief-grid label{font-size:14px}.brief-grid input,.brief-grid textarea,.brief-grid select{font-size:16px}.guide-bottom .button{font-size:14px}.guide-design-actions{flex-direction:column}.guide-design-actions .button{font-size:14px}
+ .example-invite{padding:20px;gap:17px;flex-direction:column;align-items:flex-start}.example-invite .button{width:100%;white-space:normal}.dashboard-example .example-miniature{width:150px}.example-preview-note{padding:22px 20px;gap:20px}.example-preview-note h2{font-size:23px}.example-actions{width:100%}.example-actions .button{font-size:13px;padding:10px}.example-actions .button:first-child{flex-basis:100%}
+ .canvas-toolbar{flex-wrap:wrap}.canvas-actions{margin-left:auto}.inspector-actions{flex-wrap:wrap}.mailing-3d-stage{height:320px}.mailing-3d-card{width:79%}.three-d-toolbar{flex-wrap:wrap}.three-d-toolbar .segmented button{font-size:12px}.three-d-zoom>.button{font-size:11px}.three-d-footer .button{font-size:12px;padding:8px}.three-d-footer p{font-size:12px}.three-d-footer>div{flex-wrap:wrap}.three-d-zoom .icon-button{width:30px;height:35px}.preview-mode-bar .segmented button{font-size:14px}.data-toolbar>div{flex-wrap:wrap}.guide-tip p{font-size:13px}
+}
+.example-photo-credit{display:inline-block;margin-top:9px;font-size:11px;color:#627553;text-decoration:underline;text-underline-offset:3px}.example-miniature{position:relative;overflow:hidden}.example-miniature img{position:absolute;right:0;bottom:0;width:44%;height:76%;object-fit:cover}.example-miniature b{max-width:70%;font-size:13px;position:relative}
+@media(max-width:620px){.left-panel{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.left-panel>.panel-section{min-width:0}.left-panel>.panel-section:first-child{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.field-buttons{grid-template-columns:1fr}.upload-zone span{font-size:11px}.upload-zone strong{font-size:12px}.left-panel .section-label{flex-wrap:wrap;gap:5px}.field-buttons button{font-size:13px;min-width:0}.layer-section{grid-column:1/-1}.layer{font-size:13px}.layer .layer-name{max-width:none}}

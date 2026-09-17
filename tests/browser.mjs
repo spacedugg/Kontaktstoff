@@ -54,7 +54,7 @@ try{
  await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(2);await page.locator('.campaign-card-content [data-dashboard-open]').first().click();
  // A malicious import is rejected and the current campaign remains intact.
  const bad=structuredClone(saved);bad.sides.front.fields[0].id='x" onclick="alert(1)';await page.locator('#project-file').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(bad))});await expect(page.locator('#toast')).toContainText('nicht importiert');
- await page.locator('#new-campaign').click();await page.locator('[data-result="template"]').click();await waitCanvas();await page.waitForTimeout(300);await snapshot('studio-desktop-final');
+ await page.locator('#new-campaign').click();await page.locator('[data-result="template"]').click();await expect(page.locator('#example-preview-note')).toBeVisible();await page.locator('[data-tab="design"]').click();await waitCanvas();await page.waitForTimeout(300);await snapshot('studio-desktop-final');
  await expect(page.locator('#format-select')).toHaveValue('a5-landscape');assert.equal((await project()).format,'a5-landscape');
  // Long text overflow is visible in preflight and prevents a clipped export.
  await page.locator('#field-text').fill('X'.repeat(300));await page.locator('#field-fit').uncheck();await page.locator('#open-preview').click();await expect(page.locator('#check-list')).toContainText('Textfeld');await expect(page.locator('#pdf-export')).toBeDisabled();

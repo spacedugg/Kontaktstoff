@@ -1,0 +1,32 @@
+import {chromium,expect} from '@playwright/test';
+import {readFile,mkdir} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import jsQR from 'jsqr';
+await mkdir('test-results',{recursive:true});
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const page=await browser.newPage({viewport:{width:1512,height:1080},acceptDownloads:true});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+async function project(){const event=page.waitForEvent('download');await page.locator('#project-export').click();return JSON.parse(await readFile(await(await event).path(),'utf8'));}
+async function shot(name){await page.locator('#toast').evaluate(e=>e.classList.remove('show'));await page.screenshot({path:`test-results/example-${name}.png`,fullPage:true});}
+try{
+ await page.goto('http://127.0.0.1:4177/studio/?start=blank');await page.locator('#setup-name').fill('Mein eigener Entwurf');await page.locator('[data-guide-step="3"]').click();await shot('guide-desktop');
+ assert.ok(await page.locator('.guide-intro>p').evaluate(e=>parseFloat(getComputedStyle(e).fontSize))>=15);
+ for(const width of [1024,768,390]){await page.setViewportSize({width,height:950});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Guide overflow '+width);await shot('guide-'+width);}
+ await page.setViewportSize({width:1512,height:1080});await page.locator('[data-guide-action="example"]').click();await expect(page.locator('#example-preview-note')).toBeVisible();await expect(page.locator('#three-d-view')).toBeVisible();await page.waitForFunction(()=>document.querySelector('#three-d-back').width>500);let c=await project();assert.equal(c.sample,true);assert.equal(c.recipients.length,3);assert.equal(c.sides.front.background.kind,'blank');assert.ok(c.sides.back.fields.some(f=>f.type==='qr'));assert.ok(c.sides.front.fields.length>5);assert.ok(!c.onboarding.active);assert.ok(c.sides.front.fields.some(f=>f.type==='image'&&f.fit==='cover'));await shot('photo-front');
+ const canvasData=()=>page.locator('#three-d-back').evaluate(canvas=>{const data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height);return {data:Array.from(data.data),width:canvas.width,height:canvas.height};});
+ let pixels=await canvasData();assert.equal(jsQR(new Uint8ClampedArray(pixels.data),pixels.width,pixels.height).data,c.recipients[0].chatbot_url);
+ const before=await page.locator('#three-d-back').evaluate(c=>c.toDataURL());await page.locator('#example-next').click();await expect(page.locator('#preview-recipient')).toHaveValue('1');await page.waitForFunction(old=>document.querySelector('#three-d-back').toDataURL()!==old,before);pixels=await canvasData();assert.equal(jsQR(new Uint8ClampedArray(pixels.data),pixels.width,pixels.height).data,c.recipients[1].chatbot_url);
+ await page.locator('#three-d-flip').click();await expect(page.locator('#three-d-stage')).toHaveAttribute('data-face','back');await page.waitForTimeout(650);await shot('proof-desktop');await page.locator('#audit-all').click();await expect(page.locator('#audit-results')).toContainText('Alle Empfänger geprüft');
+ await page.locator('#example-edit').click();await expect(page.locator('#resolved')).toHaveText('Studio Hafenblick');await page.locator('#field-text').fill('Für {{company}}');await expect(page.locator('#resolved')).toHaveText('Für Studio Hafenblick');
+ const photo=c.sides.front.fields.find(f=>f.type==='image');await page.locator(`[data-layer="${photo.id}"]`).click();await expect(page.locator('#image-fit')).toHaveValue('cover');await page.locator('#image-fit').selectOption('contain');
+ const chooserEvent=page.waitForEvent('filechooser');await page.locator('#replace-image').click();const chooser=await chooserEvent;await chooser.setFiles('assets/photos/team-work.jpg');await expect(page.locator('#toast')).toContainText('Bild ersetzt');const replaced=(await project()).sides.front.fields.find(f=>f.id===photo.id);assert.equal(replaced.x,photo.x);assert.equal(replaced.w,photo.w);assert.equal(replaced.fit,'contain');
+ for(const width of [1024,768,390]){await page.setViewportSize({width,height:950});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Editor overflow '+width);}await page.setViewportSize({width:1512,height:1080});
+ await page.locator('#open-preview').click();await page.locator('#example-data').click();await expect(page.locator('#sample-notice')).toBeVisible();await expect(page.locator('[data-key="company"]')).toHaveCount(3);
+ await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(2);const draft=page.locator('.campaign-card-content [data-dashboard-open]').filter({hasText:'Mein eigener Entwurf'});await draft.click();assert.equal((await project()).recipients.length,0);await expect(page.locator('#setup-view')).toBeVisible();await expect(page.locator('[data-guide-step="3"]')).toHaveClass(/active/);
+ // The direct URL loads a fresh example even when an unrelated draft was active.
+ await page.goto('http://127.0.0.1:4177/studio/?example=chattastic');await expect(page.locator('#example-preview-note')).toBeVisible();assert.ok(!page.url().includes('example='));await page.reload();await page.locator('#open-preview').click();await expect(page.locator('#example-preview-note')).toBeVisible();
+ for(const width of [1024,768,390]){await page.setViewportSize({width,height:950});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Preview overflow '+width);await shot('proof-'+width);}
+ await page.locator('#breadcrumb-campaigns').click();await expect(page.locator('.dashboard-card')).toHaveCount(3);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await page.locator('[data-dashboard-example]').click();await expect(page.locator('#example-preview-note')).toBeVisible();
+ await page.goto('http://127.0.0.1:4177/');await expect(page.locator('.hero-actions a[href="studio/?example=chattastic"]')).toBeVisible();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ assert.deepEqual(errors,[]);console.log('Example tests passed: visible guide and dashboard entry points, editable complete campaign, decoded distinct QR links, recipient switching, original draft preserved, direct route, reload without duplicate, and readable responsive guide/preview.');
+}finally{await browser.close();}

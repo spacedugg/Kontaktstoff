@@ -18,8 +18,9 @@ npm run dev
 - Kampagnen: http://127.0.0.1:4177/studio/
 - Geführter Einstieg: http://127.0.0.1:4177/studio/?start=blank
 - Bearbeitbare chattastic-Vorlage: http://127.0.0.1:4177/studio/?template=chattastic
+- Fertige Fotobeispielkampagne: http://127.0.0.1:4177/studio/?example=chattastic
 
-Ein frischer Browser öffnet eine leere Kampagnenübersicht. Es werden keine Beispielkontakte automatisch als echte Kampagne angelegt. `?demo=1` und „Beispiel ausprobieren“ bieten weiterhin das ausdrücklich fiktive ursprüngliche chattastic-Muster.
+Ein frischer Browser öffnet eine leere Kampagnenübersicht. Es werden keine Beispielkontakte automatisch als echte Kampagne angelegt. „Beispielkampagne laden“ öffnet eine eigene, vollständig bearbeitbare Kampagne mit echtem Stockfoto und drei ausdrücklich fiktiven Kontakten direkt in 3D. Vorhandene Entwürfe bleiben erhalten. `?demo=1` bietet das ursprüngliche Muster für die bestehenden Regressionstests.
 
 ## Was funktioniert
 
@@ -55,6 +56,7 @@ npm run test:browser
 npm run test:guide
 npm run test:product
 npm run test:handoff
+npm run test:example
 ```
 
 Die Tests prüfen unter anderem echte QR-Pixel, PDF-Maße und Seitenzahl, Uploads, Rundlauf von Projektdateien, 3D-Eingaben, Anleitung, lokale Speicherung, alle neuen Produktabläufe und mobile Ansichten. Screenshots liegen unter `test-results/` und werden nicht eingecheckt.

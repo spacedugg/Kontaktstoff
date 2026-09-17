@@ -49,6 +49,7 @@ export function validateCampaign(value) {
     if(s.background.color!==undefined&&!/^#[0-9a-f]{6}$/i.test(s.background.color))throw new Error('Ungültige Flächenfarbe.');
     if(s.background.kind==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s.background.data)||s.background.data.length>16000000||![s.background.width,s.background.height].every(n=>Number.isFinite(n)&&n>0)))throw new Error('Ungültige Bilddatei im Projekt.');
     for(const f of s.fields){
+      if(f.fit!==undefined&&!['contain','cover'].includes(f.fit))throw new Error('Ungültige Bildanpassung.');
       if(f.type==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f.data)||f.data.length>16000000))throw new Error('Ungültiges Bildelement.');
       if(!f||!/^[-a-zA-Z0-9_]{1,100}$/.test(f.id)||!['text','qr','image','shape'].includes(f.type)||typeof f.text!=='string'||f.text.length>5000||![f.x,f.y,f.w,f.h,f.fontSize].every(Number.isFinite)||f.x<0||f.y<0||f.w<2||f.h<2||f.x+f.w>format.width+.1||f.y+f.h>format.height+.1||f.fontSize<6||f.fontSize>80||!/^#[0-9a-f]{6}$/i.test(f.color)||!['400','700'].includes(f.weight)||!['left','center','right'].includes(f.align)||!(f.background==='transparent'||/^#[0-9a-f]{6}$/i.test(f.background))) throw new Error('Ungültige Personalisierungsfelder.');
     }
@@ -70,6 +71,7 @@ export function checks(campaign) {
       if(Math.abs(s.background.width/s.background.height-format.width/format.height)>.035)issues.push({level:'warning',text:`${label}: Das Bildformat weicht ab. Das Design wird vollständig mit weißen Rändern eingepasst.`});
     }
     for(const f of s.fields){
+      if(f.fit!==undefined&&!['contain','cover'].includes(f.fit))throw new Error('Ungültige Bildanpassung.');
       if(f.type==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f.data)||f.data.length>16000000))throw new Error('Ungültiges Bildelement.');
       if(f.type!=='shape'&&(f.x<5||f.y<5||f.x+f.w>format.width-5||f.y+f.h>format.height-5))issues.push({level:'warning',text:`${label}: Ein Feld liegt außerhalb des 5-mm-Sicherheitsabstands.`});
       if(f.type==='qr'&&Math.min(f.w,f.h)<20)issues.push({level:'warning',text:`${label}: Ein QR-Code ist kleiner als 20 mm.`});

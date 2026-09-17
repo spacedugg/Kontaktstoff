@@ -6,9 +6,9 @@ Eigenständige Anwendung unter `/studio/`, direkt mit der Homepage verbunden. De
 
 **Von null starten** erstellt zwei leere DIN-A5-Seiten ohne Beispielkontakte. Die Anleitung erklärt Briefing, Format, Gestaltung, persönliche Felder, Empfänger und Prüfung. Sie speichert den Fortschritt und bleibt später erreichbar.
 
-**Vorlagen** sind native, vollständig bearbeitbare Elemente: chattastic, Ein guter Anfang und Ein neuer Impuls. Name, Text, Farbe, Flächen und QR-Code lassen sich bearbeiten. Empfänger ergänzt der Nutzer. Das alte ausdrücklich fiktive chattastic-Muster bleibt über „Beispiel ausprobieren“ verfügbar; dessen Hintergrund ist fest.
+**Vorlagen** sind native, vollständig bearbeitbare Elemente: chattastic, Ein guter Anfang und Ein neuer Impuls. Name, Text, Farbe, Flächen und QR-Code lassen sich bearbeiten. Empfänger ergänzt der Nutzer. „Beispielkampagne laden“ ist von der Übersicht, jeder Anleitung und dem Dialog „Neue Kampagne“ erreichbar. Sie erstellt eine unabhängige, vollständig bearbeitbare Fotokampagne mit drei fiktiven Empfängern und öffnet sie in 3D. Über „Nächster Beispielkontakt“ wechseln die personalisierten Inhalte sichtbar mit. Das frühere Muster bleibt nur unter `?demo=1` verfügbar.
 
-**Gestaltung:** PDF, PNG, JPG oder WebP als Hintergrund hochladen, maximal 20 MB. Eine PDF kann beide Seiten beliefern. Pro Seite sind bis zu 40 Elemente möglich: Text, QR-Code, Bild oder Farbfläche. Logos als PNG behalten ihre Transparenz. Elemente lassen sich ziehen, skalieren, duplizieren, löschen und nach vorn/hinten ordnen. Text unterstützt Schriftgröße, Farbe, Ausrichtung und automatisches Einpassen. Positionen und Größen sind in Millimetern. Pfeiltasten verschieben um 0,5 mm, mit Umschalt um 5 mm. Rückgängig/Wiederholen: Strg/⌘ Z bzw. Strg/⌘ Umschalt Z.
+**Gestaltung:** PDF, PNG, JPG oder WebP als Hintergrund hochladen, maximal 20 MB. Eine PDF kann beide Seiten beliefern. Pro Seite sind bis zu 40 Elemente möglich: Text, QR-Code, Bild oder Farbfläche. Logos als PNG behalten ihre Transparenz. Bildelemente können vollständig eingepasst oder rahmenfüllend zugeschnitten werden. „Eigenes Bild einsetzen“ ersetzt das ausgewählte Bild und behält Rahmen und Position bei. Elemente lassen sich ziehen, skalieren, duplizieren, löschen und nach vorn/hinten ordnen. Text unterstützt Schriftgröße, Farbe, Ausrichtung und automatisches Einpassen. Positionen und Größen sind in Millimetern. Pfeiltasten verschieben um 0,5 mm, mit Umschalt um 5 mm. Rückgängig/Wiederholen: Strg/⌘ Z bzw. Strg/⌘ Umschalt Z.
 
 **Empfänger:** CSV mit Komma/Semikolon, BOM, mehrzeiligen und in Anführungszeichen gesetzten Werten. Deutsche Spaltennamen werden zugeordnet. Bis zu 1.000 Kontakte; Werte bis 5.000 Zeichen. Standardspalten: `company`, `first_name`, `salutation`, `website`, `chatbot_url`, `street`, `postal_code`, `city`, `country`. Eigene CSV-Spalten sind mit `{{spaltenname}}` im Design verwendbar. Die Tabelle erlaubt direkte Bearbeitung und Suche. Postleitzahlen bleiben Text, führende Nullen erhalten.
 
@@ -39,6 +39,7 @@ npm run test:browser
 npm run test:guide
 npm run test:product
 npm run test:handoff
+npm run test:example
 ```
 
 Browserprüfungen erwarten einen laufenden Server auf Port 4177 und Google Chrome. Die ursprünglichen Editor-/Anleitungstests unterstützen `STUDIO_URL` und `BROWSER_CHANNEL`. `build` erzeugt `studio/app.js` samt lokalen Bibliotheksressourcen und `dist/` für Vercel.
@@ -59,3 +60,7 @@ Browserprüfungen erwarten einen laufenden Server auf Port 4177 und Google Chrom
 | `src/icons.js` | Lokale SVG-Icons |
 
 Die Testdaten sind fiktiv. Empfängerdaten und exportierte Pakete gehören nicht ins Repository.
+
+## Beispielbilder
+
+Die Fotokampagne verwendet ein echtes Stockfoto von Vitaly Gariev (Unsplash), siehe `assets/photos/CREDITS.md`. Die Datei wird lokal ausgeliefert und als Daten-URL in Beispielprojekten gesichert. Die abgebildeten Personen werden nicht als Kunden oder Mitarbeiter von chattastic bezeichnet. `node scripts/embed-example-photo.mjs` aktualisiert die eingebettete Fassung nach einem Bildwechsel.

@@ -4,13 +4,13 @@ import {renderCanvas,imageFrom} from './render.js';
 import {icon,hydrateIcons} from './icons.js';
 import {Mailing3D} from './three-d.js';
 import {guideHTML,GUIDE_STEPS} from './guide.js';
-import {createTemplate} from './templates.js';
+import {createTemplate,createExampleCampaign} from './templates.js';
 import {dashboardHTML} from './dashboard.js';
 import {auditCampaign,createHandoff} from './handoff.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let campaign=createCampaign(), side='front', selected=campaign.sides.front.fields[0]?.id, recipientIndex=0, view='design', guides=true;
-let previewMode='3d', hasActive=false, dashboardCampaigns=[], dashboardVersion=0, jobController=null;
+let previewMode='3d', hasActive=false, dashboardCampaigns=[], dashboardVersion=0, jobController=null, imageReplaceTarget=null;
 function clearAudit(){const results=$('#audit-results');results.hidden=true;results.innerHTML='';}
 
 const threeD=new Mailing3D(document.querySelector('#three-d-stage'));
@@ -45,6 +45,8 @@ function renderUI(inspector=true,table=true,guide=true){
  $('.breadcrumb strong').textContent=view==='dashboard'?'Dein Arbeitsplatz':'Designstudio';
  $('#dashboard-view').hidden=view!=='dashboard';
  if(view==='dashboard')return;
+ $('#example-preview-note').hidden=!campaign.sample;
+ $('.draft-pill').textContent=campaign.sample?'Beispiel':'Entwurf';
  $('#rename-campaign').textContent=campaign.name;$('#recipient-count').textContent=campaign.recipients.length;
  $$('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===view);b.setAttribute('aria-current',b.dataset.tab===view?'step':'false');});
  for(const name of ['setup','design','recipients','preview'])$('#'+name+'-view').hidden=name!==view;
@@ -82,12 +84,14 @@ function renderInspector(){
  if(!f){$('#inspector').innerHTML=`<div class="inspector-empty">${icon('move')}<h3>Platz für Persönlichkeit.</h3><p>Wähle ein Feld im Design aus oder füge links ein neues hinzu. Hier bestimmst du Inhalt, Position und Aussehen.</p></div>`;return;}
  const decorative=['image','shape'].includes(f.type);
  const bound=f.text.match(/^\{\{(\w+)\}\}$/)?.[1]||'custom';
- $('#inspector').innerHTML=`<div class="inspector-heading"><div class="eyebrow">FELD BEARBEITEN</div><h3>${icon(f.type==='qr'?'qr':'type')}${escape(fieldName(f))}</h3><p>${f.type==='image'?'Dein Bild bleibt im Originalverhältnis innerhalb des Rahmens.':f.type==='shape'?'Setze eine farbige Fläche und ordne sie hinter deinen Texten an.':f.type==='qr'?'Jeder Empfänger bekommt seinen eigenen, scannbaren QR-Code.':'Schreibe deinen Text oder verbinde ihn mit Empfängerdaten.'}</p></div>
+ $('#inspector').innerHTML=`<div class="inspector-heading"><div class="eyebrow">FELD BEARBEITEN</div><h3>${icon(f.type==='qr'?'qr':'type')}${escape(fieldName(f))}</h3><p>${f.type==='image'?'Passe den Bildausschnitt an oder ersetze das Foto durch dein eigenes Bild.':f.type==='shape'?'Setze eine farbige Fläche und ordne sie hinter deinen Texten an.':f.type==='qr'?'Jeder Empfänger bekommt seinen eigenen, scannbaren QR-Code.':'Schreibe deinen Text oder verbinde ihn mit Empfängerdaten.'}</p></div>
  <section class="inspector-group" ${decorative?'hidden':''}><label for="field-binding">Mit Daten verbinden</label><select id="field-binding"><option value="custom">Eigener Text / Kombination</option>${keys().map(k=>`<option value="${escape(k)}" ${bound===k?'selected':''}>${escape(KEYS[k]||k)}</option>`).join('')}</select><label class="sr-only" for="field-text">Feldinhalt</label><textarea id="field-text" spellcheck="false">${escape(f.text)}</textarea><div class="field-label">VORSCHAU FÜR DIESEN EMPFÄNGER</div><div class="resolved-value" id="resolved">${escape(resolveText(f.text,recipient())||'Für diesen Empfänger fehlt ein Wert.')}</div></section>
  <section class="inspector-group"><div class="section-label">POSITION & GRÖSSE</div><div class="coordinate-grid">${[['x','Abstand links'],['y','Abstand oben'],['w','Breite'],['h','Höhe']].map(([key,label])=>`<div><label for="field-${key}">${label}</label><div class="unit-input"><input id="field-${key}" data-coordinate="${key}" type="number" min="${['w','h'].includes(key)?2:0}" step="0.5" value="${f[key].toFixed(1)}"><span>mm</span></div></div>`).join('')}</div></section>
  ${f.type==='text'?`<section class="inspector-group"><div class="section-label">TYPOGRAFIE</div><div class="style-row"><label for="field-size">Schriftgröße</label><div class="unit-input"><input id="field-size" class="font-size" type="number" min="6" max="80" value="${f.fontSize}"><span>pt</span></div></div><div class="style-row"><label for="field-weight">Schriftschnitt</label><select id="field-weight"><option value="400" ${f.weight==='400'?'selected':''}>Normal</option><option value="700" ${f.weight==='700'?'selected':''}>Fett</option></select></div><div class="style-row"><label for="field-align">Ausrichtung</label><select id="field-align">${[['left','Links'],['center','Mittig'],['right','Rechts']].map(([v,l])=>`<option value="${v}" ${f.align===v?'selected':''}>${l}</option>`).join('')}</select></div><div class="style-row"><label for="field-color">Textfarbe</label><div class="color-field"><span>${escape(f.color)}</span><input type="color" id="field-color" value="${f.color}"></div></div><label class="checkbox-label"><input type="checkbox" id="field-fit" ${f.autoFit?'checked':''}> Lange Texte automatisch einpassen</label></section>`:''}
  <section class="inspector-group"><div class="style-row"><label for="field-background">Hintergrund</label><input id="field-background" type="color" value="${f.background==='transparent'?'#ffffff':f.background}"></div><label class="checkbox-label"><input id="field-transparent" type="checkbox" ${f.background==='transparent'?'checked':''}> Transparent</label></section>
+ ${f.type==='image'?`<section class="inspector-group"><label for="image-fit">Bild im Rahmen</label><select id="image-fit"><option value="contain" ${f.fit!=='cover'?'selected':''}>Ganzes Bild einpassen</option><option value="cover" ${f.fit==='cover'?'selected':''}>Rahmen füllen (Zuschnitt)</option></select><button class="button" id="replace-image" style="margin-top:14px;width:100%">Eigenes Bild einsetzen</button></section>`:''}
  <div class="layer-order"><button class="button" id="layer-back">↓ Nach hinten</button><button class="button" id="layer-front">↑ Nach vorn</button></div><div class="inspector-actions"><button class="button" id="duplicate-field">${icon('copy')}Duplizieren</button><button class="button" id="delete-field" aria-label="Feld löschen">${icon('trash')}Löschen</button></div><div class="inspector-help">${decorative?'Mit den Pfeiltasten verschieben. Über „Nach hinten“ und „Nach vorn“ legst du die Reihenfolge fest.':f.type==='qr'?'Der QR-Code enthält den vollständigen Link des Empfängers. Seine weiße Ruhezone wird automatisch mit angelegt.':'Nutze {{company}}, {{first_name}} oder eigene CSV-Spalten. Pfeiltasten verschieben um 0,5 mm; mit Umschalt um 5 mm.'}</div>`;
+ if(f.type==='image'){$('#image-fit').onchange=e=>commit(()=>f.fit=e.target.value);$('#replace-image').onclick=()=>{imageReplaceTarget=f.id;$('#image-file').click();};}
  for(const [id,delta] of [['layer-back',-1],['layer-front',1]]){const fields=campaign.sides[side].fields,index=fields.indexOf(f);$('#'+id).disabled=index+delta<0||index+delta>=fields.length;$('#'+id).onclick=()=>commit(()=>{fields.splice(index,1);fields.splice(index+delta,0,f);});}
  $('#field-binding').onchange=e=>{if(e.target.value!=='custom')commit(()=>f.text=`{{${e.target.value}}}`);};
  $('#field-text').oninput=e=>commit(()=>f.text=e.target.value.slice(0,5000),{inspector:false,table:false});
@@ -222,6 +226,7 @@ async function showDashboard(){
 const campaignList=showDashboard;
 $('#dashboard-view').onclick=async e=>{
  const b=e.target.closest('button');if(!b)return;
+ if(b.hasAttribute('data-dashboard-example'))return loadExample();
  if(b.hasAttribute('data-dashboard-new'))return activateCampaign(createCampaign(true));
  if(b.hasAttribute('data-dashboard-import'))return $('#project-file').click();
  if(b.dataset.dashboardTemplate)return activateCampaign(createTemplate(b.dataset.dashboardTemplate));
@@ -230,7 +235,8 @@ $('#dashboard-view').onclick=async e=>{
  if(b.dataset.dashboardCopy){const copy=clone(c);copy.id=uid();copy.name=(c.name+' · Kopie').slice(0,120);copy.updatedAt=Date.now();try{await saveCampaign(copy);toast('Eine unabhängige Kopie wurde erstellt.');return showDashboard();}catch{toast('Die Kopie konnte nicht gespeichert werden. Bitte sichere dein Projekt als Datei.',true);return;}}
  if(b.dataset.dashboardDelete&&await confirm('Kampagne löschen?',`„${c.name}“ wird aus diesem Browser entfernt. Sichere bei Bedarf vorher eine Projektdatei.`,'Löschen')){try{await pendingSaves;if(campaign.id===id){clearTimeout(saveTimer);hasActive=false;}await removeCampaign(id);toast('Kampagne gelöscht.');await showDashboard();}catch{toast('Löschen war nicht möglich.',true);}}
 };
-async function newCampaign(){const result=await modal('Dein Mailing beginnt hier.',`<p><strong>Von null starten:</strong> Eine eigene Kampagne mit zwei leeren Seiten. Wir erklären dir Schritt für Schritt, wie daraus ein persönliches Mailing wird.</p><div class="help-step" style="margin-top:22px"><b>1</b><div><h3>Deine Idee festhalten</h3><p>Was bietest du an, für wen und mit welchem Ziel?</p></div></div><div class="help-step"><b>2</b><div><h3>Design und persönliche Felder</h3><p>Eigene Designs hochladen oder mit Farbe und Text beginnen.</p></div></div><div class="help-step"><b>3</b><div><h3>Empfänger hinzufügen und in 3D prüfen</h3><p>Dein Mailing mit echten Daten von beiden Seiten ansehen.</p></div></div><p>Oder öffne die chattastic-Vorlage, um den Editor erst einmal kennenzulernen.</p>`,[{id:'cancel',label:'Abbrechen'},{id:'template',label:'Beispiel ausprobieren'},{id:'blank',label:'Von null starten',primary:true}]);if(!['blank','template'].includes(result))return;await flushSave();campaign=createCampaign(result==='blank');hasActive=true;history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view=result==='blank'?'setup':'design';changed();toast(result==='blank'?'Deine eigene Kampagne. Wir starten mit deiner Idee.':'Beispielkampagne geöffnet.');}
+async function loadExample(){previewMode='3d';threeD.reset();await activateCampaign(createExampleCampaign(),'preview');window.scrollTo({top:0,behavior:'instant'});toast('Fertiges Beispiel geladen. Dein vorheriger Entwurf bleibt in deinen Kampagnen.');}
+async function newCampaign(){const result=await modal('Dein Mailing beginnt hier.',`<p><strong>Von null starten:</strong> Eine eigene Kampagne mit zwei leeren Seiten. Wir erklären dir Schritt für Schritt, wie daraus ein persönliches Mailing wird.</p><div class="help-step" style="margin-top:22px"><b>1</b><div><h3>Deine Idee festhalten</h3><p>Was bietest du an, für wen und mit welchem Ziel?</p></div></div><div class="help-step"><b>2</b><div><h3>Design und persönliche Felder</h3><p>Eigene Designs hochladen oder mit Farbe und Text beginnen.</p></div></div><div class="help-step"><b>3</b><div><h3>Empfänger hinzufügen und in 3D prüfen</h3><p>Dein Mailing mit echten Daten von beiden Seiten ansehen.</p></div></div><p><strong>Erst einmal alles sehen?</strong> Lade eine fertige Beispielkampagne mit beiden Designseiten, drei fiktiven Kontakten und persönlichen QR-Codes. Sie öffnet sich direkt in 3D.</p>`,[{id:'cancel',label:'Abbrechen'},{id:'template',label:'Beispielkampagne laden'},{id:'blank',label:'Von null starten',primary:true}]);if(!['blank','template'].includes(result))return;if(result==='template')return loadExample();await flushSave();campaign=createCampaign(result==='blank');hasActive=true;history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view=result==='blank'?'setup':'design';changed();toast(result==='blank'?'Deine eigene Kampagne. Wir starten mit deiner Idee.':'Beispielkampagne geöffnet.');}
 $('#campaigns-button').onclick=campaignList;$('#breadcrumb-campaigns').onclick=campaignList;$('#new-campaign').onclick=newCampaign;$('#new-campaign-top').onclick=newCampaign;
 $('#help-button').onclick=()=>modal('Vom Design zum persönlichen Mailing',`<div class="help-step"><b>1</b><div><h3>Dein Design, auf beiden Seiten.</h3><p>Nutze die Vorlage oder lade deine Designs hoch. Bei einer zweiseitigen PDF kannst du beide Seiten gleichzeitig übernehmen. Bilder werden vollständig eingepasst.</p></div></div><div class="help-step"><b>2</b><div><h3>Platz für Persönlichkeit.</h3><p>Lege Text- und QR-Felder über das Design. Ziehe sie an ihren Platz und verbinde sie mit Spalten aus deiner Empfängerliste. Ein Hintergrund in der passenden Farbe kann alte Platzhalter abdecken.</p></div></div><div class="help-step"><b>3</b><div><h3>Für jeden Kontakt einmal prüfen.</h3><p>Importiere eine CSV oder bearbeite Empfänger direkt. Wechsle in der Vorschau zwischen ihnen und exportiere ein Ansichts-PDF. Ein Scan öffnet den vollständigen Link aus der jeweiligen Zeile.</p></div></div><p><strong>Deine Daten bleiben hier.</strong> Designs, Empfänger und Kampagnen werden nur in diesem Browser gespeichert. Mit „Projekt sichern“ erhältst du eine Datei für Backups und zum Weiterarbeiten auf anderen Geräten. Es gibt noch keine Cloud-Synchronisierung oder Versandfunktion.</p><p style="margin-top:12px">Tastatur: ⌘/Strg Z rückgängig · ⌘/Strg Umschalt Z wiederholen · Pfeiltasten zum Verschieben eines ausgewählten Felds. Der Export ist eine RGB-Ansicht ohne Druckbeschnitt.</p>`);
 async function exportProof(type){
@@ -269,6 +275,7 @@ $('#setup-view').addEventListener('submit',e=>{
 $('#setup-view').addEventListener('click',e=>{
  const step=e.target.closest('[data-guide-step]');if(step){guideStep(Number(step.dataset.guideStep));return;}
  const control=e.target.closest('[data-guide-action]');if(!control)return;const action=control.dataset.guideAction;
+ if(action==='example'){loadExample();return;}
  if(action==='next'){if(campaign.onboarding.step===0&&!$('#setup-name').value.trim()){$('#setup-name').focus();toast('Gib deiner Kampagne bitte einen Namen.',true);return;}guideStep(campaign.onboarding.step+1);}
  if(action==='previous')guideStep(campaign.onboarding.step-1);
  if(action==='finish'){commit(()=>campaign.onboarding.active=false);previewMode='3d';setView('preview');toast('Dein Einstieg ist abgeschlossen. Alle Schritte bleiben über die Anleitung erreichbar.');}
@@ -286,10 +293,11 @@ function filterRecipients(){
  $('#recipient-filter-count').textContent=query?`${visible} von ${campaign.recipients.length} Empfängern`:'';
 }
 $('#recipient-search').oninput=filterRecipients;
-$('#image-upload').onclick=()=>$('#image-file').click();
+$('#image-upload').onclick=()=>{imageReplaceTarget=null;$('#image-file').click();};
 $('#image-file').onchange=async e=>{
  const file=e.target.files[0];e.target.value='';if(!file)return;
- if(campaign.sides[side].fields.length>=40)return toast('Maximal 40 Elemente pro Seite.',true);
+ const replacement=campaign.sides[side].fields.find(f=>f.id===imageReplaceTarget&&f.type==='image');imageReplaceTarget=null;
+ if(!replacement&&campaign.sides[side].fields.length>=40)return toast('Maximal 40 Elemente pro Seite.',true);
  if(file.size>20*1024*1024)return toast('Bitte ein Bild mit maximal 20 MB verwenden.',true);
  if(!['image/png','image/jpeg','image/webp'].includes(file.type))return toast('Bitte PNG, JPG oder WebP verwenden.',true);
  await busy('Dein Bildelement wird vorbereitet …',async()=>{
@@ -297,6 +305,7 @@ $('#image-file').onchange=async e=>{
   const image=await imageFrom(source);if(image.width*image.height>80000000)throw new Error('Bitte das Bild auf maximal 80 Megapixel verkleinern.');
   const scale=Math.min(1,2000/Math.max(image.width,image.height)),canvas=document.createElement('canvas');canvas.width=Math.round(image.width*scale);canvas.height=Math.round(image.height*scale);canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);
   const w=Math.min(70,65*image.width/image.height),h=w*image.height/image.width;
+  if(replacement){commit(()=>replacement.data=canvas.toDataURL('image/png'));toast('Bild ersetzt. Position und Rahmen bleiben erhalten.');return;}
   commit(()=>{const f={id:uid(),type:'image',text:'',data:canvas.toDataURL('image/png'),x:15,y:15,w:Math.max(2,w),h:Math.max(2,h),fontSize:12,weight:'400',align:'left',color:'#202321',background:'transparent',autoFit:true};campaign.sides[side].fields.push(f);selected=f.id;});toast('Bild eingefügt. Ziehen und Größe rechts anpassen.');
  });
 };
@@ -328,16 +337,20 @@ $('#handoff-export').onclick=async()=>{
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
 hydrateIcons();
+$('#example-next').onclick=()=>{recipientIndex=(recipientIndex+1)%Math.max(1,campaign.recipients.length);renderUI();};
+$('#example-edit').onclick=()=>{side='front';selected=campaign.sides.front.fields.find(f=>f.text==='{{company}}')?.id;setView('design');};
+$('#example-data').onclick=()=>setView('recipients');
 const params=new URLSearchParams(location.search);
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
- if(params.get('start')==='blank'){campaign=createCampaign(true);hasActive=true;view='setup';await saveCampaign(campaign);}
+ if(params.has('example')){campaign=createExampleCampaign();hasActive=true;view='preview';await saveCampaign(campaign);}
+ else if(params.get('start')==='blank'){campaign=createCampaign(true);hasActive=true;view='setup';await saveCampaign(campaign);}
  else if(params.has('template')){campaign=createTemplate(params.get('template'));hasActive=true;view='setup';await saveCampaign(campaign);}
  else if(params.has('demo')){hasActive=true;if(latest)campaign=validateCampaign(latest);else await saveCampaign(campaign);view=campaign.onboarding?.active?'setup':'design';}
  else if(latest&&sessionStorage.getItem('kontaktstoff-active')===latest.id){campaign=validateCampaign(latest);hasActive=true;view=campaign.onboarding?.active?'setup':'design';}
  else view='dashboard';
  selected=campaign.sides.front.fields[0]?.id;
 }catch{saveFailed=true;saveState('Speichern nicht verfügbar',true);toast('Lokaler Speicher ist nicht verfügbar. Sichere dein Projekt als Datei.',true);view='dashboard';}
-if(params.has('start')||params.has('template'))window.history.replaceState({},'',location.pathname);
+if(params.has('start')||params.has('template')||params.has('example'))window.history.replaceState({},'',location.pathname);
 if(hasActive)try{sessionStorage.setItem('kontaktstoff-active',campaign.id);}catch{}
 await document.fonts.ready;if(view==='dashboard')await showDashboard();else renderUI();

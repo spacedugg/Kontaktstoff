@@ -46,7 +46,7 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
     const value=resolveText(field.text,recipient);
     if(field.background!=='transparent')rect(ctx,field.x,field.y,field.w,field.h,field.background);
     if(field.type==='shape'){continue;}
-    if(field.type==='image'){const img=await imageFrom(field.data);const ratio=Math.min(field.w/img.width,field.h/img.height);ctx.drawImage(img,field.x+(field.w-img.width*ratio)/2,field.y+(field.h-img.height*ratio)/2,img.width*ratio,img.height*ratio);continue;}
+    if(field.type==='image'){const img=await imageFrom(field.data);const ratio=(field.fit==='cover'?Math.max:Math.min)(field.w/img.width,field.h/img.height);ctx.save();ctx.beginPath();ctx.rect(field.x,field.y,field.w,field.h);ctx.clip();ctx.drawImage(img,field.x+(field.w-img.width*ratio)/2,field.y+(field.h-img.height*ratio)/2,img.width*ratio,img.height*ratio);ctx.restore();continue;}
     if(field.type==='qr'){
       if(validURL(value)&&value.length<=1000){let code=codes.get(value);if(!code){code=await QRCode.toDataURL(value,{errorCorrectionLevel:'M',margin:4,width:800,color:{dark:'#101820',light:'#ffffff'}});if(codes.size>=128)codes.delete(codes.keys().next().value);codes.set(value,code);}const img=await imageFrom(code);const size=Math.min(field.w,field.h);ctx.drawImage(img,field.x,field.y,size,size);}
       else{rect(ctx,field.x,field.y,field.w,field.h,'#fff1f0');label(ctx,'Link fehlt',field.x+2,field.y+field.h/2,3,'#b43e36');}
