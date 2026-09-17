@@ -4,8 +4,8 @@ export const CLIENT_PAGES=[{
  id:'money-making-sprint',name:'Money Making Sprint',addressee:'Jakob & das Money Making Sprint Team',
  title:'Euer nächstes Gespräch beginnt im Briefkasten.',
  intro:'Ihr helft Agenturen und Freelancern, neue Kunden zu gewinnen. Wir haben eine Kampagne entworfen, die genau diese Menschen persönlich anspricht – mit einer Karte in eurem Look und einem direkten Weg zu eurem Strategiegespräch.',
- concept:'Gute Arbeit. Neue Kunden?',
- rationale:'Eure Website spricht direkt, zeigt Kundengeschichten und lädt zum Gespräch ein. Die Karte übernimmt diesen klaren Einstieg: eine Frage, die Agenturinhaber kennen, plus ein QR-Code zu eurer bestehenden Terminseite.',
+ concept:'Eine persönliche Nachricht. Von Jakob.',
+ rationale:'Diese Karte spricht Inhaber von Agenturen und B2B-Dienstleistern an, die passende Kunden gezielter gewinnen wollen. Jakob lädt persönlich zum Austausch ein. Ein konkreter Akquise-Anlass macht die Nachricht relevant; die Rückseite erklärt, worüber ihr im Gespräch sprechen könnt.',
  audience:'Inhaber von Agenturen und B2B-Dienstleistungsunternehmen',
  source:'https://www.money-making-sprint.de/',target:'https://www.money-making-sprint.de/termin',contactUrl:'',
  color:'#7338ea',accent:'#dbff00',pilot:250

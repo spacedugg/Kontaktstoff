@@ -5,3 +5,5 @@
 
 /* Let the dark intro follow its content at every viewport width. */
 .client-page:before{display:none}.client-hero{isolation:isolate}.client-hero:before{content:"";position:absolute;top:0;bottom:-85px;left:0;right:0;background:#121014;box-shadow:0 0 0 100vmax #121014;clip-path:inset(0 -100vmax);z-index:-1}.client-design{position:relative}
+
+.client-personal-note{display:block;margin-top:20px;font-size:12px;font-weight:700}.client-personal-note textarea{resize:vertical;min-height:78px;line-height:1.6}.client-personal-note small{display:block;font-size:11px;line-height:1.7;font-weight:400;color:#756b7d;margin-top:8px}

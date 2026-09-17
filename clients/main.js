@@ -7,10 +7,10 @@ document.body.style.setProperty('--client-purple',client.color);document.body.st
 const campaign=createClientCampaign(client.id),stage=$('#client-stage');
 mountCardPreview({stage,card:$('#client-card'),flip:$('#client-flip'),reset:$('#client-reset')});
 let revision=0,briefUrl=null;
-const person=()=>({...campaign.recipients[0],first_name:$('#client-name').value.trim()||'Anna',company:$('#client-company').value.trim()||'Studio Nordlicht',salutation:'Hey '+($('#client-name').value.trim()||'Anna')+','});
+const person=()=>({...campaign.recipients[0],first_name:$('#client-name').value.trim()||'Anna',company:$('#client-company').value.trim()||'Studio Nordlicht',personal_note:$('#client-note').value.trim()||campaign.recipients[0].personal_note,salutation:'Hey '+($('#client-name').value.trim()||'Anna')+','});
 const snapshot=()=>{const c=structuredClone(campaign);c.recipients=[person()];return c;};
 async function render(){
- const version=++revision,c=snapshot(),showPlaceholders=$('#client-placeholders').checked,r=showPlaceholders?{...c.recipients[0],first_name:'{{first_name}}',company:'{{company}}',salutation:'Hey {{first_name}},'}:c.recipients[0];
+ const version=++revision,c=snapshot(),showPlaceholders=$('#client-placeholders').checked,r=showPlaceholders?{...c.recipients[0],first_name:'{{first_name}}',company:'{{company}}',personal_note:'{{personal_note}}',salutation:'Hey {{first_name}},'}:c.recipients[0];
  stage.setAttribute('aria-busy','true');$('#client-status').textContent='Vorschau wird aktualisiert …';
  try{
   const canvases=await Promise.all(['front','back'].map(async side=>{const canvas=document.createElement('canvas');await renderCanvas(canvas,c,side,r,{scale:6});return {side,canvas};}));
@@ -20,7 +20,7 @@ async function render(){
  }catch(error){if(version===revision){$('#client-error').textContent='Die Vorschau konnte nicht geladen werden. Bitte lade die Seite erneut.';$('#client-error').hidden=false;$('#client-status').textContent='Vorschau nicht verfügbar';}}
  finally{if(version===revision)stage.setAttribute('aria-busy','false');}
 }
-for(const id of ['client-name','client-company'])$('#'+id).addEventListener('input',render);
+for(const id of ['client-name','client-company','client-note'])$('#'+id).addEventListener('input',render);
 $('#client-placeholders').addEventListener('change',render);
 document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{const flat=button.dataset.view==='flat';stage.hidden=flat;$('#client-flat').hidden=!flat;$('.client-preview-controls').hidden=flat;document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));});
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}
