@@ -1,3 +1,4 @@
+import {CLIENT_CAMPAIGNS,createClientCampaign} from './client-campaigns.js';
 import {FORMATS,KEYS,uid,clone,clamp,validURL,resolveText,missingKeys,createCampaign,parseCSV,csvString,validateCampaign,checks} from './core.js';
 import {listCampaigns,saveCampaign,removeCampaign} from './storage.js';
 import {renderCanvas,imageFrom} from './render.js';
@@ -51,9 +52,11 @@ function renderUI(inspector=true,table=true,guide=true){
  $('#dashboard-view').hidden=view!=='dashboard';
  if(view==='dashboard')return;
  $('#example-preview-note').hidden=!campaign.sample||!!campaign.tutorial?.active;
+ const client=CLIENT_CAMPAIGNS.find(p=>p.id===campaign.templateId);
  const promotion=PROMOTIONS.find(p=>p.id===campaign.templateId)||PROMOTIONS[0];
  const credit=$('.example-photo-credit');credit.href=promotion.source;credit.textContent='Stockfoto: '+promotion.credit+' / Unsplash ↗';
- const sampleCopy=promotion.id==='chattastic'?'Alle Empfänger und Anschriften sind fiktiv. Die Beispiellinks öffnen chattastic.de; ersetze sie für den Versand durch echte Chatbot-Links.':'Fiktive Beispielmarke, Empfänger und Anschriften. Die QR-Codes führen zu example.org als Demo-Ziel. Ersetze diese Links vor einer echten Kampagne.';
+ credit.hidden=!!client;
+ const sampleCopy=client?'Kontaktstoff Designvorschlag für '+client.name+'. Fiktive Empfänger und Anschriften. Die QR-Codes öffnen die echte Terminseite mit Beispiel-Kampagnenparametern.':promotion.id==='chattastic'?'Alle Empfänger und Anschriften sind fiktiv. Die Beispiellinks öffnen chattastic.de; ersetze sie für den Versand durch echte Chatbot-Links.':'Fiktive Beispielmarke, Empfänger und Anschriften. Die QR-Codes führen zu example.org als Demo-Ziel. Ersetze diese Links vor einer echten Kampagne.';
  $('#sample-notice span').textContent=sampleCopy;
  $('#example-preview-note p').textContent='Wechsle den Kontakt: Firmenname, Ansprache und QR-Code ändern sich mit. '+sampleCopy;
  $('.draft-pill').textContent=campaign.sample?'Beispiel':'Entwurf';
@@ -430,6 +433,7 @@ const params=new URLSearchParams(location.search);
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
  if(params.has('tutorial')){campaign=makeTutorialCampaign();hasActive=true;view='tutorial';await saveCampaign(campaign);}
+ else if(CLIENT_CAMPAIGNS.some(c=>c.id===params.get('client'))){campaign=createClientCampaign(params.get('client'));hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.has('example')){campaign=createExampleCampaign(params.get('example'));hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.get('start')==='blank'){campaign=createCampaign(true);hasActive=true;view='setup';await saveCampaign(campaign);}
  else if(params.has('template')){campaign=createTemplate(params.get('template'));hasActive=true;view='setup';await saveCampaign(campaign);}
@@ -438,6 +442,6 @@ try{
  else view='dashboard';
  selected=campaign.sides.front.fields[0]?.id;
 }catch{saveFailed=true;saveState('Speichern nicht verfügbar',true);toast('Lokaler Speicher ist nicht verfügbar. Sichere dein Projekt als Datei.',true);view='dashboard';}
-if(params.has('start')||params.has('template')||params.has('example')||params.has('tutorial'))window.history.replaceState({},'',location.pathname);
+if(params.has('client')||params.has('start')||params.has('template')||params.has('example')||params.has('tutorial'))window.history.replaceState({},'',location.pathname);
 if(hasActive)try{sessionStorage.setItem('kontaktstoff-active',campaign.id);}catch{}
 await document.fonts.ready;if(view==='dashboard')await showDashboard();else renderUI();

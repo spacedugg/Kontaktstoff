@@ -1,3 +1,4 @@
+import {mountCardPreview} from './card-preview.js';
 import {mountImpactCalculator} from './impact.js';
 mountImpactCalculator();
 const info={imprint:{title:'Impressum · Entwicklungsvorschau',text:['Diese Vorschau dient der Entwicklung von Kontaktstoff und dem Test erster Kampagnen. Vollständige Betreiberangaben sind noch nicht hinterlegt.','Vor einem öffentlichen Marktstart müssen Unternehmensname, Rechtsform, Vertretung, ladungsfähige Anschrift und Kontaktangaben ergänzt werden. Über dieses Studio werden keine Bestellungen aufgegeben.']},privacy:{title:'Deine Daten in dieser Vorschau',text:['Designs, Kontakte und Kampagnen werden im Browser verarbeitet und lokal in IndexedDB gespeichert. Es gibt keine Cloud-Synchronisierung. Die Felder der Homepage werden nur für die Vorschau verwendet. Eigene Analyse- oder Marketingdienste sind nicht eingebunden.','Projekt- und Kampagnenexporte enthalten die eingegebenen Empfängerdaten. Du entscheidest, wo du diese Dateien speicherst und mit wem du sie teilst.','Schriften und Bibliotheken werden mit dieser Website ausgeliefert. Der Hosting-Anbieter verarbeitet technische Verbindungsdaten beim Seitenaufruf. Für den öffentlichen Betrieb sind die verantwortliche Stelle, der konkrete Hosting-Anbieter und alle tatsächlichen Verarbeitungen in einer vollständigen Datenschutzerklärung zu ergänzen.']}};
@@ -6,16 +7,10 @@ const dialog=document.querySelector('#info-dialog');document.querySelectorAll('[
 import {PROMOTIONS,createPromotion} from '../studio/src/promotions.js';
 import {renderCanvas} from '../studio/src/render.js';
 const stage=document.querySelector('#hero-stage'),card=document.querySelector('#hero-card');
-let rx=7,ry=-12,rz=-4,drag=null,active='chattastic',revision=0;
+let active='chattastic',revision=0;
 const campaigns=new Map(PROMOTIONS.map(p=>[p.id,createPromotion(p.id)]));
-const paint=()=>{card.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`;const back=Math.cos(ry*Math.PI/180)<0;document.querySelector('#hero-flip').textContent=back?'Vorderseite ansehen ↻':'Rückseite ansehen ↻';stage.dataset.face=back?'back':'front';};
-function reset(){rx=7;ry=-12;rz=-4;paint();}
-stage.addEventListener('pointerdown',e=>{if(e.button!==0)return;drag={x:e.clientX,y:e.clientY,rx,ry};stage.setPointerCapture(e.pointerId);});
-stage.addEventListener('pointermove',e=>{if(!drag)return;ry=drag.ry+(e.clientX-drag.x)*.65;rx=Math.max(-65,Math.min(65,drag.rx-(e.clientY-drag.y)*.35));paint();});
-for(const event of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(event,()=>drag=null);
-stage.addEventListener('keydown',e=>{if(!e.key.startsWith('Arrow'))return;e.preventDefault();if(e.key==='ArrowLeft')ry-=15;if(e.key==='ArrowRight')ry+=15;if(e.key==='ArrowUp')rx=Math.max(-65,rx-10);if(e.key==='ArrowDown')rx=Math.min(65,rx+10);paint();});
-document.querySelector('#hero-flip').onclick=()=>{ry+=180;paint();};
-document.querySelector('#hero-reset').onclick=reset;
+const preview=mountCardPreview({stage,card,flip:document.querySelector('#hero-flip'),reset:document.querySelector('#hero-reset')});
+const reset=()=>preview.reset();
 async function render(){
  const version=++revision,c=campaigns.get(active),r={...c.recipients[0],company:document.querySelector('#demo-company').value.trim()||c.recipients[0].company};
  stage.setAttribute('aria-busy','true');

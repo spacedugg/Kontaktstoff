@@ -3,3 +3,5 @@ studio/app.js.LEGAL.txt linguist-generated=true -whitespace
 studio/vendor/** linguist-vendored=true -whitespace
 studio/src/example-photo.js linguist-generated=true -whitespace
 app.js linguist-generated=true -whitespace
+
+clients/app.js linguist-generated=true
