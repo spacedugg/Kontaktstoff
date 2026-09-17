@@ -10,7 +10,10 @@ export function mountImpactCalculator(root=document){
  if(inputs.some(input=>!input))return;
  const number=new Intl.NumberFormat('de-DE',{maximumFractionDigits:0});
  const percent=new Intl.NumberFormat('de-DE',{maximumFractionDigits:2});
- const put=(id,value)=>root.querySelector('#impact-'+id).textContent=value;
+ const put=(id,value)=>{
+  const output=root.querySelector('#impact-'+id);if(output)output.textContent=value;
+  root.querySelectorAll('[data-impact="'+id+'"]').forEach(output=>{output.textContent=value;});
+ };
  function update(){
   const [cards,scan,conversion]=inputs.map(i=>Number(i.value)),result=mailingScenario(cards,scan,conversion);
   put('mailings-value',number.format(cards));put('scan-value',percent.format(scan)+' %');put('conversion-value',percent.format(conversion)+' %');
