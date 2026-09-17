@@ -42,6 +42,7 @@ export function validateCampaign(value) {
   if(value.recipients.some(r=>!r||!/^[-a-zA-Z0-9_]{1,100}$/.test(r.id)||Object.keys(r).some(k=>['__proto__','prototype','constructor'].includes(k))||Object.values(r).some(v=>typeof v!=='string'||v.length>5000)))throw new Error('Ungültige Empfängerdaten.');
   if(value.brief && (!['sender','audience','goal','offer'].every(key=>typeof value.brief[key]==='string'&&value.brief[key].length<=1000)))throw new Error('Ungültiges Kampagnenbriefing.');
   if(value.onboarding && (!Number.isInteger(value.onboarding.step)||value.onboarding.step<0||value.onboarding.step>5||typeof value.onboarding.active!=='boolean'))throw new Error('Ungültiger Anleitungsstand.');
+  if(value.tutorial&&(!Number.isInteger(value.tutorial.step)||value.tutorial.step<0||value.tutorial.step>7||typeof value.tutorial.active!=='boolean'||!/^[-a-zA-Z0-9_]{1,100}$/.test(value.tutorial.fieldId)))throw new Error('Ungültiger Tutorialstand.');
   const format=FORMATS.find(f=>f.id===value.format);
   for(const side of ['front','back']){
     const s=value.sides?.[side];

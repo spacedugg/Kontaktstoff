@@ -40,6 +40,7 @@ npm run test:guide
 npm run test:product
 npm run test:handoff
 npm run test:example
+npm run test:tutorial
 ```
 
 Browserprüfungen erwarten einen laufenden Server auf Port 4177 und Google Chrome. Die ursprünglichen Editor-/Anleitungstests unterstützen `STUDIO_URL` und `BROWSER_CHANNEL`. `build` erzeugt `studio/app.js` samt lokalen Bibliotheksressourcen und `dist/` für Vercel.
@@ -64,3 +65,11 @@ Die Testdaten sind fiktiv. Empfängerdaten und exportierte Pakete gehören nicht
 ## Beispielbilder
 
 Die Fotokampagne verwendet ein echtes Stockfoto von Vitaly Gariev (Unsplash), siehe `assets/photos/CREDITS.md`. Die Datei wird lokal ausgeliefert und als Daten-URL in Beispielprojekten gesichert. Die abgebildeten Personen werden nicht als Kunden oder Mitarbeiter von chattastic bezeichnet. `node scripts/embed-example-photo.mjs` aktualisiert die eingebettete Fassung nach einem Bildwechsel.
+
+## Mitmach-Tutorial
+
+„Tutorial starten“ erstellt eine eigene Fotobeispielkampagne mit Anna, Jonas und Sarah. Acht Schritte erklären den kompletten Ablauf. Eine Zuordnungstabelle stellt `{{company}}`, `{{first_name}}`, `{{salutation}}` und `{{chatbot_url}}` den tatsächlichen Werten gegenüber. Der Textspielplatz bearbeitet das reale Ansprachefeld; Namens- und URL-Änderungen wirken direkt auf Vorschau und QR-Code. CSV-Download, 3D-Rückkehr, Gesamtaudit und PDF-Export verwenden die normalen Studiofunktionen.
+
+Fortschritt liegt unter `campaign.tutorial` (Schritt 0–7, Aktivstatus, Übungsfeld-ID), wird validiert und mit Projektdateien gesichert. Bei aktivem Tutorial setzt ein Reload den aktuellen Schritt fort. „Eigene Kampagne“ startet anschließend einen leeren Entwurf. Wenn Übungsdaten im freien Editor gelöscht wurden, kann eine neue unabhängige Tutorialkampagne gestartet werden. Einstieg: `/studio/?tutorial=1`, Homepage, Übersicht, Anleitung oder obere Studioleiste.
+
+Die Anleitung zeigt am Ende die echte gerenderte Vorderseite statt einer symbolischen Karte. Erklärungstexte sind standardmäßig 18 px, zentrale Bedienelemente 16 px; die Schriftgröße der gedruckten Designs bleibt davon unabhängig.

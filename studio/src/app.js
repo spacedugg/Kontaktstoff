@@ -4,6 +4,7 @@ import {renderCanvas,imageFrom} from './render.js';
 import {icon,hydrateIcons} from './icons.js';
 import {Mailing3D} from './three-d.js';
 import {guideHTML,GUIDE_STEPS} from './guide.js';
+import {tutorialHTML,TUTORIAL_STEPS} from './tutorial.js';
 import {createTemplate,createExampleCampaign} from './templates.js';
 import {dashboardHTML} from './dashboard.js';
 import {auditCampaign,createHandoff} from './handoff.js';
@@ -49,8 +50,13 @@ function renderUI(inspector=true,table=true,guide=true){
  $('.draft-pill').textContent=campaign.sample?'Beispiel':'Entwurf';
  $('#rename-campaign').textContent=campaign.name;$('#recipient-count').textContent=campaign.recipients.length;
  $$('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===view);b.setAttribute('aria-current',b.dataset.tab===view?'step':'false');});
- for(const name of ['setup','design','recipients','preview'])$('#'+name+'-view').hidden=name!==view;
+ for(const name of ['tutorial','setup','design','recipients','preview'])$('#'+name+'-view').hidden=name!==view;
  $$('[data-side]').forEach(b=>{b.classList.toggle('active',b.dataset.side===side);b.setAttribute('aria-pressed',String(b.dataset.side===side));});
+ $('#start-tutorial').textContent=campaign.tutorial?'Tutorial öffnen':'Tutorial starten';
+ $('#tutorial-tab').hidden=!campaign.tutorial;
+ $('#tutorial-return').hidden=!campaign.tutorial?.active||view==='tutorial';
+ if(view==='tutorial'&&guide)$('#tutorial-view').innerHTML=tutorialHTML(campaign,recipientIndex);
+ if(view==='tutorial')updateTutorialLive();
  $('#setup-tab').hidden=!campaign.onboarding;
  $('#guide-return').hidden=!campaign.onboarding?.active||view==='setup';
  if(view==='setup'&&guide)$('#setup-view').innerHTML=guideHTML(campaign);
@@ -119,12 +125,13 @@ function renderOverlays(){
 async function requestRender(){
  if(view==='dashboard')return;
  const version=++renderVersion;const snapshot=clone(campaign),person=clone(recipient());
- const targets=view==='setup'?(campaign.onboarding?.step===2?[['front','#guide-front'],['back','#guide-back']]:[]):view==='preview'?[['front','#proof-front'],['back','#proof-back'],['front','#three-d-front'],['back','#three-d-back']]:[[side,'#design-canvas'],['front','#thumb-front'],['back','#thumb-back']];
+ const targets=view==='tutorial'?['front','back'].filter(s=>$('#tutorial-'+s)).map(s=>[s,'#tutorial-'+s]):view==='setup'?(campaign.onboarding?.step===2?[['front','#guide-front'],['back','#guide-back']]:campaign.onboarding?.step===5?[['front','#guide-finish-front']]:[]):view==='preview'?[['front','#proof-front'],['back','#proof-back'],['front','#three-d-front'],['back','#three-d-back']]:[[side,'#design-canvas'],['front','#thumb-front'],['back','#thumb-back']];
  try{
    const results=await Promise.all(targets.map(async([s,target])=>{const cvs=document.createElement('canvas');const overflow=await renderCanvas(cvs,snapshot,s,person,{scale:target.includes('thumb')?1.2:5});return{cvs,target,overflow,side:s};}));
    if(version!==renderVersion)return;
    drawingIssues=[];
    for(const{cvs,target,overflow,side:s}of results){const dest=$(target);dest.width=cvs.width;dest.height=cvs.height;dest.getContext('2d').drawImage(cvs,0,0);if(!target.includes('thumb')&&!target.includes('three-d')&&overflow.length)drawingIssues.push({level:'error',text:`${s==='front'?'Vorderseite':'Rückseite'}: ${overflow.length} Textfeld(er) zu klein für diesen Empfänger. Bitte größer ziehen.`});}
+   if(view==='tutorial'&&$('#tutorial-qr')){const qr=snapshot.sides.back.fields.find(f=>f.type==='qr'),back=results.find(r=>r.side==='back');if(qr&&back){const q=$('#tutorial-qr');q.width=q.height=440;q.getContext('2d').drawImage(back.cvs,qr.x*5,qr.y*5,Math.min(qr.w,qr.h)*5,Math.min(qr.w,qr.h)*5,0,0,440,440);}}
    if(view==='preview')renderChecks();
  }catch(e){if(version===renderVersion)toast(e.message,true);}
 }
@@ -212,7 +219,7 @@ $('#rename-campaign').onclick=async()=>{const promise=modal('Kampagne umbenennen
 $('#project-export').onclick=()=>{download(new Blob([JSON.stringify(campaign,null,2)],{type:'application/json'}),filename()+'.kontaktstoff.json');toast('Projekt inklusive Designs und Empfängern gesichert.');};
 $('#project-file').onchange=async e=>{const file=e.target.files[0];e.target.value='';if(!file)return;if(file.size>40*1024*1024)return toast('Projektdateien dürfen maximal 40 MB groß sein.',true);await busy('Projekt wird geöffnet …',async()=>{let imported;try{imported=validateCampaign(JSON.parse(await file.text()));}catch(e){throw new Error('Projekt konnte nicht importiert werden: '+e.message);}await flushSave();imported.id=uid();imported.name=(imported.name+' · Import').slice(0,120);campaign=imported;hasActive=true;history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view='design';changed();toast('Projekt als eigenständige Kampagne geöffnet.');});};
 async function activateCampaign(next,initialView){
- await flushSave();try{campaign=validateCampaign(next);}catch(e){toast('Die Kampagne konnte nicht geöffnet werden: '+e.message,true);return;}hasActive=true;history=[];future=[];side='front';recipientIndex=0;selected=campaign.sides.front.fields[0]?.id;view=initialView||(campaign.onboarding?.active?'setup':'design');clearAudit();changed();
+ await flushSave();try{campaign=validateCampaign(next);}catch(e){toast('Die Kampagne konnte nicht geöffnet werden: '+e.message,true);return;}hasActive=true;history=[];future=[];side='front';recipientIndex=0;selected=campaign.sides.front.fields[0]?.id;view=initialView||(campaign.tutorial?.active?'tutorial':campaign.onboarding?.active?'setup':'design');clearAudit();changed();
 }
 async function showDashboard(){
  await flushSave();try{sessionStorage.removeItem('kontaktstoff-active');}catch{}view='dashboard';renderVersion++;renderUI();const version=++dashboardVersion;
@@ -226,6 +233,7 @@ async function showDashboard(){
 const campaignList=showDashboard;
 $('#dashboard-view').onclick=async e=>{
  const b=e.target.closest('button');if(!b)return;
+ if(b.hasAttribute('data-dashboard-tutorial'))return startTutorial(true);
  if(b.hasAttribute('data-dashboard-example'))return loadExample();
  if(b.hasAttribute('data-dashboard-new'))return activateCampaign(createCampaign(true));
  if(b.hasAttribute('data-dashboard-import'))return $('#project-file').click();
@@ -275,6 +283,7 @@ $('#setup-view').addEventListener('submit',e=>{
 $('#setup-view').addEventListener('click',e=>{
  const step=e.target.closest('[data-guide-step]');if(step){guideStep(Number(step.dataset.guideStep));return;}
  const control=e.target.closest('[data-guide-action]');if(!control)return;const action=control.dataset.guideAction;
+ if(action==='tutorial'){startTutorial();return;}
  if(action==='example'){loadExample();return;}
  if(action==='next'){if(campaign.onboarding.step===0&&!$('#setup-name').value.trim()){$('#setup-name').focus();toast('Gib deiner Kampagne bitte einen Namen.',true);return;}guideStep(campaign.onboarding.step+1);}
  if(action==='previous')guideStep(campaign.onboarding.step-1);
@@ -334,6 +343,53 @@ $('#handoff-export').onclick=async()=>{
  });
 };
 
+function makeTutorialCampaign(){
+ const c=createExampleCampaign();c.name='chattastic · Mein Mitmach-Tutorial';
+ const field=c.sides.back.fields.find(f=>f.text==='{{salutation}}');field.text='Hallo {{first_name}},';
+ c.tutorial={active:true,step:0,fieldId:field.id};return c;
+}
+async function startTutorial(fresh=false){
+ if(campaign.tutorial&&!fresh){setView('tutorial');return;}
+ await activateCampaign(makeTutorialCampaign(),'tutorial');window.scrollTo({top:0,behavior:'instant'});
+ toast('Dein Tutorial hat eine eigene Beispielkampagne. Vorherige Entwürfe bleiben erhalten.');
+}
+function tutorialStep(step){commit(()=>{campaign.tutorial.step=clamp(step,0,TUTORIAL_STEPS.length-1);campaign.tutorial.active=true;});$('#tutorial-title')?.focus({preventScroll:true});$('#tutorial-view').scrollIntoView({block:'start',behavior:'instant'});}
+function updateTutorialLive(){
+ const f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial?.fieldId),r=recipient();
+ if($('#tutorial-resolved'))$('#tutorial-resolved').textContent=resolveText(f?.text||'',r)||'Hier erscheint dein persönlicher Text.';
+ if($('#tutorial-text-help')){const missing=missingKeys(f?.text||'',r);$('#tutorial-text-help').textContent=missing.length?'Für diese Platzhalter fehlt ein Wert: '+[...new Set(missing)].map(k=>'{{'+k+'}}').join(', '):'Dieser Text steht jetzt auch auf deiner Beispielkarte.';}
+ if($('#tutorial-qr-status'))$('#tutorial-qr-status').textContent=validURL(r.chatbot_url)&&r.chatbot_url.length<=1000?'Der Code enthält genau den Link aus dieser Empfängerzeile.':'Bitte einen vollständigen HTTP(S)-Link mit maximal 1.000 Zeichen eingeben.';
+}
+$('#start-tutorial').onclick=()=>startTutorial();$('#example-tutorial').onclick=()=>startTutorial();$('#back-to-tutorial').onclick=()=>setView('tutorial');
+$('#tutorial-view').addEventListener('input',e=>{
+ if(e.target.id!=='tutorial-text')return;
+ const f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial.fieldId);if(f)commit(()=>f.text=e.target.value.slice(0,180),{guide:false});
+});
+$('#tutorial-view').addEventListener('change',e=>{
+ if(e.target.id==='tutorial-person'){recipientIndex=Number(e.target.value)||0;renderUI();return;}
+ if(e.target.dataset.tutorialData){const key=e.target.dataset.tutorialData,value=e.target.value.trim();commit(()=>{recipient()[key]=value;if(key==='first_name')recipient().salutation=value?'Hallo '+value+',':'Guten Tag,';});}
+ if(e.target.id==='tutorial-url'){const value=e.target.value.trim();commit(()=>recipient().chatbot_url=value);}
+});
+$('#tutorial-view').addEventListener('click',async e=>{
+ const step=e.target.closest('[data-tutorial-step]');if(step){tutorialStep(Number(step.dataset.tutorialStep));return;}
+ const person=e.target.closest('[data-tutorial-person]');if(person){recipientIndex=Number(person.dataset.tutorialPerson);renderUI();return;}
+ const token=e.target.closest('[data-tutorial-token]');if(token){const input=$('#tutorial-text'),f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial.fieldId);if(!f)return;const start=input.selectionStart,end=input.selectionEnd,value=input.value.slice(0,start)+'{{'+token.dataset.tutorialToken+'}}'+input.value.slice(end);commit(()=>f.text=value.slice(0,180));$('#tutorial-text').focus();$('#tutorial-text').setSelectionRange(start+token.dataset.tutorialToken.length+4,start+token.dataset.tutorialToken.length+4);return;}
+ const action=e.target.closest('[data-tutorial-action]')?.dataset.tutorialAction;if(!action)return;
+ if(action==='fresh'){await startTutorial(true);return;}
+ if(action==='next')tutorialStep(campaign.tutorial.step+1);if(action==='previous')tutorialStep(campaign.tutorial.step-1);if(action==='restart')tutorialStep(0);
+ if(action==='reset-text'){const f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial.fieldId);if(f)commit(()=>f.text='Hallo {{first_name}},');}
+ if(action==='design'){side='front';selected=campaign.sides.front.fields.find(f=>f.text==='{{company}}')?.id;setView('design');}
+ if(action==='upload'){side='front';setView('design');$('#design-file').click();}
+ if(action==='recipients')setView('recipients');
+ if(action==='csv')$('#csv-export').click();
+ if(action==='three-d'){previewMode='3d';setView('preview');$('#three-d-stage').scrollIntoView({block:'center',behavior:'smooth'});}
+ if(action==='audit'){setView('preview');$('#audit-all').click();$('#audit-results').scrollIntoView({block:'center'});}
+ if(action==='package'){setView('preview');$('#handoff-export').scrollIntoView({block:'center',behavior:'smooth'});}
+ if(action==='pdf')exportProof('pdf');
+ if(action==='finish'){commit(()=>campaign.tutorial.active=false);setView('preview');toast('Tutorial abgeschlossen. Deine Beispielkampagne bleibt vollständig bearbeitbar.');}
+ if(action==='blank')await activateCampaign(createCampaign(true));
+});
+
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
 hydrateIcons();
@@ -343,14 +399,15 @@ $('#example-data').onclick=()=>setView('recipients');
 const params=new URLSearchParams(location.search);
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
- if(params.has('example')){campaign=createExampleCampaign();hasActive=true;view='preview';await saveCampaign(campaign);}
+ if(params.has('tutorial')){campaign=makeTutorialCampaign();hasActive=true;view='tutorial';await saveCampaign(campaign);}
+ else if(params.has('example')){campaign=createExampleCampaign();hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.get('start')==='blank'){campaign=createCampaign(true);hasActive=true;view='setup';await saveCampaign(campaign);}
  else if(params.has('template')){campaign=createTemplate(params.get('template'));hasActive=true;view='setup';await saveCampaign(campaign);}
- else if(params.has('demo')){hasActive=true;if(latest)campaign=validateCampaign(latest);else await saveCampaign(campaign);view=campaign.onboarding?.active?'setup':'design';}
- else if(latest&&sessionStorage.getItem('kontaktstoff-active')===latest.id){campaign=validateCampaign(latest);hasActive=true;view=campaign.onboarding?.active?'setup':'design';}
+ else if(params.has('demo')){hasActive=true;if(latest)campaign=validateCampaign(latest);else await saveCampaign(campaign);view=campaign.tutorial?.active?'tutorial':campaign.onboarding?.active?'setup':'design';}
+ else if(latest&&sessionStorage.getItem('kontaktstoff-active')===latest.id){campaign=validateCampaign(latest);hasActive=true;view=campaign.tutorial?.active?'tutorial':campaign.onboarding?.active?'setup':'design';}
  else view='dashboard';
  selected=campaign.sides.front.fields[0]?.id;
 }catch{saveFailed=true;saveState('Speichern nicht verfügbar',true);toast('Lokaler Speicher ist nicht verfügbar. Sichere dein Projekt als Datei.',true);view='dashboard';}
-if(params.has('start')||params.has('template')||params.has('example'))window.history.replaceState({},'',location.pathname);
+if(params.has('start')||params.has('template')||params.has('example')||params.has('tutorial'))window.history.replaceState({},'',location.pathname);
 if(hasActive)try{sessionStorage.setItem('kontaktstoff-active',campaign.id);}catch{}
 await document.fonts.ready;if(view==='dashboard')await showDashboard();else renderUI();
