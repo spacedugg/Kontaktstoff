@@ -12,7 +12,8 @@
     "test:product": "node tests/product.mjs",
     "test:handoff": "node tests/handoff.mjs",
     "test:example": "node tests/example.mjs",
-    "test:tutorial": "node tests/tutorial.mjs"
+    "test:tutorial": "node tests/tutorial.mjs",
+    "test:promotions": "node tests/promotions.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

@@ -12,7 +12,7 @@ async function download(selector){const event=page.waitForEvent('download');awai
 async function project(){return JSON.parse((await download('#project-export')).toString());}
 async function shot(name){await page.waitForTimeout(180);await page.locator('#toast').evaluateAll(nodes=>nodes.forEach(n=>n.classList.remove('show')));await page.screenshot({path:`test-results/product-${name}.png`,fullPage:true});}
 try{
- await page.goto(base);await page.locator('#demo-company').fill('Hotel Nordlicht');await expect(page.locator('.demo-company')).toHaveText('Hotel Nordlicht');
+ await page.goto(base);await page.locator('#demo-company').fill('Hotel Nordlicht');await expect(page.locator('#hero-front')).toHaveAttribute('aria-label','Vorderseite für Hotel Nordlicht');
  const original=await page.locator('#hero-card').getAttribute('style');await page.locator('#hero-flip').click();assert.notEqual(await page.locator('#hero-card').getAttribute('style'),original);await expect(page.locator('#hero-flip')).toContainText('Vorderseite');await page.locator('#hero-reset').click();
  await shot('homepage');
  for(const width of [1024,768,390]){await page.setViewportSize({width,height:900});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Home overflow '+width);if(width===390)await shot('homepage-mobile');}

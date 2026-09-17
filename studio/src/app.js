@@ -6,6 +6,7 @@ import {Mailing3D} from './three-d.js';
 import {guideHTML,GUIDE_STEPS} from './guide.js';
 import {tutorialHTML,TUTORIAL_STEPS} from './tutorial.js';
 import {createTemplate,createExampleCampaign} from './templates.js';
+import {PROMOTIONS} from './promotions.js';
 import {dashboardHTML} from './dashboard.js';
 import {auditCampaign,createHandoff} from './handoff.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -47,6 +48,11 @@ function renderUI(inspector=true,table=true,guide=true){
  $('#dashboard-view').hidden=view!=='dashboard';
  if(view==='dashboard')return;
  $('#example-preview-note').hidden=!campaign.sample;
+ const promotion=PROMOTIONS.find(p=>p.id===campaign.templateId)||PROMOTIONS[0];
+ const credit=$('.example-photo-credit');credit.href=promotion.source;credit.textContent='Stockfoto: '+promotion.credit+' / Unsplash ↗';
+ const sampleCopy=promotion.id==='chattastic'?'Alle Empfänger und Anschriften sind fiktiv. Die Beispiellinks öffnen chattastic.de; ersetze sie für den Versand durch echte Chatbot-Links.':'Fiktive Beispielmarke, Empfänger und Anschriften. Die QR-Codes führen zu example.org als Demo-Ziel. Ersetze diese Links vor einer echten Kampagne.';
+ $('#sample-notice span').textContent=sampleCopy;
+ $('#example-preview-note p').textContent='Wechsle den Kontakt: Firmenname, Ansprache und QR-Code ändern sich mit. '+sampleCopy;
  $('.draft-pill').textContent=campaign.sample?'Beispiel':'Entwurf';
  $('#rename-campaign').textContent=campaign.name;$('#recipient-count').textContent=campaign.recipients.length;
  $$('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===view);b.setAttribute('aria-current',b.dataset.tab===view?'step':'false');});
@@ -227,6 +233,11 @@ async function showDashboard(){
  if(view!=='dashboard'||version!==dashboardVersion)return;
  $('#dashboard-view').innerHTML=dashboardHTML(dashboardCampaigns);
  $('#campaign-search').oninput=e=>{const query=e.target.value.toLowerCase().trim();let visible=0;$$('[data-campaign-card]').forEach(card=>{card.hidden=!card.dataset.name.includes(query);if(!card.hidden)visible++;});$('#search-empty').hidden=visible>0||!dashboardCampaigns.length;};
+ for(const p of PROMOTIONS){
+  if(view!=='dashboard'||version!==dashboardVersion)return;
+  const canvas=$(`[data-promotion-thumb="${p.id}"]`),example=createExampleCampaign(p.id);
+  if(canvas)try{await renderCanvas(canvas,example,'front',example.recipients[0],{scale:3});}catch{canvas.replaceWith(document.createTextNode('Beispiel im Studio öffnen'));}
+ }
  // Render sequentially to keep large local libraries responsive.
  for(const c of dashboardCampaigns){if(view!=='dashboard'||version!==dashboardVersion)break;const canvas=$(`[data-dashboard-thumb="${c.id}"]`);if(canvas)try{await renderCanvas(canvas,c,'front',c.recipients[0]||{company:'Ihr Unternehmen',salutation:'Guten Tag,',chatbot_url:'https://chattastic.de/'},{scale:2});}catch{canvas.replaceWith(document.createTextNode('Vorschau nicht verfügbar'));}}
 }
@@ -234,8 +245,8 @@ const campaignList=showDashboard;
 $('#dashboard-view').onclick=async e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-dashboard-tutorial'))return startTutorial(true);
- if(b.hasAttribute('data-dashboard-example'))return loadExample();
- if(b.hasAttribute('data-dashboard-new'))return activateCampaign(createCampaign(true));
+ if(b.hasAttribute('data-dashboard-example'))return loadExample(b.dataset.dashboardExample||'chattastic');
+ if(b.hasAttribute('data-dashboard-new'))return startTutorial(true);
  if(b.hasAttribute('data-dashboard-import'))return $('#project-file').click();
  if(b.dataset.dashboardTemplate)return activateCampaign(createTemplate(b.dataset.dashboardTemplate));
  const id=b.dataset.dashboardOpen||b.dataset.dashboardCopy||b.dataset.dashboardDelete,c=dashboardCampaigns.find(c=>c.id===id);if(!c)return;
@@ -243,7 +254,7 @@ $('#dashboard-view').onclick=async e=>{
  if(b.dataset.dashboardCopy){const copy=clone(c);copy.id=uid();copy.name=(c.name+' · Kopie').slice(0,120);copy.updatedAt=Date.now();try{await saveCampaign(copy);toast('Eine unabhängige Kopie wurde erstellt.');return showDashboard();}catch{toast('Die Kopie konnte nicht gespeichert werden. Bitte sichere dein Projekt als Datei.',true);return;}}
  if(b.dataset.dashboardDelete&&await confirm('Kampagne löschen?',`„${c.name}“ wird aus diesem Browser entfernt. Sichere bei Bedarf vorher eine Projektdatei.`,'Löschen')){try{await pendingSaves;if(campaign.id===id){clearTimeout(saveTimer);hasActive=false;}await removeCampaign(id);toast('Kampagne gelöscht.');await showDashboard();}catch{toast('Löschen war nicht möglich.',true);}}
 };
-async function loadExample(){previewMode='3d';threeD.reset();await activateCampaign(createExampleCampaign(),'preview');window.scrollTo({top:0,behavior:'instant'});toast('Fertiges Beispiel geladen. Dein vorheriger Entwurf bleibt in deinen Kampagnen.');}
+async function loadExample(id='chattastic'){previewMode='3d';threeD.reset();await activateCampaign(createExampleCampaign(id),'preview');window.scrollTo({top:0,behavior:'instant'});toast('Fertiges Beispiel geladen. Dein vorheriger Entwurf bleibt in deinen Kampagnen.');}
 async function newCampaign(){const result=await modal('Dein Mailing beginnt hier.',`<p><strong>Von null starten:</strong> Eine eigene Kampagne mit zwei leeren Seiten. Wir erklären dir Schritt für Schritt, wie daraus ein persönliches Mailing wird.</p><div class="help-step" style="margin-top:22px"><b>1</b><div><h3>Deine Idee festhalten</h3><p>Was bietest du an, für wen und mit welchem Ziel?</p></div></div><div class="help-step"><b>2</b><div><h3>Design und persönliche Felder</h3><p>Eigene Designs hochladen oder mit Farbe und Text beginnen.</p></div></div><div class="help-step"><b>3</b><div><h3>Empfänger hinzufügen und in 3D prüfen</h3><p>Dein Mailing mit echten Daten von beiden Seiten ansehen.</p></div></div><p><strong>Erst einmal alles sehen?</strong> Lade eine fertige Beispielkampagne mit beiden Designseiten, drei fiktiven Kontakten und persönlichen QR-Codes. Sie öffnet sich direkt in 3D.</p>`,[{id:'cancel',label:'Abbrechen'},{id:'template',label:'Beispielkampagne laden'},{id:'blank',label:'Von null starten',primary:true}]);if(!['blank','template'].includes(result))return;if(result==='template')return loadExample();await flushSave();campaign=createCampaign(result==='blank');hasActive=true;history=[];future=[];side='front';selected=campaign.sides.front.fields[0]?.id;recipientIndex=0;view=result==='blank'?'setup':'design';changed();toast(result==='blank'?'Deine eigene Kampagne. Wir starten mit deiner Idee.':'Beispielkampagne geöffnet.');}
 $('#campaigns-button').onclick=campaignList;$('#breadcrumb-campaigns').onclick=campaignList;$('#new-campaign').onclick=newCampaign;$('#new-campaign-top').onclick=newCampaign;
 $('#help-button').onclick=()=>modal('Vom Design zum persönlichen Mailing',`<div class="help-step"><b>1</b><div><h3>Dein Design, auf beiden Seiten.</h3><p>Nutze die Vorlage oder lade deine Designs hoch. Bei einer zweiseitigen PDF kannst du beide Seiten gleichzeitig übernehmen. Bilder werden vollständig eingepasst.</p></div></div><div class="help-step"><b>2</b><div><h3>Platz für Persönlichkeit.</h3><p>Lege Text- und QR-Felder über das Design. Ziehe sie an ihren Platz und verbinde sie mit Spalten aus deiner Empfängerliste. Ein Hintergrund in der passenden Farbe kann alte Platzhalter abdecken.</p></div></div><div class="help-step"><b>3</b><div><h3>Für jeden Kontakt einmal prüfen.</h3><p>Importiere eine CSV oder bearbeite Empfänger direkt. Wechsle in der Vorschau zwischen ihnen und exportiere ein Ansichts-PDF. Ein Scan öffnet den vollständigen Link aus der jeweiligen Zeile.</p></div></div><p><strong>Deine Daten bleiben hier.</strong> Designs, Empfänger und Kampagnen werden nur in diesem Browser gespeichert. Mit „Projekt sichern“ erhältst du eine Datei für Backups und zum Weiterarbeiten auf anderen Geräten. Es gibt noch keine Cloud-Synchronisierung oder Versandfunktion.</p><p style="margin-top:12px">Tastatur: ⌘/Strg Z rückgängig · ⌘/Strg Umschalt Z wiederholen · Pfeiltasten zum Verschieben eines ausgewählten Felds. Der Export ist eine RGB-Ansicht ohne Druckbeschnitt.</p>`);
@@ -376,6 +387,12 @@ $('#tutorial-view').addEventListener('click',async e=>{
  const token=e.target.closest('[data-tutorial-token]');if(token){const input=$('#tutorial-text'),f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial.fieldId);if(!f)return;const start=input.selectionStart,end=input.selectionEnd,value=input.value.slice(0,start)+'{{'+token.dataset.tutorialToken+'}}'+input.value.slice(end);commit(()=>f.text=value.slice(0,180));$('#tutorial-text').focus();$('#tutorial-text').setSelectionRange(start+token.dataset.tutorialToken.length+4,start+token.dataset.tutorialToken.length+4);return;}
  const action=e.target.closest('[data-tutorial-action]')?.dataset.tutorialAction;if(!action)return;
  if(action==='fresh'){await startTutorial(true);return;}
+ if(action==='skip'||action==='blank'){
+  commit(()=>campaign.tutorial.active=false);
+  const blank=createCampaign(true);blank.onboarding.active=false;
+  await activateCampaign(blank,'design');window.scrollTo({top:0,behavior:'instant'});
+  toast('Deine leere Kampagne ist bereit. Die Anleitung und das Tutorial bleiben erreichbar.');return;
+ }
  if(action==='next')tutorialStep(campaign.tutorial.step+1);if(action==='previous')tutorialStep(campaign.tutorial.step-1);if(action==='restart')tutorialStep(0);
  if(action==='reset-text'){const f=campaign.sides.back.fields.find(f=>f.id===campaign.tutorial.fieldId);if(f)commit(()=>f.text='Hallo {{first_name}},');}
  if(action==='design'){side='front';selected=campaign.sides.front.fields.find(f=>f.text==='{{company}}')?.id;setView('design');}
@@ -387,7 +404,7 @@ $('#tutorial-view').addEventListener('click',async e=>{
  if(action==='package'){setView('preview');$('#handoff-export').scrollIntoView({block:'center',behavior:'smooth'});}
  if(action==='pdf')exportProof('pdf');
  if(action==='finish'){commit(()=>campaign.tutorial.active=false);setView('preview');toast('Tutorial abgeschlossen. Deine Beispielkampagne bleibt vollständig bearbeitbar.');}
- if(action==='blank')await activateCampaign(createCampaign(true));
+
 });
 
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
@@ -400,7 +417,7 @@ const params=new URLSearchParams(location.search);
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
  if(params.has('tutorial')){campaign=makeTutorialCampaign();hasActive=true;view='tutorial';await saveCampaign(campaign);}
- else if(params.has('example')){campaign=createExampleCampaign();hasActive=true;view='preview';await saveCampaign(campaign);}
+ else if(params.has('example')){campaign=createExampleCampaign(params.get('example'));hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.get('start')==='blank'){campaign=createCampaign(true);hasActive=true;view='setup';await saveCampaign(campaign);}
  else if(params.has('template')){campaign=createTemplate(params.get('template'));hasActive=true;view='setup';await saveCampaign(campaign);}
  else if(params.has('demo')){hasActive=true;if(latest)campaign=validateCampaign(latest);else await saveCampaign(campaign);view=campaign.tutorial?.active?'tutorial':campaign.onboarding?.active?'setup':'design';}

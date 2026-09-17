@@ -61,7 +61,7 @@ export function validateCampaign(value) {
 }
 export function checks(campaign) {
   const issues=[];const format=FORMATS.find(f=>f.id===campaign.format);
-  if(campaign.sample)issues.push({level:'info',text:'Beispielkampagne: Unternehmen sind fiktiv. Die Musterlinks öffnen chattastic.de.'});
+  if(campaign.sample)issues.push({level:'info',text:'Beispielkampagne: Empfänger sind fiktiv. Die QR-Codes enthalten Demo-Links; vor dem Einsatz durch eigene Ziele ersetzen.'});
   if(!campaign.recipients.length)issues.push({level:'error',text:'Noch keine Empfänger vorhanden.'});
   for(const [side,label] of [['front','Vorderseite'],['back','Rückseite']]){
     const s=campaign.sides[side];
