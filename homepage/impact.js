@@ -17,6 +17,8 @@ export function mountImpactCalculator(root=document){
  function update(){
   const [cards,scan,conversion]=inputs.map(i=>Number(i.value)),result=mailingScenario(cards,scan,conversion);
   put('mailings-value',number.format(cards));put('scan-value',percent.format(scan)+' %');put('conversion-value',percent.format(conversion)+' %');
+  put('visitors-caption',Math.round(result.visitors)===1?'Mensch scannt den QR-Code':'Menschen scannen den QR-Code');
+  put('leads-caption',Math.round(result.leads)===1?'davon fragt bei dir an':'davon fragen bei dir an');
   put('sent',number.format(result.sent));put('visitors',number.format(result.visitors));put('leads',number.format(result.leads));put('total',percent.format(result.conversion)+' %');
  }
  inputs.forEach(input=>input.addEventListener('input',update));update();
