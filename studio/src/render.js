@@ -10,23 +10,23 @@ function template(ctx,side,w,h){
   if(side==='front'){
     rect(ctx,0,0,210,148,'#2563eb');logo(ctx,12,10,true);
     label(ctx,'PERSÖNLICH FÜR',126,14,2.5,'#d4e2ff','700');
-    label(ctx,'Ihre Website.',12,44,13,'#ffffff','700');label(ctx,'Jetzt mit',12,60,13,'#ffffff','700');label(ctx,'Antworten.',12,76,13,'#ff8065','700');
-    label(ctx,'Ihr KI-Assistent beantwortet Kundenfragen.',12,91,3.7,'#ffffff');label(ctx,'Auch wenn Sie gerade keine Zeit haben.',12,97,3.7,'#ffffff');
-    label(ctx,'Auf Basis Ihrer Website. Rund um die Uhr.',12,110,3,'#ffffff','700');
+    label(ctx,'Deine Website.',12,44,13,'#ffffff','700');label(ctx,'Jetzt mit',12,60,13,'#ffffff','700');label(ctx,'Antworten.',12,76,13,'#ff8065','700');
+    label(ctx,'Dein KI-Assistent beantwortet Kundenfragen.',12,91,3.7,'#ffffff');label(ctx,'Auch wenn du gerade keine Zeit hast.',12,97,3.7,'#ffffff');
+    label(ctx,'Auf Basis deiner Website. Rund um die Uhr.',12,110,3,'#ffffff','700');
     rect(ctx,124,34,73,76,'#154bbf',5);rect(ctx,122,32,73,76,'#ffffff',5);
     rect(ctx,127,37,9,9,'#eef3ff',3);label(ctx,'c',129.6,43.5,6,'#2563eb','700');
-    label(ctx,'Ihr Website-Assistent',140,41,3.1,'#0f172a','700');label(ctx,'So könnte Ihr Chat aussehen',140,46,2.3,'#68758b');
-    rect(ctx,135,56,55,14,'#2563eb',4);label(ctx,'Was bieten Sie an?',139,65,3.4,'#ffffff','700');
-    rect(ctx,127,76,63,22,'#eef3ff',4);label(ctx,'Hallo! Ich helfe Ihnen gern,',131,83,3.1);label(ctx,'das passende Angebot',131,88,3.1);label(ctx,'zu finden. Was suchen Sie?',131,93,3.1);
-    rect(ctx,0,118,210,30,'#ffffff');label(ctx,'Stellen Sie Ihrer Website eine Frage.',12,129,5.1,'#0f172a','700');label(ctx,'Scannen und Ihren Assistenten ausprobieren.',12,135,3.2,'#64748b');
+    label(ctx,'Dein Website-Assistent',140,41,3.1,'#0f172a','700');label(ctx,'So könnte dein Chat aussehen',140,46,2.3,'#68758b');
+    rect(ctx,135,56,55,14,'#2563eb',4);label(ctx,'Was bietest du an?',139,65,3.4,'#ffffff','700');
+    rect(ctx,127,76,63,22,'#eef3ff',4);label(ctx,'Hallo! Ich helfe dir gern,',131,83,3.1);label(ctx,'das passende Angebot',131,88,3.1);label(ctx,'zu finden. Was suchst du?',131,93,3.1);
+    rect(ctx,0,118,210,30,'#ffffff');label(ctx,'Stell deiner Website eine Frage.',12,129,5.1,'#0f172a','700');label(ctx,'Scannen und deinen Assistenten ausprobieren.',12,135,3.2,'#64748b');
   }else{
     rect(ctx,0,0,210,148,'#f7f9fd');logo(ctx,12,10);
     label(ctx,'Aus Fragen werden',12,36,9.4,'#0f172a','700');label(ctx,'neue Kontakte.',12,48,9.4,'#0f172a','700');
-    label(ctx,'Ein Besucher interessiert sich für Ihr Angebot.',12,58,3.5,'#526078');label(ctx,'Ihr Assistent hilft genau in diesem Moment.',12,64,3.5,'#526078');
-    [['Antworten statt warten.','Kundenfragen klären, auch nach Feierabend.'],['Ihr Angebot. Ihr Auftritt.','Wissen aus Ihrer Website, in Ihrem Design.'],['Den nächsten Kontakt gewinnen.','Interessenten hinterlassen ihre Kontaktdaten.']].forEach(([title,body],i)=>{let y=77+i*16;rect(ctx,12,y-5,8,8,'#e8effd',2);label(ctx,`0${i+1}`,14,y,3,'#2563eb','700');label(ctx,title,25,y,3.9,'#0f172a','700');label(ctx,body,25,y+6,3.1,'#526078');});
-    rect(ctx,124,29,74,95,'#2563eb',5);label(ctx,'JETZT SELBST AUSPROBIEREN',131,39,2.65,'#d4e2ff','700');label(ctx,'Ihr Assistent wartet.',131,48,5.2,'#ffffff','700');
+    label(ctx,'Ein Besucher interessiert sich für dein Angebot.',12,58,3.5,'#526078');label(ctx,'Dein Assistent hilft genau in diesem Moment.',12,64,3.5,'#526078');
+    [['Antworten statt warten.','Kundenfragen klären, auch nach Feierabend.'],['Dein Angebot. Dein Auftritt.','Wissen aus deiner Website, in deinem Design.'],['Den nächsten Kontakt gewinnen.','Interessenten hinterlassen ihre Kontaktdaten.']].forEach(([title,body],i)=>{let y=77+i*16;rect(ctx,12,y-5,8,8,'#e8effd',2);label(ctx,`0${i+1}`,14,y,3,'#2563eb','700');label(ctx,title,25,y,3.9,'#0f172a','700');label(ctx,body,25,y+6,3.1,'#526078');});
+    rect(ctx,124,29,74,95,'#2563eb',5);label(ctx,'JETZT SELBST AUSPROBIEREN',131,39,2.65,'#d4e2ff','700');label(ctx,'Dein Assistent wartet.',131,48,5.2,'#ffffff','700');
     rect(ctx,140,52,40,40,'#ffffff',3);label(ctx,'Scannen. Eine Frage stellen.',130,115,3.3,'#ffffff','700');
-    rect(ctx,12,132,186,.2,'#dce3ee');label(ctx,'Ihr nächster Schritt beginnt hier.',12,140,3.9,'#0f172a','700');label(ctx,'Persönlichen Assistenten kennenlernen.',12,146,2.6,'#526078');label(ctx,'hey@chattastic.de',161,140,3.5,'#2563eb','700');
+    rect(ctx,12,132,186,.2,'#dce3ee');label(ctx,'Dein nächster Schritt beginnt hier.',12,140,3.9,'#0f172a','700');label(ctx,'Persönlichen Assistenten kennenlernen.',12,146,2.6,'#526078');label(ctx,'hey@chattastic.de',161,140,3.5,'#2563eb','700');
   }
   ctx.restore();
 }

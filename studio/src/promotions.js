@@ -21,10 +21,10 @@ export function createPromotion(id='chattastic',{sample=true}={}){
   const ink='#0f172a',blue='#2563eb',muted='#475569';
   c.sides.front=page('#f7f9fc',[
    shape(117,0,93,148,'#e7edf6'),photo(examplePhoto,117,0,93,148),
-   text('chattastic.',12,11,88,12,23,ink,'700'),text('IHRE WEBSITE KANN MEHR.',12,33,101,6,9,blue,'700'),
+   text('chattastic.',12,11,88,12,23,ink,'700'),text('DEINE WEBSITE KANN MEHR.',12,33,101,6,9,blue,'700'),
    text('Gute Fragen.\nSofort eine\nAntwort.',12,45,100,46,33,ink,'700'),
-   text('Ihr KI-Assistent beantwortet Kundenfragen.\nAuch wenn Ihr Team gerade anderes vorhat.',12,98,97,19,11,muted),
-   shape(12,124,93,13,blue),text('Ihren Assistenten kennenlernen  →',17,128,84,7,10,'#ffffff','700'),
+   text('Dein KI-Assistent beantwortet Kundenfragen.\nAuch wenn dein Team gerade anderes vorhat.',12,98,97,19,11,muted),
+   shape(12,124,93,13,blue),text('Deinen Assistenten kennenlernen  →',17,128,84,7,10,'#ffffff','700'),
    shape(123,102,81,36,'#ffffff'),shape(123,102,2,36,blue),
    text('EIN PERSÖNLICHER EINBLICK FÜR',129,109,69,5,7.5,muted,'700'),
    text('{{company}}',129,119,69,12,15,ink,'700')
@@ -32,29 +32,29 @@ export function createPromotion(id='chattastic',{sample=true}={}){
   c.sides.back=page('#ffffff',[
    shape(133,0,77,148,'#eef3ff'),text('chattastic.',12,11,107,11,20,ink,'700'),
    text('{{salutation}}',12,33,109,12,17,ink,'700'),
-   text('Ihre nächste Anfrage\nbeginnt mit einer Antwort.',12,50,109,26,23,ink,'700'),
-   text('Auf Ihrer Website steckt viel Wissen. Machen Sie es im Gespräch zugänglich – mit einem Assistenten, der Ihr Angebot kennt.',12,82,108,23,11,muted),
+   text('Deine nächste Anfrage\nbeginnt mit einer Antwort.',12,50,109,26,23,ink,'700'),
+   text('Auf deiner Website steckt viel Wissen. Mach es im Gespräch zugänglich – mit einem Assistenten, der dein Angebot kennt.',12,82,108,23,11,muted),
    shape(12,114,109,2,'#eef1f6'),text('Website-Wissen nutzen\nFragen rund um die Uhr beantworten\nBesucher zum nächsten Schritt begleiten',12,121,110,19,10,muted),
    text('FÜR {{company}}',142,13,58,15,9,ink,'700'),
    qr(147,36,49),text('Scannen. Fragen.\nKennenlernen.',142,93,59,19,17,ink,'700'),
-   text('Ihr persönlicher Zugang',142,117,58,6,9,muted),text('{{chatbot_url}}',142,127,58,14,7.5,blue)
+   text('Dein persönlicher Zugang',142,117,58,6,9,muted),text('{{chatbot_url}}',142,127,58,14,7.5,blue)
   ]);
  }else if(theme.id==='raumwerk'){
   const ink='#354636',muted='#5c6759';
   c.sides.front=page('#f4f1e8',[
    photo(interiorPhoto,103,0,107,148),text('raumwerk',12,11,84,12,24,ink,'700'),
-   text('RÄUME FÜR IHR TEAM',12,37,82,6,8,muted,'700'),text('Mehr Raum.\nFür gute\nArbeit.',12,51,87,45,31,ink,'700'),
-   text('Ein neuer Blick auf die Orte,\nan denen Ihre Ideen entstehen.',12,104,84,14,11,muted),
-   shape(12,127,79,2,ink),text('Ihre Einladung zur Raumberatung  →',12,133,85,6,9,ink,'700'),
+   text('RÄUME FÜR DEIN TEAM',12,37,82,6,8,muted,'700'),text('Mehr Raum.\nFür gute\nArbeit.',12,51,87,45,31,ink,'700'),
+   text('Ein neuer Blick auf die Orte,\nan denen deine Ideen entstehen.',12,104,84,14,11,muted),
+   shape(12,127,79,2,ink),text('Deine Einladung zur Raumberatung  →',12,133,85,6,9,ink,'700'),
    shape(111,113,91,27,'#f4f1e8'),text('PERSÖNLICH FÜR',117,119,78,5,8,muted),text('{{company}}',117,127,78,8,13,ink,'700')
   ]);
   c.sides.back=page('#f4f1e8',[
    shape(133,0,77,148,ink),text('raumwerk',12,11,106,11,22,ink,'700'),text('{{salutation}}',12,35,107,12,17,ink,'700'),
-   text('Wie könnte sich\nIhr Büro anfühlen?',12,52,107,25,25,ink,'700'),
-   text('Konzentriert arbeiten. Gemeinsam denken. Gern zusammenkommen. Wir entdecken mit Ihnen, was in Ihren Räumen steckt.',12,84,107,24,12,muted),
-   text('Ein erstes Gespräch.\nEin frischer Blick auf Ihre Arbeitswelt.',12,122,107,16,11,ink),
-   text('IHRE PERSÖNLICHE EINLADUNG',142,17,58,12,9,'#f4f1e8','700'),qr(147,39,49),
-   text('Lassen Sie uns\nRaum schaffen.',142,99,59,21,17,'#ffffff','700'),text('{{chatbot_url}}',142,128,58,13,7.5,'#f4f1e8')
+   text('Wie könnte sich\ndein Büro anfühlen?',12,52,107,25,25,ink,'700'),
+   text('Konzentriert arbeiten. Gemeinsam denken. Gern zusammenkommen. Wir entdecken mit dir, was in deinen Räumen steckt.',12,84,107,24,12,muted),
+   text('Ein erstes Gespräch.\nEin frischer Blick auf deine Arbeitswelt.',12,122,107,16,11,ink),
+   text('DEINE PERSÖNLICHE EINLADUNG',142,17,58,12,9,'#f4f1e8','700'),qr(147,39,49),
+   text('Lass uns\nRaum schaffen.',142,99,59,21,17,'#ffffff','700'),text('{{chatbot_url}}',142,128,58,13,7.5,'#f4f1e8')
   ]);
  }else{
   const ink='#532b20',cream='#fff2dc';
@@ -67,8 +67,8 @@ export function createPromotion(id='chattastic',{sample=true}={}){
   c.sides.back=page(cream,[
    shape(132,0,78,148,'#9b422b'),text('morgen.',12,11,107,13,27,ink,'700'),text('{{salutation}}',12,36,108,12,17,ink,'700'),
    text('Die beste Pause?\nDie gemeinsame.',12,53,108,27,25,ink,'700'),
-   text('Bringen Sie Ihr Team an einen Tisch. Entdecken Sie gemeinsam neue Kaffees, tauschen Sie Ideen aus und genießen Sie den Moment.',12,88,107,25,12,ink),
-   text('Ihre Einladung zum Team-Tasting.\nKleine Auszeit. Viel Gesprächsstoff.',12,124,107,15,11,ink),
+   text('Bring dein Team an einen Tisch. Entdeckt gemeinsam neue Kaffees, tauscht Ideen aus und genießt den Moment.',12,88,107,25,12,ink),
+   text('Deine Einladung zum Team-Tasting.\nKleine Auszeit. Viel Gesprächsstoff.',12,124,107,15,11,ink),
    text('FÜR {{company}}',142,16,58,13,9,cream,'700'),qr(146,39,49),text('Lust auf eine\ngute Pause?',142,99,58,20,17,cream,'700'),
    text('{{chatbot_url}}',142,129,58,12,7.5,cream)
   ]);
