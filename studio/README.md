@@ -46,7 +46,7 @@ npm test
 npm run test:browser
 ```
 
-`build` bündelt den modularen Quellcode nach `studio/app.js` und kopiert PDF-Worker sowie Ressourcen nach `studio/vendor`. Die gebaute Version ist bewusst eingecheckt, damit die Unterseite ohne Build-Server statisch auslieferbar ist. Es gibt keinen automatischen Deploy-Workflow.
+`build` bündelt den modularen Quellcode nach `studio/app.js` und kopiert PDF-Worker sowie Ressourcen nach `studio/vendor`. Die gebaute Version ist bewusst eingecheckt, damit die Unterseite ohne Build-Server statisch auslieferbar ist. Zusätzlich entsteht unter `dist/` eine vollständige statische Website mit unveränderter Landingpage und neuer Studio-Unterseite. `vercel.json` legt diesen Ausgabeordner explizit fest. Die vorhandene Vercel-GitHub-Anbindung erzeugt eine separate Branch-Vorschau; der Produktionsbranch wird nicht geändert.
 
 Die Browserprüfung erwartet den laufenden lokalen Server und installiertes Google Chrome. Alternativ `BROWSER_CHANNEL` und `STUDIO_URL` setzen. Testbilder bleiben unter dem ignorierten `test-results/`.
 
