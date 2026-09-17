@@ -34,7 +34,7 @@ try{
  for(const id of ['chattastic','raumwerk','morgen']){
   await page.goto(base+'/studio/?example='+id);await expect(page.locator('#three-d-view')).toBeVisible();await page.waitForFunction(()=>document.querySelector('#three-d-back').width>500);
   const c=await project();assert.equal(c.templateId,id);assert.equal(c.recipients.length,3);assert.ok(c.sides.front.fields.some(f=>f.type==='image'));assert.ok(c.sides.front.fields.some(f=>f.text==='{{company}}'));
-  await page.locator('#audit-all').click();await expect(page.locator('#audit-results')).toContainText('Alle Empfänger geprüft');
+  await page.locator('#preview-extras>summary').click();await page.locator('#audit-all').click();await expect(page.locator('#audit-results')).toContainText('Alle Empfänger geprüft');
   await page.locator('#preview-mode-2d').click();await page.locator('#toast').evaluate(e=>e.classList.remove('show'));await page.locator('#proof-spread').screenshot({path:`test-results/promotions-${id}-spread.png`});
   if(id!=='chattastic')await expect(page.locator('#example-preview-note')).toContainText('example.org');
  }

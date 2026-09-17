@@ -14,6 +14,7 @@ import {auditCampaign,createHandoff} from './handoff.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let campaign=createCampaign(), side='front', selected=campaign.sides.front.fields[0]?.id, recipientIndex=0, view='design', guides=true;
+let previewExtrasContext=null;
 let previewMode='3d', hasActive=false, dashboardCampaigns=[], dashboardVersion=0, jobController=null, imageReplaceTarget=null;
 function clearAudit(){const results=$('#audit-results');results.hidden=true;results.innerHTML='';}
 
@@ -50,9 +51,11 @@ function renderUI(inspector=true,table=true,guide=true){
  document.body.classList.toggle('starting-campaign',view==='start');
  $('#start-view').hidden=view!=='start';
  $('#workflow-hint').hidden=!['design','recipients','preview'].includes(view);
- if(!$('#workflow-hint').hidden){const hints={design:['1. Gestalte deine Karte','Bearbeite Vorder- und Rückseite. Du kannst dein Design hochladen oder Texte, Bilder und persönliche Felder einsetzen.','recipients','Weiter zu den Empfängern →'],recipients:['2. Für wen ist dein Mailing?','Füge deine Kontakte hinzu oder importiere eine CSV. Die Spalten verbinden Namen, Firmen und Links mit deinen Karten.','preview','Mailing ansehen →'],preview:['3. Prüfe dein fertiges Mailing','Wechsle zwischen deinen Empfängern, prüfe beide Seiten und lade anschließend dein PDF oder Kampagnenpaket herunter.','design','Design weiter bearbeiten']},hint=hints[view];$('#workflow-hint').innerHTML=`<div><strong>${hint[0]}</strong><p>${hint[1]}</p></div><button class="button" data-workflow-next="${hint[2]}">${hint[3]}</button>`;}
+ if(!$('#workflow-hint').hidden){const hints={design:['1. Gestalte deine Karte','Klicke auf einen Text in der Karte und ändere ihn rechts. Passe danach die Rückseite an. Dein Design wird automatisch gespeichert.','recipients','Weiter zu den Empfängern →'],recipients:['2. Für wen ist dein Mailing?','Füge deine Kontakte hinzu oder importiere eine CSV. Die Spalten verbinden Namen, Firmen und Links mit deinen Karten.','preview','Mailing ansehen →'],preview:['3. Prüfe dein fertiges Mailing','Wechsle zwischen deinen Empfängern, prüfe beide Seiten und lade anschließend dein PDF oder Kampagnenpaket herunter.','design','Design weiter bearbeiten']},hint=hints[view];$('#workflow-hint').innerHTML=`<div><strong>${hint[0]}</strong><p>${hint[1]}</p></div><button class="button" data-workflow-next="${hint[2]}">${hint[3]}</button>`;}
  document.body.classList.toggle('tutorial-excursion',!!campaign.tutorial?.active&&view!=='tutorial'&&view!=='dashboard');
  document.body.classList.toggle('dashboard-active',view==='dashboard');
+ document.body.classList.toggle('example-focus',view==='preview'&&campaign.sample&&!!campaign.templateId&&!campaign.tutorial?.active);
+ const extrasContext=campaign.id+':'+campaign.sample;if(previewExtrasContext!==extrasContext){$('#preview-extras').open=!(campaign.sample&&campaign.templateId);previewExtrasContext=extrasContext;}
  $('.breadcrumb strong').textContent=view==='start'?'Neue Kampagne':view==='dashboard'?'Dein Arbeitsplatz':view==='tutorial'?'Beispiel ausprobieren':view==='setup'?'Deine Kampagne':'Designstudio';
  $('#dashboard-view').hidden=view!=='dashboard';
  if(view==='dashboard'||view==='start'){for(const name of ['tutorial','setup','design','recipients','preview'])$('#'+name+'-view').hidden=true;return;}
@@ -63,6 +66,7 @@ function renderUI(inspector=true,table=true,guide=true){
  credit.hidden=!!client;
  const sampleCopy=client?'Kontaktstoff Designvorschlag für '+client.name+'. Fiktive Empfänger und Anschriften. Die QR-Codes öffnen die echte Terminseite mit Beispiel-Kampagnenparametern.':promotion.id==='chattastic'?'Alle Empfänger und Anschriften sind fiktiv. Die Beispiellinks öffnen chattastic.de; ersetze sie für den Versand durch echte Chatbot-Links.':'Fiktive Beispielmarke, Empfänger und Anschriften. Die QR-Codes führen zu example.org als Demo-Ziel. Ersetze diese Links vor einer echten Kampagne.';
  $('#sample-notice span').textContent=sampleCopy;
+ $('#example-preview-note h2').textContent=client?client.name+' · Dein Designvorschlag':promotion.name+' · So könnte dein Mailing aussehen.';
  $('#example-preview-note p').textContent='Wechsle den Kontakt: Firmenname, Ansprache und QR-Code ändern sich mit. '+sampleCopy;
  $('.draft-pill').textContent=campaign.sample?'Beispiel':'Entwurf';
  $('#rename-campaign').textContent=campaign.name;$('#recipient-count').textContent=campaign.recipients.length;
@@ -243,7 +247,7 @@ async function showDashboard(){
  let deleted=[];try{dashboardCampaigns=(await listCampaigns()).sort((a,b)=>b.updatedAt-a.updatedAt);deleted=await listDeletedCampaigns();}catch{dashboardCampaigns=[];toast('Lokaler Speicher ist nicht verfügbar. Du kannst trotzdem mit einer Projektdatei arbeiten.',true);}
  if(view!=='dashboard'||version!==dashboardVersion)return;
  $('#dashboard-view').innerHTML=dashboardHTML(dashboardCampaigns,deleted);
- $('#campaign-search').oninput=e=>{const query=e.target.value.toLowerCase().trim();let visible=0;$$('[data-campaign-card]').forEach(card=>{card.hidden=!card.dataset.name.includes(query);if(!card.hidden)visible++;});$('#search-empty').hidden=visible>0||!dashboardCampaigns.length;};
+ $('#campaign-search').oninput=e=>{const query=e.target.value.toLowerCase().trim();let visible=0;$$('[data-campaign-card]').forEach(card=>{card.hidden=!card.dataset.name.includes(query);if(!card.hidden)visible++;});const savedExamples=$('#saved-examples');if(savedExamples)savedExamples.open=!!query&&!!savedExamples.querySelector('[data-campaign-card]:not([hidden])');$('#search-empty').hidden=!query||visible>0||!dashboardCampaigns.length;};
  for(const p of PROMOTIONS){
   if(view!=='dashboard'||version!==dashboardVersion)return;
   const canvas=$(`[data-promotion-thumb="${p.id}"]`),example=createExampleCampaign(p.id);
@@ -442,6 +446,7 @@ $('#tutorial-view').addEventListener('click',async e=>{
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
 hydrateIcons();
+$('#example-use').onclick=async()=>{const button=$('#example-use');button.disabled=true;try{const own=clone(campaign);own.id=uid();own.name=('Meine Kampagne · '+(CLIENT_CAMPAIGNS.find(p=>p.id===own.templateId)?.name||PROMOTIONS.find(p=>p.id===own.templateId)?.name||'Mein Design')).slice(0,120);own.sample=false;own.recipients=[];own.updatedAt=Date.now();delete own.tutorial;own.onboarding={active:false,step:0,personalizationSkipped:false};await activateCampaign(own,'design');window.scrollTo({top:0,behavior:'instant'});toast('Deine eigene Kopie. Klicke auf einen Text in der Karte, um ihn zu ändern.');}finally{button.disabled=false;}};
 $('#example-next').onclick=()=>{recipientIndex=(recipientIndex+1)%Math.max(1,campaign.recipients.length);renderUI();};
 $('#example-edit').onclick=()=>{side='front';selected=campaign.sides.front.fields.find(f=>f.text==='{{company}}')?.id;setView('design');};
 $('#example-data').onclick=()=>setView('recipients');
