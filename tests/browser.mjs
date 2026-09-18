@@ -28,7 +28,7 @@ try{
  await page.locator('[data-side="back"]').click();await expect(page.locator('#side-title')).toHaveText('Rückseite');await page.locator('[data-side="front"]').click();
  await page.locator('[data-tab="recipients"]').click();
  const csv='Firmenname;Vorname;Ansprache;Website;Chatbot-Link\nNordlicht Test;Anna;Hallo Anna,;example.org;https://example.org/chat/anna\nBergmann Test;Ben;Hallo Ben,;example.org;https://example.org/chat/ben';
- await page.locator('#csv-file').setInputFiles({name:'kontakte.csv',mimeType:'text/csv',buffer:Buffer.from(csv)});await expect(page.locator('#modal')).toBeVisible();await page.locator('[data-result="replace"]').click();await expect(page.locator('#data-count')).toHaveText('2 Empfänger');
+ await page.locator('#csv-file').setInputFiles({name:'kontakte.csv',mimeType:'text/csv',buffer:Buffer.from(csv)});await expect(page.locator('#csv-import-dialog')).toBeVisible();await page.locator('[name=csv-import-mode][value=replace]').check();await page.locator('#csv-confirm').click();await expect(page.locator('#data-count')).toHaveText('2 Empfänger');
  await expect(page.locator('#sample-notice')).toBeHidden();
  await page.locator('[data-row="0"][data-key="company"]').fill('Nordlicht & Partner');
  await page.locator('[data-tab="design"]').click();await expect(page.locator('#resolved')).toHaveText('Für Nordlicht & Partner');

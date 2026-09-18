@@ -2,10 +2,10 @@
 // contactUrl stays empty until an actual Kontaktstoff sales destination is supplied.
 export const CLIENT_PAGES=[{
  id:'money-making-sprint',name:'Money Making Sprint',addressee:'Jakob & das Money Making Sprint Team',
- title:'Euer nächstes Gespräch beginnt im Briefkasten.',
- intro:'Ihr helft Agenturen und Freelancern, neue Kunden zu gewinnen. Wir haben eine Kampagne entworfen, die genau diese Menschen persönlich anspricht – mit einer Karte in eurem Look und einem direkten Weg zu eurem Strategiegespräch.',
- concept:'Eine persönliche Nachricht. Von Jakob.',
- rationale:'Diese Karte spricht Inhaber von Agenturen und B2B-Dienstleistern an, die passende Kunden gezielter gewinnen wollen. Jakob lädt persönlich zum Austausch ein. Ein konkreter Akquise-Anlass macht die Nachricht relevant; die Rückseite erklärt, worüber ihr im Gespräch sprechen könnt.',
+ title:'Eure nächste gute Anfrage? Könnte mit dieser Karte anfangen.',
+ intro:'Jakob, ihr sprecht Klartext über Kundengewinnung. Wir bringen diesen Ton in den Briefkasten eurer Wunschkunden: eine persönliche Frage an Agenturinhaber, ein konkreter Anlass und ein Scan zu eurem Gespräch.',
+ concept:'Hey Anna, wer holt den nächsten Kunden für euch rein?',
+ rationale:'Euer Auftritt ist direkt, persönlich und auf Kundengewinnung fokussiert. Genau das greift die Karte auf: außen eine Frage, die bei Agenturinhabern ansetzt; innen eine kurze Nachricht von Jakob. Der Einstieg verändert sich für Webdesign, KI und Content – das Ziel bleibt euer Strategiegespräch.',
  audience:'Inhaber von Agenturen und B2B-Dienstleistungsunternehmen',
  source:'https://www.money-making-sprint.de/',target:'https://www.money-making-sprint.de/termin',contactUrl:'',
  color:'#7338ea',accent:'#dbff00',pilot:250

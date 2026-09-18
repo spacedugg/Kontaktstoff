@@ -16,7 +16,8 @@
     "test:promotions": "node tests/promotions.mjs",
     "test:homepage": "node tests/homepage.mjs",
     "test:onboarding": "node tests/onboarding.mjs",
-    "test:content": "node tests/studio-content.mjs"
+    "test:content": "node tests/studio-content.mjs",
+    "test:csv-client": "node tests/csv-client.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",
