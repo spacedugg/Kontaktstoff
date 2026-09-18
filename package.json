@@ -15,7 +15,8 @@
     "test:tutorial": "node tests/tutorial.mjs",
     "test:promotions": "node tests/promotions.mjs",
     "test:homepage": "node tests/homepage.mjs",
-    "test:onboarding": "node tests/onboarding.mjs"
+    "test:onboarding": "node tests/onboarding.mjs",
+    "test:content": "node tests/studio-content.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

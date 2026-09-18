@@ -6,7 +6,7 @@ export const TEMPLATES = [
  {id:'impuls',name:'Ein neuer Impuls.',tag:'ANGEBOT & WEBSITE',description:'Eine warme, klare Karte für deine nächste Produkt- oder Servicekampagne.',color:'#f3b898',accent:'#352b49'}
 ];
 export function createTemplate(id){
- if(id==='chattastic')return createPromotion('chattastic',{sample:false});
+ if(['chattastic','raumwerk','morgen'].includes(id))return createPromotion(id,{sample:false});
  const theme=TEMPLATES.find(t=>t.id===id)||TEMPLATES[0],c=createCampaign(true);
  c.name=theme.id==='chattastic'?'chattastic · Persönlich für Sie':theme.name;c.onboarding.step=0;c.brief.sender=theme.id==='chattastic'?'chattastic':'Deine Marke';c.brief.goal=theme.id==='dialog'?'appointment':theme.id==='impuls'?'website':'chatbot';c.templateId=theme.id;
  const light=theme.id!=='impuls',ink=light?'#ffffff':'#352b49';

@@ -1,5 +1,5 @@
 export const FORMATS = [{ id:'a5-landscape', name:'DIN A5 · Querformat', width:210, height:148 }];
-export const KEYS = { company:'Firmenname', first_name:'Vorname', salutation:'Ansprache', website:'Website', chatbot_url:'Chatbot-Link',street:'Straße & Hausnummer',postal_code:'PLZ',city:'Ort',country:'Land' };
+export const KEYS = { company:'Firmenname', first_name:'Vorname', salutation:'Ansprache', personal_note:'Persönliche Nachricht', website:'Website', chatbot_url:'Chatbot-Link',street:'Straße & Hausnummer',postal_code:'PLZ',city:'Ort',country:'Land' };
 export const uid = () => crypto.randomUUID();
 export const clone = value => structuredClone(value);
 export const clamp = (n,min,max) => Math.min(max,Math.max(min,n));

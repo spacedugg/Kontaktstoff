@@ -1,9 +1,9 @@
 import {createCampaign,uid} from './core.js';
 import {examplePhoto,interiorPhoto,coffeePhoto} from './example-photo.js';
 export const PROMOTIONS=[
- {id:'chattastic',name:'chattastic',category:'KI & KUNDENDIALOG',title:'Eine Karte. Ein erstes Gespräch.',description:'Ein persönlicher Einstieg zum Website-Assistenten. Mit Teamfoto, konkretem Nutzen und eigenem QR-Link.',color:'#2563eb',photo:'team-work.jpg',credit:'Vitaly Gariev',source:'https://unsplash.com/photos/two-colleagues-collaborating-on-a-project-at-a-desk-UUcgVSq2m3g'},
- {id:'raumwerk',name:'raumwerk',category:'EINRICHTUNG & BERATUNG',title:'Raum für neue Ideen.',description:'Eine ruhige Einladung zur Einrichtungsberatung. Mit großem Interior-Foto und persönlicher Ansprache.',color:'#435345',photo:'interior.jpg',credit:'NEW DATA SERVICES',source:'https://unsplash.com/photos/two-chairs-near-the-window-nZ50HrjAFNc'},
- {id:'morgen',name:'morgen.',category:'KAFFEE & TEAMEVENT',title:'Guter Kaffee. Gute Gespräche.',description:'Eine warme Einladung zum Team-Tasting. Mit Café-Fotografie, kräftiger Typografie und persönlichem Zugang.',color:'#9b422b',photo:'coffee.jpg',credit:'Long Chung',source:'https://unsplash.com/photos/modern-cafe-interior-with-wooden-counter-and-baristas-kgiyCobwS-Y'}
+ {id:'chattastic',name:'chattastic',category:'KI & KUNDENDIALOG',title:'Eine Karte. Ein erstes Gespräch.',description:'Ein Brief mit einer konkreten Idee für die Website. Außen ein Gespräch, innen eine persönliche Nachricht.',color:'#2563eb',photo:'team-work.jpg',credit:'Vitaly Gariev',source:'https://unsplash.com/photos/two-colleagues-collaborating-on-a-project-at-a-desk-UUcgVSq2m3g'},
+ {id:'raumwerk',name:'raumwerk',category:'EINRICHTUNG & BERATUNG',title:'Raum für neue Ideen.',description:'Architektur-Fotografie trifft auf eine persönliche Einladung: gemeinsam auf die eigenen Räume schauen.',color:'#435345',photo:'interior.jpg',credit:'NEW DATA SERVICES',source:'https://unsplash.com/photos/two-chairs-near-the-window-nZ50HrjAFNc'},
+ {id:'morgen',name:'morgen.',category:'KAFFEE & TEAMEVENT',title:'Guter Kaffee. Gute Gespräche.',description:'Ein Kaffee-Ticket fürs Team. Kräftige Typografie, warme Farben und eine Einladung auf Augenhöhe.',color:'#9b422b',photo:'coffee.jpg',credit:'Long Chung',source:'https://unsplash.com/photos/modern-cafe-interior-with-wooden-counter-and-baristas-kgiyCobwS-Y'}
 ];
 const text=(value,x,y,w,h,size=12,color='#18263b',weight='400')=>({id:uid(),type:'text',text:value,x,y,w,h,fontSize:size,color,weight,align:'left',background:'transparent',autoFit:true});
 const shape=(x,y,w,h,color)=>({...text('',x,y,w,h),type:'shape',background:color});
@@ -17,60 +17,78 @@ export function createPromotion(id='chattastic',{sample=true}={}){
  c.brief={sender:theme.name,audience:sample?'Drei fiktive Unternehmen zum Ausprobieren':'',goal:theme.id==='chattastic'?'chatbot':'appointment',offer:theme.title};
  c.onboarding={active:!sample,step:sample?5:0,personalizationSkipped:false};
  if(sample)c.recipients=createCampaign().recipients.map((r,i)=>({...r,street:`Beispielweg ${i+1}`,postal_code:'00000',city:'Beispielstadt',country:'Deutschland',chatbot_url:theme.id==='chattastic'?`https://chattastic.de/?beispiel=${['nordlicht','hafenblick','bergmann'][i]}`:`https://example.org/?demo=${theme.id}-${i+1}`}));
+ const notes={
+  chattastic:[
+   'Zwischen Exposé und Besichtigung kommen oft ähnliche Fragen auf. Wie wäre es mit einem Assistenten, der euren Interessenten schon auf der Website weiterhilft?',
+   'Neue Projekte beginnen oft mit denselben Fragen: Was bietet ihr an? Wie läuft die Zusammenarbeit? Ein Website-Assistent könnte den ersten Einstieg leichter machen.',
+   'Heizungstausch, Wartung oder eine erste Beratung: Ein Website-Assistent könnte das Anliegen vorab klären, bevor euer Team übernimmt.'
+  ],
+  raumwerk:[
+   'Ihr helft anderen, den passenden Ort zu finden. Vielleicht lohnt sich auch ein frischer Blick auf den Ort, an dem euer eigenes Team zusammenkommt.',
+   'Gute Ideen brauchen Platz. Zum konzentrierten Arbeiten genauso wie zum gemeinsamen Weiterdenken. Wie gut unterstützen eure Räume diesen Wechsel?',
+   'Zwischen Baustelle, Planung und Kundentermin ist euer Büro der gemeinsame Anlaufpunkt. Was würde diesen Ort für euer Team noch besser machen?'
+  ],
+  morgen:[
+   'Ihr findet jeden Tag Räume für andere. Wir hätten einen Tisch für euch – und einen guten Anlass, mal über etwas anderes als Immobilien zu sprechen.',
+   'Zwischen Projekten und neuen Ideen darf auch mal Platz für eine Pause sein. Wie wäre es mit einer, bei der ihr gemeinsam etwas Neues probiert?',
+   'Nach Terminen, Baustellen und vollen Tagen hat euer Team eine gemeinsame Pause verdient. Wir hätten da frisch gerösteten Gesprächsstoff.'
+  ]
+ };
+ if(sample)c.recipients.forEach((r,i)=>r.personal_note=notes[theme.id][i]);
+ c.designRevision=2;
  if(theme.id==='chattastic'){
-  const ink='#0f172a',blue='#2563eb',muted='#475569';
-  c.sides.front=page('#f7f9fc',[
-   shape(117,0,93,148,'#e7edf6'),photo(examplePhoto,117,0,93,148),
-   text('chattastic.',12,11,88,12,23,ink,'700'),text('DEINE WEBSITE KANN MEHR.',12,33,101,6,9,blue,'700'),
-   text('Gute Fragen.\nSofort eine\nAntwort.',12,45,100,46,33,ink,'700'),
-   text('Dein KI-Assistent beantwortet Kundenfragen.\nAuch wenn dein Team gerade anderes vorhat.',12,98,97,19,11,muted),
-   shape(12,124,93,13,blue),text('Deinen Assistenten kennenlernen  →',17,128,84,7,10,'#ffffff','700'),
-   shape(123,102,81,36,'#ffffff'),shape(123,102,2,36,blue),
-   text('EIN PERSÖNLICHER EINBLICK FÜR',129,109,69,5,7.5,muted,'700'),
-   text('{{company}}',129,119,69,12,15,ink,'700')
+  const ink='#152642',blue='#2458ee',pale='#e9f0ff';
+  c.sides.front=page(blue,[
+   text('chattastic.',12,10,96,12,23,'#ffffff','700'),
+   text('EINE IDEE FÜR',131,12,67,5,8,'#cdddff','700'),text('{{company}}',131,20,67,13,13,'#ffffff','700'),
+   text('{{first_name}},',12,36,106,18,31,'#dfff87','700'),
+   text('wer antwortet,\nwenn ihr gerade\nkeine Zeit habt?',12,55,108,54,31,'#ffffff','700'),
+   text('Lass deine Website das Gespräch beginnen.',12,121,105,15,12,'#ffffff'),
+   shape(129,45,69,64,'#ffffff'),text('EINE FRAGE NACH FEIERABEND',135,52,57,6,7,blue,'700'),
+   shape(140,65,52,13,blue),text('Passt euer Angebot zu mir?',144,69,44,6,9,'#ffffff'),
+   shape(135,82,57,19,pale),text('Lass uns gemeinsam schauen.\nWas möchtest du wissen?',139,87,49,12,10,ink),
+   photo(examplePhoto,129,114,23,23),text('Mehr Raum für\nechte Gespräche.',157,117,41,17,11,'#ffffff','700')
   ]);
-  c.sides.back=page('#ffffff',[
-   shape(133,0,77,148,'#eef3ff'),text('chattastic.',12,11,107,11,20,ink,'700'),
-   text('{{salutation}}',12,33,109,12,17,ink,'700'),
-   text('Deine nächste Anfrage\nbeginnt mit einer Antwort.',12,50,109,26,23,ink,'700'),
-   text('Auf deiner Website steckt viel Wissen. Mach es im Gespräch zugänglich – mit einem Assistenten, der dein Angebot kennt.',12,82,108,23,11,muted),
-   shape(12,114,109,2,'#eef1f6'),text('Website-Wissen nutzen\nFragen rund um die Uhr beantworten\nBesucher zum nächsten Schritt begleiten',12,121,110,19,10,muted),
-   text('FÜR {{company}}',142,13,58,15,9,ink,'700'),
-   qr(147,36,49),text('Scannen. Fragen.\nKennenlernen.',142,93,59,19,17,ink,'700'),
-   text('Dein persönlicher Zugang',142,117,58,6,9,muted),text('{{chatbot_url}}',142,127,58,14,7.5,blue)
+  c.sides.back=page('#fffdf8',[
+   text('chattastic.',14,10,107,11,19,ink,'700'),text('EINE PERSÖNLICHE IDEE FÜR',137,11,59,5,7,blue,'700'),text('{{company}}',137,18,59,11,11,ink,'700'),
+   shape(14,32,182,2,'#d8dfeb'),text('{{salutation}}',14,41,174,11,20,ink,'700'),
+   text('{{personal_note}}',14,59,174,29,14,ink),
+   text('Wenn das für euch interessant klingt: Schau dir an, wie ein Gespräch mit einem Website-Assistenten aussehen kann.',14,94,119,21,12,ink),
+   text('Was meinst du?\nDein Team von chattastic',14,123,111,15,12,ink,'700'),
+   qr(155,96,36),text('DEMO ANSEHEN ↗',151,136,46,6,8,blue,'700')
   ]);
  }else if(theme.id==='raumwerk'){
-  const ink='#354636',muted='#5c6759';
-  c.sides.front=page('#f4f1e8',[
-   photo(interiorPhoto,103,0,107,148),text('raumwerk',12,11,84,12,24,ink,'700'),
-   text('RÄUME FÜR DEIN TEAM',12,37,82,6,8,muted,'700'),text('Mehr Raum.\nFür gute\nArbeit.',12,51,87,45,31,ink,'700'),
-   text('Ein neuer Blick auf die Orte,\nan denen deine Ideen entstehen.',12,104,84,14,11,muted),
-   shape(12,127,79,2,ink),text('Deine Einladung zur Raumberatung  →',12,133,85,6,9,ink,'700'),
-   shape(111,113,91,27,'#f4f1e8'),text('PERSÖNLICH FÜR',117,119,78,5,8,muted),text('{{company}}',117,127,78,8,13,ink,'700')
-  ]);
-  c.sides.back=page('#f4f1e8',[
-   shape(133,0,77,148,ink),text('raumwerk',12,11,106,11,22,ink,'700'),text('{{salutation}}',12,35,107,12,17,ink,'700'),
-   text('Wie könnte sich\ndein Büro anfühlen?',12,52,107,25,25,ink,'700'),
-   text('Konzentriert arbeiten. Gemeinsam denken. Gern zusammenkommen. Wir entdecken mit dir, was in deinen Räumen steckt.',12,84,107,24,12,muted),
-   text('Ein erstes Gespräch.\nEin frischer Blick auf deine Arbeitswelt.',12,122,107,16,11,ink),
-   text('DEINE PERSÖNLICHE EINLADUNG',142,17,58,12,9,'#f4f1e8','700'),qr(147,39,49),
-   text('Lass uns\nRaum schaffen.',142,99,59,21,17,'#ffffff','700'),text('{{chatbot_url}}',142,128,58,13,7.5,'#f4f1e8')
-  ]);
- }else{
-  const ink='#532b20',cream='#fff2dc';
+  const ink='#2d4038',cream='#f2eee4',muted='#59675f';
   c.sides.front=page(cream,[
-   photo(coffeePhoto,0,0,210,93),shape(0,0,72,26,cream),text('morgen.',10,7,57,14,27,ink,'700'),
-   shape(126,64,77,22,cream),text('EINE EINLADUNG FÜR',132,69,64,5,7.5,ink),text('{{company}}',132,77,64,7,12,ink,'700'),
-   text('Guter Kaffee.\nGute Gespräche.',12,100,135,34,30,ink,'700'),shape(160,104,37,32,'#9b422b'),
-   text('TEAM\nTASTING',165,111,28,18,13,cream,'700'),text('Zusammen probieren. Neues entdecken.  →',12,137,142,6,9,ink)
+   photo(interiorPhoto,0,0,210,148),shape(10,10,66,20,cream),text('raumwerk',15,14,56,12,23,ink,'700'),
+   shape(112,10,88,20,cream),text('EIN NEUER BLICK AUF DIE RÄUME VON',117,14,78,5,7,muted,'700'),text('{{company}}',117,21,78,7,12,ink,'700'),
+   shape(10,82,190,56,ink),text('{{first_name}},',17,89,69,13,22,'#dce4bc','700'),
+   text('wie wollt ihr\nmorgen arbeiten?',17,105,133,28,28,cream,'700'),text('LASS UNS\nDARÜBER\nSPRECHEN. ↗',162,107,29,23,9,cream,'700')
   ]);
   c.sides.back=page(cream,[
-   shape(132,0,78,148,'#9b422b'),text('morgen.',12,11,107,13,27,ink,'700'),text('{{salutation}}',12,36,108,12,17,ink,'700'),
-   text('Die beste Pause?\nDie gemeinsame.',12,53,108,27,25,ink,'700'),
-   text('Bring dein Team an einen Tisch. Entdeckt gemeinsam neue Kaffees, tauscht Ideen aus und genießt den Moment.',12,88,107,25,12,ink),
-   text('Deine Einladung zum Team-Tasting.\nKleine Auszeit. Viel Gesprächsstoff.',12,124,107,15,11,ink),
-   text('FÜR {{company}}',142,16,58,13,9,cream,'700'),qr(146,39,49),text('Lust auf eine\ngute Pause?',142,99,58,20,17,cream,'700'),
-   text('{{chatbot_url}}',142,129,58,12,7.5,cream)
+   text('raumwerk',13,10,101,11,21,ink,'700'),text('KEIN KATALOG. EIN GESPRÄCH.',121,13,75,7,8,muted,'700'),shape(13,29,183,2,'#b6beb0'),
+   text('{{salutation}}',13,39,77,12,19,ink,'700'),text('{{personal_note}}',13,58,110,39,13,ink),
+   text('Bring eine Frage zu euren Räumen mit.\nWir bringen einen frischen Blick.\nDein Team von raumwerk',13,110,111,25,12,ink),
+   shape(136,39,2,97,'#b6beb0'),text('01 / ANKOMMEN',145,39,52,6,8,muted,'700'),text('{{company}}',145,49,52,14,14,ink,'700'),
+   text('02 / WEITERDENKEN',145,72,52,6,8,muted,'700'),text('Dein Raumgespräch\nbeginnt hier.',145,82,52,16,13,ink,'700'),
+   qr(145,104,31),text('SCAN &\nKONTAKT ↗',179,114,19,14,8,muted,'700')
+  ]);
+ }else{
+  const ink='#612d20',cream='#fff2dc',orange='#b84929';
+  c.sides.front=page(cream,[
+   photo(coffeePhoto,144,0,66,148),shape(144,115,66,33,orange),text('morgen.',12,9,89,14,25,ink,'700'),
+   text('FÜR {{first_name}} UND DAS TEAM VON',12,30,122,6,8,ink,'700'),text('{{company}}',12,39,122,12,17,ink,'700'),
+   text('KAFFEE.\nKEIN\nMEETING.',10,58,127,67,46,ink,'700'),
+   text('Eure Einladung zum gemeinsamen Tasting. ↗',12,134,125,7,9,ink,'700'),
+   text('MAL RAUS.\nZUSAMMEN REIN.',152,122,51,20,16,cream,'700')
+  ]);
+  c.sides.back=page(orange,[
+   shape(145,0,65,148,cream),text('morgen.',13,10,115,14,26,cream,'700'),text('{{salutation}}',13,34,119,11,18,cream,'700'),
+   text('{{personal_note}}',13,52,116,42,14,cream),
+   text('Kaffee probieren. Ins Gespräch kommen.\nEinfach mal zusammen Pause machen.',13,101,116,18,12,cream),text('Wir freuen uns auf euch.\nDein Team von morgen.',13,127,117,15,12,cream,'700'),
+   ...Array.from({length:14},(_,i)=>shape(143,4+i*10,2,4,'#d99974')),
+   text('EURE KLEINE AUSZEIT',153,13,48,6,8,ink,'700'),text('{{company}}',153,27,48,20,15,ink,'700'),
+   qr(154,58,43),text('Seid ihr dabei?',153,109,48,9,15,ink,'700'),text('Termin & Details\nfindet ihr hier. ↗',153,124,48,15,10,ink)
   ]);
  }
  return c;
