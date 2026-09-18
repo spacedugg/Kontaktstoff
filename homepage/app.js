@@ -1,3 +1,4 @@
+import {mountPersonalDemo} from './personalization.js';
 import {mountCardPreview} from './card-preview.js';
 import {mountImpactCalculator} from './impact.js';
 mountImpactCalculator();
@@ -49,5 +50,5 @@ function revealSection(){const target=document.getElementById(location.hash.slic
 window.addEventListener('hashchange',revealSection);revealSection();
 document.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener('click',()=>{const target=document.getElementById(link.hash.slice(1));if(target?.matches('details.learn-more'))target.open=true;}));
 
-await document.fonts.ready;select(active);
+await document.fonts.ready;await mountPersonalDemo();select(active);
 await Promise.all([...document.querySelectorAll('[data-example-canvas]')].map(async canvas=>{const c=campaigns.get(canvas.dataset.exampleCanvas);try{await renderCanvas(canvas,c,'front',c.recipients[0],{scale:4});}catch{canvas.setAttribute('aria-label','Vorschau nicht verfügbar. Beispiel im Studio öffnen.');}}));
