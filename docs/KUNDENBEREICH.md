@@ -46,7 +46,7 @@ Tracking wird ausdrücklich im Bereich Auswertung aktiviert und ändert die QR-Z
 1. Produktion ist mit Neon verbunden; Preview und Development besitzen bewusst keine Produktionsverbindung. Für eine Cloud-Preview eine separate Datenbank anlegen. Backups/Wiederherstellung und Kapazitätsgrenzen des Free-Tarifs vor wachsendem Betrieb prüfen.
 2. E-Mail ist vorbereitet, aber bewusst nicht eingerichtet: `RESEND_API_KEY`, verifizierter `MAIL_FROM` und `REQUEST_NOTIFICATION_TO` ergänzen. Keine Schlüssel ins Repository. Solange E-Mail fehlt, bleiben die entsprechenden Schaltflächen ausgeblendet; Registrierung, Entwürfe und Anfragen funktionieren trotzdem.
 3. Team-Adressen als `OPERATOR_EMAILS` hinterlegen. Adminrechte werden niemals aus dem Firmenprofil oder aus einer Registrierung übernommen. Ein Teamkonto muss zusätzlich seine E-Mail bestätigt haben. Noch kein Betreiberkonto wurde berechtigt.
-4. Betreiberangaben/Datenschutzhinweise, tatsächliche Preise und Druck-/Versandprozess sind weiterhin auszufüllen. Kein Zahlungsdienst, Credit-Wallet oder automatischer Druckauftrag. A5 ist direkt editierbar; Sonderformate bleiben Angebotswünsche.
+4. Betreiberangaben/Datenschutzhinweise, tatsächliche Preise und Druck-/Versandprozess sind weiterhin auszufüllen. Kein Zahlungsdienst, Credit-Wallet oder automatischer Druckauftrag. Sieben Formate sind editierbar; weitere Sonderformate bleiben Angebotswünsche.
 
 ## E-Mail- und Kontoverbindungen
 
@@ -72,3 +72,27 @@ Die Browsertests prüfen Gast → Anfrage → Registrierung → Konto, zweites G
 ## Veröffentlichungsprüfung 21.09.2026
 
 Deployment `dpl_GQKj8Va5Une3CA6yZZ2x8SBCdhYJ`, Commit `0455462`, API-Region `fra1`. Live liefert `/api/health` HTTP 200 mit `storage: postgres` und `email: false`; `/api/auth/me` liefert als Gast HTTP 200. 33 automatisierte Tests, kompletter lokaler Workspace-Browsertest und gezielter UI-Test für Team-Eingang/Passwortlinks erfolgreich. Der zusätzliche produktive Schreibtest benötigt eigene Freigabe, da er dauerhafte synthetische Testdatensätze hinterlässt.
+
+
+## Zielgruppen, Designbibliothek und Freigaben (21.09.2026)
+
+Der Kundenbereich trennt unter `/konto/?tab=audiences`, `designs`, `new-campaign` und `reviews` jetzt vier Aufgaben:
+
+- **Zielgruppen**: CSV-Spaltenzuordnung, B2C-Namen ohne Firmenpflicht, Adresshinweise, Dublettenentfernung im Entwurf, einzelne Kontakte bearbeiten und CSV-Export. Bis 1.000 Kontakte. Änderungen bleiben bis zum Speichern im Entwurf.
+- **Designs**: eigenständige Kontodatensätze mit Format, Gestaltung und Vorschaukontakten. Neue Designs können leer, aus allen Kundenkonzepten oder allgemeinen Beispielen entstehen. Vorhandene Kampagnen lassen sich kopieren. Der Studio-Link `?design=ID` speichert direkt in der Bibliothek; Änderungen betreffen keine abgeleiteten Kampagnen.
+- **Kampagnen**: Zielgruppe und Design auswählen, Personalisierung prüfen, Ziel und Versandwunsch angeben. Der Server prüft Besitz und Versionsnummern beider Quellen und speichert Kopien inklusive Quellen-IDs/-Revisionen. Es gibt noch keinen automatisierten Shop-Import oder Versandplaner. Der Versandtag ist ein Wunschdatum.
+- **Freigaben**: separater, nicht werblicher Kundenlink `/freigabe/#token=…`. Kunde sieht nur einen ausdrücklich ausgewählten Vorschaukontakt, kann Markierungen und Kommentare setzen und nach Erledigung offener Punkte eine Designversion freigeben. Kein Kundenlogin erforderlich; angegebene Namen sind nicht verifiziert. Keine rechtssichere E-Signatur und keine Druckbestellung.
+
+Neue Tabellen `library`, `reviews`, `review_versions`, `review_events` werden additiv durch die bestehende Schemainitialisierung angelegt. Bestehende Kampagnen und Anfragen werden nicht migriert, ersetzt oder gelöscht. Bibliothekseinträge sind kontogebunden und versionsgeschützt. Archivierte Bibliothekseinträge verändern keine Kampagnenkopien.
+
+Freigaben speichern eine unveränderliche Vorschau pro Version. Empfängerlisten, nicht verwendete Kontaktfelder, Briefing und Kontodaten werden nicht mitgeteilt. Bilder mit Produktvarianten werden auf das gewählte Bild reduziert. Schlüssel stehen im Fragment und werden als Bearer-Header an `/api/review` übergeben; nur SHA-256-Hashes werden gespeichert. Links laufen nach 90 Tagen ab, sind deaktivierbar und können ersetzt werden. Mutationen verlangen den eigenen Origin; öffentliche Schreibaktionen sind begrenzt. Neue Versionen setzen die Freigabe zurück, behalten aber den Kommentar- und Freigabeverlauf. Veraltete Schreibzugriffe werden mit 409 abgewiesen. Änderungen am Quelldesign werden im Kontobereich als ungeteilter Stand angezeigt. Das Teilen eines neuen Stands ist explizit; ein geändertes Quelldesign ersetzt keinen freigegebenen Stand.
+
+Aktuell werden Freigabelinks manuell kopiert und versendet, Feedback wird über „Feedback aktualisieren“ geladen. E-Mail-Benachrichtigungen bleiben wie vereinbart unkonfiguriert.
+
+### Formate und Postpal-Vorlagen
+
+Zusätzlich zu DIN A5 stehen DIN A6 (148 × 105), DIN lang (210 × 98), DIN Maxi (235 × 125), DIN A4 (210 × 297, ein- oder beidseitig) und DIN lang im Umschlag bereit. Geprüft anhand der Formatwahl und sechs originalen Downloadpakete unter https://app.getpostpal.com/designs am 21.09.2026. Die Bibliothek verlinkt die Originalpakete als externe Postpal-Dateien; sie werden nicht als Kontaktstoff-eigene Entwürfe ausgegeben. Endformate sind im Editor tatsächlich bearbeitbar. Einseitige Formate exportieren nur die Vorderseite.
+
+Originalvorlagen benötigen 3 mm Beschnitt pro Seite; die Postpal-PDFs nennen einen Sicherheitsabstand von 6 mm ab Datenformat. Adressier-, Codier-, Frankierzonen und A4-Falzlinien unterscheiden sich je Vorlage. Diese Produktionsflächen werden noch nicht automatisch reserviert oder auf Einhaltung geprüft. Unsere Exporte bleiben ausdrücklich Ansichtsdateien im Endformat, RGB, ohne Beschnitt/PDF-X. Für die Produktion muss die ausgewählte Original-Druckvorlage separat berücksichtigt werden.
+
+Prüfung: `npm test`, `PORT=4183 SQLITE_PATH=test-results/workflow.sqlite npm run dev`, `npm run test:workflow`. Browserdurchlauf umfasst echten lokalen Kontenspeicher, CSV-Zuordnung, Bibliothekseditor, Kundenkommentar mit Pin, Erledigung, Freigabe, neue Version, unabhängige Kampagnenkopie, alle sieben Formate, einseitiges A4-PDF und mobile Ansichten. Testdaten liegen ausschließlich in der getrennten Testdatenbank.

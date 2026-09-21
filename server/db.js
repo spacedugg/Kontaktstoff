@@ -1,7 +1,15 @@
 import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
 const schema=[
+
  'CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, password TEXT NOT NULL, profile TEXT NOT NULL, created_at BIGINT NOT NULL)',
+ 'CREATE TABLE IF NOT EXISTS library (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), kind TEXT NOT NULL, payload TEXT NOT NULL, revision INTEGER NOT NULL, updated_at BIGINT NOT NULL, deleted_at BIGINT)',
+ 'CREATE TABLE IF NOT EXISTS reviews (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), source_kind TEXT NOT NULL, source_id TEXT NOT NULL, recipient_index INTEGER NOT NULL, title TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, fingerprint TEXT NOT NULL, version INTEGER NOT NULL, revision INTEGER NOT NULL, status TEXT NOT NULL, expires_at BIGINT NOT NULL, updated_at BIGINT NOT NULL)',
+ 'CREATE TABLE IF NOT EXISTS review_versions (review_id TEXT NOT NULL REFERENCES reviews(id), version INTEGER NOT NULL, payload TEXT NOT NULL, created_at BIGINT NOT NULL, PRIMARY KEY(review_id,version))',
+ 'CREATE TABLE IF NOT EXISTS review_events (id TEXT PRIMARY KEY, review_id TEXT NOT NULL REFERENCES reviews(id), payload TEXT NOT NULL, created_at BIGINT NOT NULL)',
+ 'CREATE INDEX IF NOT EXISTS library_owner ON library(user_id,kind)',
+ 'CREATE INDEX IF NOT EXISTS reviews_owner ON reviews(user_id)',
+ 'CREATE INDEX IF NOT EXISTS review_events_parent ON review_events(review_id)',
  'CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), csrf TEXT NOT NULL, expires BIGINT NOT NULL)',
  'CREATE TABLE IF NOT EXISTS campaigns (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), payload TEXT NOT NULL, revision INTEGER NOT NULL, updated_at BIGINT NOT NULL, deleted_at BIGINT)',
  'CREATE TABLE IF NOT EXISTS requests (id TEXT PRIMARY KEY, campaign_id TEXT NOT NULL, user_id TEXT NOT NULL REFERENCES users(id), payload TEXT NOT NULL, created_at BIGINT NOT NULL)',

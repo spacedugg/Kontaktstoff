@@ -19,7 +19,8 @@
     "test:content": "node tests/studio-content.mjs",
     "test:csv-client": "node tests/csv-client.mjs",
     "test:workspace": "node tests/workspace.mjs",
-    "requests": "node scripts/requests.mjs"
+    "requests": "node scripts/requests.mjs",
+    "test:workflow": "node tests/workflow.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

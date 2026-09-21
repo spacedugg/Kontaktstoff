@@ -1,3 +1,4 @@
+import {libraryService} from './library.js';
 import {randomBytes,randomUUID,createHash,scrypt as rawScrypt,timingSafeEqual} from 'node:crypto';
 import {promisify} from 'node:util';
 import {HTTPError,text,profile,payload,requestIssues} from './validation.js';
@@ -17,6 +18,7 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
  async function session(req){const token=String(req.headers.cookie||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(cookieName+'='))?.slice(cookieName.length+1);if(!token)return null;const result=await db.query('SELECT users.id,users.email,users.profile,sessions.csrf FROM sessions JOIN users ON users.id=sessions.user_id WHERE sessions.token=$1 AND sessions.expires>$2',[hash(token),Date.now()]);return result.rows[0]||null;}
  async function issueSession(user,res){const token=randomBytes(32).toString('base64url'),csrf=randomBytes(24).toString('base64url');await db.query('INSERT INTO sessions(token,user_id,csrf,expires) VALUES($1,$2,$3,$4)',[hash(token),user.id,csrf,Date.now()+604800000]);cookie(res,token);return {user:await services.publicUser(user),csrf};}
  const load=async(q,id,user)=>{const result=await q('SELECT * FROM campaigns WHERE id=$1 AND user_id=$2 AND deleted_at IS NULL',[id,user]);if(!result.rows[0])throw new HTTPError(404,'Kampagne nicht gefunden.');return result.rows[0];};
+ const libraries=libraryService(db,{origin,limited});
  return async function handle(req,res){
   const url=new URL(req.url,origin),pathname=url.pathname.replace(/\/$/,'');
   if(!pathname.startsWith('/api/')&&!pathname.startsWith('/r/'))return false;
@@ -56,10 +58,12 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
     const result=await db.query('SELECT * FROM users WHERE email=$1',[email]),user=result.rows[0];const [salt,expected]=(user?.password||'00000000000000000000000000000000:'+''.padEnd(128,'0')).split(':');const actual=await scrypt(password,salt,64);
     if(!user||!timingSafeEqual(actual,Buffer.from(expected,'hex')))throw new HTTPError(401,'E-Mail oder Passwort stimmt nicht.');send(res,200,await issueSession(user,res));return true;
    }
+   if(pathname==='/api/review'){send(res,200,await libraries.public(req,req.method==='GET'?{}:await body(req)));return true;}
    const user=await session(req);
    if(pathname==='/api/auth/me'&&req.method==='GET'){send(res,200,user?{user:await services.publicUser(user),csrf:user.csrf}:{user:null});return true;}
    if(!user)throw new HTTPError(401,'Bitte melde dich an, um deine Kampagne im Konto zu speichern.');
    if(!['GET','HEAD'].includes(req.method)&&req.headers['x-csrf-token']!==user.csrf)throw new HTTPError(403,'Die Sitzung wurde erneuert. Bitte lade die Seite neu.');
+   if(pathname.startsWith('/api/library/')||pathname==='/api/compose'||pathname==='/api/reviews'||pathname.startsWith('/api/reviews/')){send(res,200,await libraries.owner(pathname,req.method,['GET','HEAD'].includes(req.method)?{}:await body(req),user));return true;}
    if(pathname==='/api/auth/send-verification'&&req.method==='POST'){await limited('verify:'+user.id,3);if(!await services.verified(user))await services.sendToken(user,'verify');send(res,200,{ok:true});return true;}
    if(pathname==='/api/operator/requests'||pathname.startsWith('/api/operator/requests/')){
     await services.requireOperator(user);const match=pathname.match(/^\/api\/operator\/requests(?:\/([a-zA-Z0-9-]+))?(?:\/(notify))?$/);if(!match)throw new HTTPError(404,'Anfrage nicht gefunden.');const [,id,action]=match;
@@ -93,10 +97,10 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
     if(action==='stats'&&req.method==='GET'){await load(db.query,id,user.id);const visits=await db.query('SELECT links.recipient_id, COUNT(visits.id) AS count, MIN(visits.created_at) AS first_visit FROM links LEFT JOIN visits ON visits.token=links.token WHERE links.campaign_id=$1 GROUP BY links.recipient_id',[id]);const requests=await db.query('SELECT requests.id,requests.created_at,request_workflow.status FROM requests LEFT JOIN request_workflow ON request_workflow.request_id=requests.id WHERE requests.campaign_id=$1 AND requests.user_id=$2 ORDER BY requests.created_at DESC',[id,user.id]);send(res,200,{visits:visits.rows,requests:requests.rows});return true;}
     if(action==='tracking'&&req.method==='POST'){
      const input=await body(req);const result=await db.tx(async q=>{const c=await load(q,id,user.id);if(Number(input.revision)!==Number(c.revision))throw new HTTPError(409,'Bitte den aktuellen Kampagnenstand laden.');const value=JSON.parse(c.payload);if(!value.project.recipients.length)throw new HTTPError(400,'Füge zuerst deine Kontakte hinzu.');
-      for(const r of value.project.recipients){const existing=(await q('SELECT * FROM links WHERE campaign_id=$1 AND recipient_id=$2',[id,r.id])).rows[0];const tracked=existing?origin+'/r/'+existing.token:null;let target=r.chatbot_url||value.meta.targetURL;
+      for(const r of value.project.recipients){const existing=(await q('SELECT * FROM links WHERE campaign_id=$1 AND recipient_id=$2',[id,r.id])).rows[0];const tracked=existing?origin+'/r/'+existing.token:null;const linkKey=Object.values(value.project.sides).some(s=>s.fields.some(f=>f.type==='qr'&&f.text.includes('{{cart_url}}')))?'cart_url':'chatbot_url';let target=r[linkKey]||value.meta.targetURL;
        if(target===tracked)target=existing.target;
        if(!validURL(target)||target.length>2000||new URL(target).username||new URL(target).password||new URL(target).origin===origin&&new URL(target).pathname.startsWith('/r/'))throw new HTTPError(400,`Bitte einen direkten Ziel-Link für ${r.company} hinterlegen.`);
-       const token=existing?.token||randomBytes(18).toString('base64url');await q('INSERT INTO links(token,campaign_id,recipient_id,target) VALUES($1,$2,$3,$4) ON CONFLICT(campaign_id,recipient_id) DO UPDATE SET target=$4',[token,id,r.id,target]);r.chatbot_url=origin+'/r/'+token;
+       const token=existing?.token||randomBytes(18).toString('base64url');await q('INSERT INTO links(token,campaign_id,recipient_id,target) VALUES($1,$2,$3,$4) ON CONFLICT(campaign_id,recipient_id) DO UPDATE SET target=$4',[token,id,r.id,target]);r[linkKey]=origin+'/r/'+token;
       }
       const updated=await q('UPDATE campaigns SET payload=$1,revision=revision+1,updated_at=$2 WHERE id=$3 AND revision=$4 RETURNING *',[JSON.stringify(value),Date.now(),id,Number(input.revision)]);if(!updated.rows.length)throw new HTTPError(409,'Bitte neu laden.');return packed(updated.rows[0]);});send(res,200,result);return true;
     }

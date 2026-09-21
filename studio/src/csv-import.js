@@ -17,10 +17,11 @@ export function readCSVTable(input){
 }
 export function guessMapping(headers,keys){return Object.fromEntries(keys.map(key=>[key,headers.findIndex(h=>(aliases[key]||[key]).includes(normalize(h)))]));}
 export function mappedRecipients(table,mapping,{fallbackURL='',salutationStyle='du'}={}){
- if(!Number.isInteger(mapping.company)||mapping.company<0||mapping.company>=table.headers.length)throw Error('Ordne zuerst die Spalte mit dem Firmennamen zu.');
+ if((!Number.isInteger(mapping.company)||mapping.company<0||mapping.company>=table.headers.length)&&![mapping.first_name,mapping.last_name].some(i=>Number.isInteger(i)&&i>=0&&i<table.headers.length))throw Error('Ordne eine Spalte für Unternehmen oder Vor-/Nachname zu.');
  if(fallbackURL&&!validURL(fallbackURL))throw Error('Der gemeinsame Ziel-Link muss mit https:// oder http:// beginnen.');
  const recipients=table.rows.map((row,i)=>{
   const r={id:uid()};for(const [key,index] of Object.entries(mapping)){if(['id','__proto__','constructor','prototype'].includes(key))continue;if(Number.isInteger(index)&&index>=0&&index<row.length)r[key]=row[index];}
+  if(!r.company?.trim())r.company=[r.first_name,r.last_name].filter(Boolean).join(' ');
   if(!r.company?.trim())throw Error(`In Zeile ${i+2} fehlt der Firmenname. Ergänze ihn in deiner CSV.`);
   if(!r.salutation)r.salutation=salutationStyle==='formal'?'Guten Tag,':r.first_name?`Hallo ${r.first_name},`:'Hallo,';
   if(!r.chatbot_url&&fallbackURL)r.chatbot_url=fallbackURL;

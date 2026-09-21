@@ -1,5 +1,6 @@
 export function ratingValue(value){const raw=String(value).trim().replace(',','.');if(!/^[0-5](?:\.\d+)?$/.test(raw))return null;const number=Number(raw);return number<=5?number:null;}
-export const FORMATS = [{ id:'a5-landscape', name:'DIN A5 · Querformat', width:210, height:148 }];
+import {FORMATS,sideNames} from './formats.js';
+export {FORMATS,sideNames} from './formats.js';
 export const KEYS = { company:'Firmenname', first_name:'Vorname',last_name:'Nachname',contact_role:'Funktion',email:'E-Mail',phone:'Telefon',industry:'Branche',employee_count:'Mitarbeiterzahl',source_url:'Kontaktquelle', salutation:'Ansprache', personal_note:'Persönliche Nachricht', personal_headline:'Persönliche Überschrift',product_id:'Produkt-ID',product_name:'Produktname',product_variant:'Größe / Variante',product_url:'Produktseite',cart_url:'Warenkorb-Link',checkout_id:'Checkout-ID',coupon_code:'Gutscheincode',offer_text:'Gutschein-Angebot',offer_terms:'Gutscheinbedingungen',rating_current:'Sterne: Ausgangswert',rating_example:'Sterne: Beispielwert danach', website:'Website', chatbot_url:'Ziel-Link',street:'Straße & Hausnummer',postal_code:'PLZ',city:'Ort',country:'Land' };
 export const uid = () => crypto.randomUUID();
 export const clone = value => structuredClone(value);
@@ -74,7 +75,7 @@ export function checks(campaign) {
   const issues=[];const format=FORMATS.find(f=>f.id===campaign.format);
   if(campaign.sample)issues.push({level:'info',text:'Beispielkampagne: Empfänger sind fiktiv. Die QR-Codes enthalten Demo-Links; vor dem Einsatz durch eigene Ziele ersetzen.'});
   if(!campaign.recipients.length)issues.push({level:'error',text:'Noch keine Empfänger vorhanden.'});
-  for(const [side,label] of [['front','Vorderseite'],['back','Rückseite']]){
+  for(const side of sideNames(campaign)){const label=side==='front'?'Vorderseite':'Rückseite';
     const s=campaign.sides[side];
     if(s.background.kind==='blank'&&!s.fields.length)issues.push({level:'error',text:`${label}: Das Design ist noch leer.`});
     if(s.background.kind==='image'){

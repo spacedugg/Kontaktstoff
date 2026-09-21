@@ -2,7 +2,7 @@ import {api as workspaceAPI} from '../../konto/src/api.js';
 import {openCSVImport} from './csv-dialog.js';
 import {startHTML} from './start.js';
 import {CLIENT_CAMPAIGNS,createClientCampaign} from './client-campaigns.js';
-import {FORMATS,KEYS,uid,clone,clamp,validURL,resolveText,missingKeys,createCampaign,csvString,validateCampaign,checks} from './core.js';
+import {FORMATS,sideNames,KEYS,uid,clone,clamp,validURL,resolveText,missingKeys,createCampaign,csvString,validateCampaign,checks} from './core.js';
 import {listCampaigns,listDeletedCampaigns,saveCampaign,trashCampaign,restoreCampaign} from './storage.js';
 import {renderCanvas,imageFrom} from './render.js';
 import {icon,hydrateIcons} from './icons.js';
@@ -16,7 +16,7 @@ import {auditCampaign,createHandoff} from './handoff.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let campaign=createCampaign(), side='front', selected=campaign.sides.front.fields[0]?.id, recipientIndex=0, view='design', guides=true;
-let cloudRecord=null;
+let cloudRecord=null,cloudPath='/campaigns/';
 let previewExtrasContext=null,editorMode='content';
 const editableFields=()=>campaign.sides[side].fields.filter(f=>editorMode==='layout'||['text','qr'].includes(f.type));
 const firstEditable=()=>editableFields().find(f=>f.type==='text'&&f.text.includes('{{'))||editableFields()[0];
@@ -34,7 +34,7 @@ const keys=()=>[...new Set([...Object.keys(KEYS),...Object.values(campaign.sides
 function toast(message,error=false){clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').classList.toggle('error',error);$('#toast').classList.add('show');toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),error?6500:3500);}
 function saveState(text,failed=false){$('#save-state').innerHTML=`<span class="status-dot" style="background:${failed?'#bf7352':'#779767'}"></span>${escape(text)}`;}
 function persist(){try{sessionStorage.setItem('kontaktstoff-active',campaign.id);}catch{}clearTimeout(saveTimer);saveState('Wird gespeichert …');saveTimer=setTimeout(flushSave,350);}
-async function flushSave(){clearTimeout(saveTimer);if(!hasActive)return;const snapshot=clone(campaign);const cloud=cloudRecord?.id===snapshot.id?cloudRecord:null;pendingSaves=pendingSaves.catch(()=>{}).then(async()=>{if(cloud){if(cloud.conflict)throw Error(cloud.conflict);try{const next=await workspaceAPI('/campaigns/'+cloud.id,{method:'PUT',body:{project:snapshot,meta:cloud.meta,revision:cloud.revision}});Object.assign(cloud,next);}catch(e){if(e.status===409)cloud.conflict=e.message;throw e;}}else await saveCampaign(snapshot);});try{await pendingSaves;saveState(cloud?'Im Konto gespeichert':'Lokal gespeichert');saveFailed=false;}catch(e){saveState('Nicht gespeichert',true);if(!saveFailed)toast(e.message||'Speichern nicht möglich. Bitte sichere dein Projekt als Datei.',true);saveFailed=true;}}
+async function flushSave(){clearTimeout(saveTimer);if(!hasActive)return;const snapshot=clone(campaign);const cloud=cloudRecord?.id===snapshot.id?cloudRecord:null;pendingSaves=pendingSaves.catch(()=>{}).then(async()=>{if(cloud){if(cloud.conflict)throw Error(cloud.conflict);try{const next=await workspaceAPI(cloudPath+cloud.id,{method:'PUT',body:{project:snapshot,meta:cloud.meta,revision:cloud.revision}});Object.assign(cloud,next);}catch(e){if(e.status===409)cloud.conflict=e.message;throw e;}}else await saveCampaign(snapshot);});try{await pendingSaves;saveState(cloud?'Im Konto gespeichert':'Lokal gespeichert');saveFailed=false;}catch(e){saveState('Nicht gespeichert',true);if(!saveFailed)toast(e.message||'Speichern nicht möglich. Bitte sichere dein Projekt als Datei.',true);saveFailed=true;}}
 function checkpoint(){history.push(clone(campaign));if(history.length>40)history.shift();future=[];}
 function changed({inspector=true,table=true,guide=true}={}){hasActive=true;clearAudit();campaign.updatedAt=Date.now();persist();renderUI(inspector,table,guide);}
 function commit(fn,options){checkpoint();fn();changed(options);}
@@ -52,8 +52,14 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
 }
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
 function renderUI(inspector=true,table=true,guide=true){
- $('#request-campaign').hidden=view!=='preview';
+ $('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=cloudPath.includes('library')?'Zur Designbibliothek →':'Kampagne anfragen →';
+ if(!sideNames(campaign).includes(side))side='front';
+ document.body.classList.toggle('single-sided',sideNames(campaign).length===1);
+ document.documentElement.style.setProperty('--mailing-ratio',format().width+'/'+format().height);
+ $$('.proof-format').forEach(el=>el.textContent=format().name);$('.export-card>p').textContent=`${sideNames(campaign).length} ${sideNames(campaign).length===1?'Seite':'Seiten'} im Originalformat, mit den Daten des ausgewählten Empfängers.`;
+ $('.mailing-3d-card').style.width=`min(${Math.min(72,70*format().width/format().height)}%, 580px)`;
  $('.steps-note').textContent=cloudRecord?.id===campaign.id?'In deinem Unternehmenskonto gespeichert':'Ohne Anmeldung gestalten';
+ document.body.classList.toggle('library-editor',cloudPath.includes('library'));
  document.body.classList.toggle('content-editing',editorMode==='content'&&view==='design');
  $('#editor-mode-bar').hidden=view!=='design';
  $$('[data-editor-mode]').forEach(b=>{b.classList.toggle('active',b.dataset.editorMode===editorMode);b.setAttribute('aria-pressed',String(b.dataset.editorMode===editorMode));});
@@ -63,7 +69,7 @@ function renderUI(inspector=true,table=true,guide=true){
  document.body.classList.toggle('focused-entry',view==='tutorial'||view==='setup'||view==='start');
  document.body.classList.toggle('starting-campaign',view==='start');
  $('#start-view').hidden=view!=='start';
- $('#workflow-hint').hidden=!['design','recipients','preview'].includes(view);
+ $('#workflow-hint').hidden=cloudPath.includes('library')||!['design','recipients','preview'].includes(view);
  if(!$('#workflow-hint').hidden){const hints={design:['1. Gestalte deine Karte','Wähle einen Text in der Karte und bearbeite ihn im Textfeld. Passe danach die Rückseite an. Dein Design wird automatisch gespeichert.','recipients','Weiter zu den Empfängern →'],recipients:['2. Für wen ist dein Mailing?','Füge deine Kontakte hinzu oder importiere eine CSV. Die Spalten verbinden Namen, Firmen und Links mit deinen Karten.','preview','Mailing ansehen →'],preview:['3. Dein Mailing ist bereit zur Ansicht','Prüfe beide Seiten. Danach kannst du deine Kampagne anfragen oder den Entwurf exportieren.','design','Design weiter bearbeiten']},hint=hints[view];$('#workflow-hint').innerHTML=`<div><strong>${hint[0]}</strong><p>${hint[1]}</p></div><button class="button" data-workflow-next="${hint[2]}">${hint[3]}</button>`;}
  document.body.classList.toggle('tutorial-excursion',!!campaign.tutorial?.active&&view!=='tutorial'&&view!=='dashboard');
  document.body.classList.toggle('dashboard-active',view==='dashboard');
@@ -96,6 +102,7 @@ function renderUI(inspector=true,table=true,guide=true){
  if(view==='setup'&&guide)$('#setup-view').innerHTML=guideHTML(campaign);
  $('#three-d-view').hidden=previewMode!=='3d';$('#proof-spread').hidden=previewMode!=='2d';
  for(const mode of ['2d','3d']){const b=$('#preview-mode-'+mode);b.classList.toggle('active',previewMode===mode);b.setAttribute('aria-pressed',String(previewMode===mode));}
+ $('#format-short').textContent=format().name;$('#format-select').innerHTML=FORMATS.map(f=>`<option value="${f.id}">${escape(f.name)}</option>`).join('');
  $('#side-title').textContent=side==='front'?'Vorderseite':'Rückseite';$('#format-select').value=campaign.format;
  $('#dimensions').textContent=`${format().width} × ${format().height} mm`;$('#width-label').textContent=`${format().width} mm`;$('#design-scale').textContent=format().name;
  $('#artboard').style.aspectRatio=`${format().width}/${format().height}`;
@@ -297,7 +304,7 @@ $('#dashboard-view').onclick=async e=>{
 };
 async function loadExample(id='chattastic'){previewMode='3d';threeD.reset();await activateCampaign(createExampleCampaign(id),'preview');window.scrollTo({top:0,behavior:'instant'});toast('Fertiges Beispiel geladen. Dein vorheriger Entwurf bleibt in deinen Kampagnen.');}
 async function deleteCreation(item){
- if(cloudRecord?.id===item.id){if(!await confirm('Kampagne löschen?',`„${item.name}“ wird aus deinem Unternehmenskonto entfernt.`,'Löschen'))return;try{await flushSave();await pendingSaves;await workspaceAPI('/campaigns/'+item.id,{method:'DELETE'});hasActive=false;clearTimeout(saveTimer);location.href='/konto/?tab=campaigns';}catch(e){toast(e.message,true);}return;}
+ if(cloudRecord?.id===item.id){if(!await confirm('Kampagne löschen?',`„${item.name}“ wird aus deinem Unternehmenskonto entfernt.`,'Löschen'))return;try{await flushSave();await pendingSaves;await workspaceAPI(cloudPath+item.id,{method:'DELETE',...(cloudPath.includes('library')?{body:{revision:cloudRecord.revision}}:{})});hasActive=false;clearTimeout(saveTimer);location.href='/konto/?tab=campaigns';}catch(e){toast(e.message,true);}return;}
  if(!await confirm('Kreation löschen?',`„${item.name}“ wird in den Papierkorb verschoben. Du kannst sie dort jederzeit wiederherstellen.`,'In den Papierkorb'))return;
  try{await flushSave();await pendingSaves;await trashCampaign(item.id);if(campaign.id===item.id){clearTimeout(saveTimer);hasActive=false;history=[];future=[];try{sessionStorage.removeItem('kontaktstoff-active');}catch{}}await showDashboard();toast('Kreation im Papierkorb. Du kannst sie wiederherstellen.');}catch{toast('Löschen war nicht möglich. Deine Kreation bleibt erhalten.',true);}
 }
@@ -318,11 +325,11 @@ $('#help-button').onclick=()=>modal('Vom Design zum persönlichen Mailing',`<div
 async function exportProof(type){
  await busy(type==='pdf'?'Dein PDF wird erstellt …':'Dein Bild wird erstellt …',async()=>{
    const snapshot=clone(campaign),person=clone(view==='design'?designRecipient():recipient());if(checks(snapshot).some(i=>i.level==='error'))throw new Error('Bitte zuerst die offenen Punkte im Kampagnen-Check beheben.');
-   const canvases=[];for(const s of type==='pdf'?['front','back']:[side]){const cvs=document.createElement('canvas');const overflow=await renderCanvas(cvs,snapshot,s,person,{scale:300/25.4});if(overflow.length)throw new Error('Ein Textfeld ist zu klein. Bitte vor dem Export vergrößern.');canvases.push(cvs);}
+   const canvases=[];for(const s of type==='pdf'?sideNames(snapshot):[side]){const cvs=document.createElement('canvas');const overflow=await renderCanvas(cvs,snapshot,s,person,{scale:300/25.4});if(overflow.length)throw new Error('Ein Textfeld ist zu klein. Bitte vor dem Export vergrößern.');canvases.push(cvs);}
    const company=String(person.company||'vorschau').replace(/[^\p{L}\p{N}]+/gu,'-').slice(0,60);
    if(type==='png'){const blob=await new Promise(r=>canvases[0].toBlob(r,'image/png'));download(blob,`${filename()}-${company}-${side==='front'?'vorderseite':'rueckseite'}.png`);}
    else{const{PDFDocument}=await import('pdf-lib');const doc=await PDFDocument.create();doc.setTitle(snapshot.name+' · '+(person.company||'Vorschau'));doc.setSubject('Kontaktstoff Ansichts-PDF · RGB · ohne Beschnitt');const f=FORMATS.find(f=>f.id===snapshot.format);for(const cvs of canvases){const img=await doc.embedPng(cvs.toDataURL('image/png'));const page=doc.addPage([f.width*72/25.4,f.height*72/25.4]);page.drawImage(img,{x:0,y:0,width:page.getWidth(),height:page.getHeight()});}download(new Blob([await doc.save()],{type:'application/pdf'}),`${filename()}-${company}-ansicht.pdf`);}
-   toast(type==='pdf'?'Zweiseitiges Ansichts-PDF exportiert.':'Mailing-Seite als PNG exportiert.');
+   toast(type==='pdf'?'Ansichts-PDF exportiert.':'Mailing-Seite als PNG exportiert.');
  });
 }
 $('#pdf-export').onclick=()=>exportProof('pdf');$('#png-export').onclick=()=>exportProof('png');
@@ -470,8 +477,8 @@ $('#tutorial-view').addEventListener('click',async e=>{
 
 });
 
-$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id);};
-$('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(saveFailed)return;location.href=cloudRecord?.id===campaign.id?'/konto/?id='+encodeURIComponent(campaign.id):'/konto/';};
+$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id);};
+$('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(saveFailed)return;location.href=cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?id='+encodeURIComponent(campaign.id):'/konto/';};
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
 hydrateIcons();
@@ -482,7 +489,8 @@ $('#example-data').onclick=()=>setView('recipients');
 const params=new URLSearchParams(location.search);
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
- if(params.has('cloud')){await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI('/campaigns/'+encodeURIComponent(params.get('cloud')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('Im Konto gespeichert');}
+ if(params.has('design')){cloudPath='/library/designs/';await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI(cloudPath+encodeURIComponent(params.get('design')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view='design';saveState('In der Designbibliothek gespeichert');}
+ else if(params.has('cloud')){await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI('/campaigns/'+encodeURIComponent(params.get('cloud')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('Im Konto gespeichert');}
  else if(params.has('local')){const local=campaigns.find(c=>c.id===params.get('local'));if(!local)throw Error('Dieser lokale Entwurf wurde nicht gefunden.');campaign=validateCampaign(local);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';}
  else if(params.has('tutorial')||params.get('start')==='1'){view='start';}
  else if(CLIENT_CAMPAIGNS.some(c=>c.id===params.get('client'))){campaign=createClientCampaign(params.get('client'));try{const draft=sessionStorage.getItem('kontaktstoff-client-draft');if(draft){const candidate=validateCampaign(JSON.parse(draft));if(candidate.templateId===campaign.templateId){campaign=candidate;campaign.id=uid();}sessionStorage.removeItem('kontaktstoff-client-draft');}}catch{}hasActive=true;view='preview';await saveCampaign(campaign);}
