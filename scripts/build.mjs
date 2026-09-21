@@ -2,6 +2,7 @@ import {buildClientPages} from './client-pages.mjs';
 import { build } from 'esbuild';
 import { copyFile, mkdir, cp, rm } from 'node:fs/promises';
 await buildClientPages();
+await build({entryPoints:['admin/main.js'],bundle:true,format:'esm',minify:true,outfile:'admin/app.js',target:['es2022']});
 await build({entryPoints:['freigabe/main.js'],bundle:true,format:'esm',minify:true,outfile:'freigabe/app.js',target:['es2022']});
 await build({entryPoints:['konto/src/app.js'],bundle:true,format:'esm',minify:true,outfile:'konto/app.js',target:['es2022']});
 await build({entryPoints:['clients/main.js'],bundle:true,format:'esm',minify:true,outfile:'clients/app.js',legalComments:'inline',target:['es2022']});
@@ -15,7 +16,7 @@ for (const [pkg, file] of [['pdfjs-dist','LICENSE'],['pdf-lib','LICENSE.md'],['q
 }
 await rm('dist', {recursive:true, force:true});
 await mkdir('dist/studio', {recursive:true});
-for (const file of ['index.html','app.js','style.css','case-studies.json','assets','logo-ideen','fuer','freigabe']) await cp(file, `dist/${file}`, {recursive:true});
+for (const file of ['index.html','app.js','style.css','case-studies.json','assets','logo-ideen','fuer','freigabe','admin']) await cp(file, `dist/${file}`, {recursive:true});
 await mkdir('dist/konto',{recursive:true});
 for(const file of ['index.html','style.css','workflow.css','app.js'])await copyFile(`konto/${file}`,`dist/konto/${file}`);
 await mkdir('dist/clients',{recursive:true});

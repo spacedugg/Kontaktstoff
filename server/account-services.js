@@ -3,11 +3,11 @@ import {promisify} from 'node:util';
 import {HTTPError,text} from './validation.js';
 const scrypt=promisify(rawScrypt),hash=value=>createHash('sha256').update(value).digest('hex');
 export const REQUEST_STATES={new:'Neu',reviewing:'In Prüfung',quoted:'Angebot erstellt',production:'In Umsetzung',completed:'Abgeschlossen',cancelled:'Abgesagt'};
-export function accountServices(db,{origin,mailer,operatorEmails='',notificationTo=''}) {
+export function accountServices(db,{origin,mailer,operatorEmails='',notificationTo='',adminUserId=''}) {
  const operators=new Set(operatorEmails.split(',').map(e=>e.trim().toLowerCase()).filter(Boolean));
  async function verified(user){return Boolean((await db.query('SELECT user_id FROM email_verifications WHERE user_id=$1',[user.id])).rows.length);}
- async function operator(user){return operators.has(user.email)&&await verified(user);}
- async function publicUser(user){return {id:user.id,email:user.email,profile:JSON.parse(user.profile),emailVerified:await verified(user),operator:await operator(user)};}
+ async function operator(user){return Boolean(adminUserId&&user.id===adminUserId)||operators.has(user.email)&&await verified(user);}
+ async function publicUser(user){return {id:user.id,email:user.email,profile:JSON.parse(user.profile),emailVerified:await verified(user),admin:Boolean(adminUserId&&user.id===adminUserId),operator:await operator(user)};}
  async function requireOperator(user){if(!await operator(user))throw new HTTPError(403,'Dieser Bereich ist nur für das Kontaktstoff-Team freigegeben.');}
  async function sendToken(user,kind){
   if(!mailer.configured)throw new HTTPError(503,'E-Mail-Versand ist noch nicht eingerichtet. Bitte wende dich an Kontaktstoff.');

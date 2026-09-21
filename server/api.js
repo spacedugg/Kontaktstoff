@@ -1,3 +1,4 @@
+import {ADMIN_ID,ADMIN_EMAIL,validAdminHash,adminLogin} from './admin-auth.js';
 import {libraryService} from './library.js';
 import {randomBytes,randomUUID,createHash,scrypt as rawScrypt,timingSafeEqual} from 'node:crypto';
 import {promisify} from 'node:util';
@@ -10,12 +11,12 @@ const send=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application
 const packed=row=>({...JSON.parse(row.payload),id:row.id,revision:Number(row.revision),updatedAt:Number(row.updated_at)});
 function jsonObject(value){if(!value||typeof value!=='object'||Array.isArray(value))throw new HTTPError(400,'Bitte ein gültiges JSON-Objekt senden.');return value;}
 async function body(req){if(!String(req.headers['content-type']||'').startsWith('application/json'))throw new HTTPError(415,'JSON erwartet.');if(req.body!==undefined){let parsed;try{parsed=typeof req.body==='string'?JSON.parse(req.body):req.body;}catch{throw new HTTPError(400,'Ungültige Anfrage.');}if(Buffer.byteLength(JSON.stringify(parsed))>4*1024*1024)throw new HTTPError(413,'Das Projekt überschreitet 4 MB. Bitte Bilder verkleinern.');return jsonObject(parsed);}let data='',bytes=0;for await(const chunk of req){bytes+=chunk.length;if(bytes>4*1024*1024)throw new HTTPError(413,'Das Projekt ist zu groß für die Kontospeicherung (max. 4 MB). Bitte Bilder verkleinern oder lokal als Projekt sichern.');data+=chunk;}try{return jsonObject(JSON.parse(data));}catch{throw new HTTPError(400,'Ungültige Anfrage.');}}
-export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.1:4177',mailer=createMailer(),operatorEmails=process.env.OPERATOR_EMAILS||'',notificationTo=process.env.REQUEST_NOTIFICATION_TO||''}={}){
+export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.1:4177',mailer=createMailer(),operatorEmails=process.env.OPERATOR_EMAILS||'',notificationTo=process.env.REQUEST_NOTIFICATION_TO||'',adminPasswordHash=process.env.ADMIN_PASSWORD_HASH||''}={}){
  origin=new URL(origin).origin;const cookieName=origin.startsWith('https:')?'__Host-kontaktstoff':'kontaktstoff_session';
- const services=accountServices(db,{origin,mailer,operatorEmails,notificationTo});
+ const services=accountServices(db,{origin,mailer,operatorEmails,notificationTo,adminUserId:validAdminHash(adminPasswordHash)?ADMIN_ID:''});
  const cookie=(res,token,maxAge=604800)=>res.setHeader('Set-Cookie',`${cookieName}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${origin.startsWith('https:')?'; Secure':''}`);
  async function limited(key,max=15){const now=Date.now(),result=await db.query('INSERT INTO rate_limits(key,count,expires) VALUES($1,1,$2) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN rate_limits.expires < $3 THEN 1 ELSE rate_limits.count+1 END, expires=CASE WHEN rate_limits.expires < $3 THEN $2 ELSE rate_limits.expires END RETURNING count',[key,now+900000,now]);if(Number(result.rows[0].count)>max)throw new HTTPError(429,'Zu viele Versuche. Bitte in 15 Minuten erneut versuchen.');}
- async function session(req){const token=String(req.headers.cookie||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(cookieName+'='))?.slice(cookieName.length+1);if(!token)return null;const result=await db.query('SELECT users.id,users.email,users.profile,sessions.csrf FROM sessions JOIN users ON users.id=sessions.user_id WHERE sessions.token=$1 AND sessions.expires>$2',[hash(token),Date.now()]);return result.rows[0]||null;}
+ async function session(req){const token=String(req.headers.cookie||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(cookieName+'='))?.slice(cookieName.length+1);if(!token)return null;const result=await db.query('SELECT users.id,users.email,users.profile,users.password,sessions.csrf FROM sessions JOIN users ON users.id=sessions.user_id WHERE sessions.token=$1 AND sessions.expires>$2',[hash(token),Date.now()]);const user=result.rows[0];if(user?.id===ADMIN_ID&&(!validAdminHash(adminPasswordHash)||user.password!==adminPasswordHash))return null;return user||null;}
  async function issueSession(user,res){const token=randomBytes(32).toString('base64url'),csrf=randomBytes(24).toString('base64url');await db.query('INSERT INTO sessions(token,user_id,csrf,expires) VALUES($1,$2,$3,$4)',[hash(token),user.id,csrf,Date.now()+604800000]);cookie(res,token);return {user:await services.publicUser(user),csrf};}
  const load=async(q,id,user)=>{const result=await q('SELECT * FROM campaigns WHERE id=$1 AND user_id=$2 AND deleted_at IS NULL',[id,user]);if(!result.rows[0])throw new HTTPError(404,'Kampagne nicht gefunden.');return result.rows[0];};
  const libraries=libraryService(db,{origin,limited});
@@ -33,13 +34,18 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
    }
    if(pathname==='/api/health'){send(res,200,{available:true,storage:process.env.DATABASE_URL?'postgres':'local',origin,email:mailer.configured});return true;}
    if(!['GET','HEAD'].includes(req.method)&&req.headers.origin!==origin)throw new HTTPError(403,'Die Anfrage muss aus deinem Kontaktstoff-Arbeitsplatz kommen.');
+   if(pathname==='/api/auth/admin'&&req.method==='POST'){
+    const address=process.env.VERCEL?String(req.headers['x-forwarded-for']||'').split(',')[0]:req.socket?.remoteAddress||'local';
+    await limited('admin-ip:'+hash(address),10);await limited('admin-total',100);
+    const input=await body(req);send(res,200,await issueSession(await adminLogin(db,input.password,adminPasswordHash),res));return true;
+   }
    if(['/api/auth/forgot','/api/auth/reset','/api/auth/verify'].includes(pathname)&&req.method==='POST'){
     const input=await body(req),address=process.env.VERCEL?String(req.headers['x-forwarded-for']||'').split(',')[0]:req.socket?.remoteAddress||'local';await limited('recovery-ip:'+hash(address),30);
     if(pathname.endsWith('/forgot')){
      if(!mailer.configured)throw new HTTPError(503,'Passwort-Wiederherstellung per E-Mail ist noch nicht eingerichtet.');
      const email=text(input.email||'',254).toLowerCase();await limited('recovery-email:'+hash(email),3);
      const found=(await db.query('SELECT * FROM users WHERE email=$1',[email])).rows[0];
-     if(found)try{await services.sendToken(found,'reset');}catch{}
+     if(found&&found.id!==ADMIN_ID)try{await services.sendToken(found,'reset');}catch{}
      send(res,200,{ok:true,message:'Falls ein Konto mit dieser Adresse besteht, erhältst du einen Link zum Zurücksetzen.'});return true;
     }
     const kind=pathname.endsWith('/reset')?'reset':'verify';const result=await services.consume(input,kind);if(kind==='reset')cookie(res,'',0);send(res,200,result);return true;
@@ -49,6 +55,7 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new HTTPError(400,'Bitte eine gültige E-Mail-Adresse eingeben.');
     // Account and network limits are persisted across process restarts.
     const address=process.env.VERCEL?String(req.headers['x-forwarded-for']||'').split(',')[0]:req.socket?.remoteAddress||'local';await limited('auth-email:'+hash(email));await limited('auth-ip:'+hash(address),60);
+    if(email===ADMIN_EMAIL)throw new HTTPError(403,'Bitte den internen Zugang unter /admin verwenden.');
     if(pathname.endsWith('register')){
      if(password.length<12)throw new HTTPError(400,'Das Passwort braucht mindestens 12 Zeichen.');const company=profile(input.profile||{});if(!company.company||!company.name)throw new HTTPError(400,'Unternehmen und Ansprechpartner fehlen.');
      const salt=randomBytes(16).toString('hex'),digest=(await scrypt(password,salt,64)).toString('hex'),user={id:randomUUID(),email,profile:JSON.stringify(company)};

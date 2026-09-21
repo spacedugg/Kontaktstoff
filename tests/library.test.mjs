@@ -1,3 +1,5 @@
+import {scryptSync} from 'node:crypto';
+import {ADMIN_ID,ADMIN_EMAIL} from '../server/admin-auth.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Readable} from 'node:stream';
@@ -11,6 +13,28 @@ import {defaults,metrics} from '../konto/src/model.js';
 import {createMailer} from '../server/mail.js';
 const origin='http://localhost:9000';
 async function fixture(options={}){const db=await connectDB({file:':memory:'}),handle=createAPI(db,{origin,...options});async function request(route,{method='GET',body,account,prepared=false,headers={}}={}){const req=Readable.from(body?[Buffer.from(JSON.stringify(body))]:[]);Object.assign(req,{url:route,method,headers:{origin,'content-type':'application/json',...(account?{cookie:account.cookie,'x-csrf-token':account.csrf}:{}),...headers},socket:{remoteAddress:'127.0.0.1'},...(prepared?{body}:{})});let status,raw;const received={};const res={setHeader:(k,v)=>received[k]=v,writeHead:(s,h)=>{status=s;Object.assign(received,h);},end:data=>raw=data};await handle(req,res);return {status,headers:received,data:raw?JSON.parse(raw):null};}async function register(email){const r=await request('/api/auth/register',{method:'POST',body:{email,password:'a-test-password-123',profile:{company:'Test GmbH',name:'Mara Test'}}});assert.equal(r.status,201);return {cookie:r.headers['Set-Cookie'].split(';')[0],csrf:r.data.csrf};}return {db,request,register};}
+test('internal admin uses a server secret, preserves its workspace, and rejects guest and customer access',async()=>{
+ const encode=password=>'0123456789abcdef0123456789abcdef:'+scryptSync(password,'0123456789abcdef0123456789abcdef',64).toString('hex');
+ const password='admin-test-only-passphrase',adminPasswordHash=encode(password),{db,request,register}=await fixture({adminPasswordHash});
+ try{
+  assert.equal((await request('/api/auth/admin',{method:'POST',body:{password},headers:{origin:'https://evil.example'}})).status,403);
+  assert.equal((await request('/api/auth/admin',{method:'POST',body:{password:'wrong'}})).status,401);
+  const r=await request('/api/auth/admin',{method:'POST',body:{password}});assert.equal(r.status,200);assert.equal(r.data.user.admin,true);assert.equal(r.data.user.operator,true);assert.equal(r.data.user.password,undefined);
+  const admin={cookie:r.headers['Set-Cookie'].split(';')[0],csrf:r.data.csrf};assert.match(r.headers['Set-Cookie'],/HttpOnly/);
+  assert.equal((await request('/api/operator/requests',{account:admin})).status,200);
+  const c=await request('/api/campaigns',{method:'POST',account:admin,body:{project:createCampaign(true)}});assert.equal(c.status,201);
+  const second=await request('/api/auth/admin',{method:'POST',body:{password}});assert.equal(second.data.user.id,ADMIN_ID);
+  const customer=await register('not-admin@example.org');assert.equal((await request('/api/operator/requests',{account:customer})).status,403);
+  assert.equal((await request('/api/campaigns/'+c.data.id,{account:customer})).status,404);
+  assert.equal((await request('/api/auth/register',{method:'POST',body:{email:ADMIN_EMAIL,password,profile:{company:'Fake',name:'Fake'}}})).status,403);
+  assert.equal((await request('/api/auth/login',{method:'POST',body:{email:ADMIN_EMAIL,password}})).status,403);
+  assert.equal((await request('/api/campaigns',{method:'POST',account:{...admin,csrf:'wrong'},body:{project:createCampaign(true)}})).status,403);
+  await request('/api/auth/logout',{method:'POST',account:admin,body:{}});assert.equal((await request('/api/auth/me',{account:admin})).data.user,null);
+  for(let i=0;i<8;i++)await request('/api/auth/admin',{method:'POST',body:{password:'wrong'}});
+  assert.equal((await request('/api/auth/admin',{method:'POST',body:{password}})).status,429);
+ }finally{await db.close();}
+ const disabled=await fixture();try{assert.equal((await disabled.request('/api/auth/admin',{method:'POST',body:{password}})).status,503);}finally{await disabled.db.close();}
+});
 test('audiences and designs are isolated, revision protected and composed into independent campaign snapshots',async()=>{
  const {db,request,register}=await fixture();try{
  const a=await register('library@example.org'),b=await register('otherlib@example.org'),project=createCampaign();project.recipients[0].street='Beispielstraße 1';
