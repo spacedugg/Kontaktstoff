@@ -116,7 +116,7 @@ export function libraryService(db,{origin,limited,reviewLinkKey}){
    await rememberLink(q,id,token);
    return await reviewResult(q,await review(q,id,user.id),true);
   });
-  const match=path.match(/^\/api\/reviews\/([\w-]+)(?:\/(publish|revoke|link|resolve|delete|restore|remember-link))?$/);
+  const match=path.match(/^\/api\/reviews\/([\w-]+)(?:\/(publish|revoke|link|resolve|delete|restore|remember-link|comment))?$/);
   if(match){const [,id,action]=match;return db.tx(async q=>{
    const r=await review(q,id,user.id),trash=(await q('SELECT * FROM review_trash WHERE review_id=$1',[id])).rows[0];if(trash&&action!=='restore')fail(404,'Diese Freigabe liegt im Papierkorb.');if(method==='GET'&&!action)return reviewResult(q,r,true);
    if(method!=='POST')fail(405,'Methode nicht erlaubt.');if(Number(input.revision)!==Number(r.revision))fail(409,'Die Freigabe wurde geändert. Bitte neu laden.');const at=Date.now();
@@ -137,6 +137,13 @@ export function libraryService(db,{origin,limited,reviewLinkKey}){
     const s=await source(q,r.source_kind,r.source_id,user.id);if(Number(input.sourceRevision)!==Number(s.revision))fail(409,'Bitte das aktuelle Design laden.');const snapshot=proof(JSON.parse(s.payload).project,Number(r.recipient_index)),version=Number(r.version)+1;
     await q('INSERT INTO review_versions(review_id,version,payload,created_at) VALUES($1,$2,$3,$4)',[id,version,JSON.stringify(snapshot),at]);
     const changed=await q("UPDATE reviews SET version=$1,revision=revision+1,status='open',fingerprint=$2,updated_at=$3 WHERE id=$4 AND revision=$5 RETURNING id",[version,hash(JSON.stringify(snapshot)),at,id,r.revision]);if(!changed.rows.length)fail(409,'Bitte neu laden.');
+   }else if(action==='comment'){
+    if(r.status==='approved'||r.status==='revoked'||Number(input.version)!==Number(r.version))fail(409,'Dieser Designstand kann nicht kommentiert werden. Bitte den aktuellen Stand laden.');
+    const message=text(input.text||'',2000);if(!message)fail(400,'Bitte deinen Änderungswunsch eintragen.');
+    const event={id:randomUUID(),type:'comment',authorRole:'team',name:'Kontaktstoff-Team',version:Number(r.version),at,text:message};
+    if(input.side!==null&&input.side!==undefined){const project=JSON.parse((await q('SELECT payload FROM review_versions WHERE review_id=$1 AND version=$2',[id,r.version])).rows[0].payload);if(!sideNames(project).includes(input.side))fail(400,'Ungültige Kartenseite.');event.side=input.side;for(const k of ['x','y']){if(!Number.isFinite(input[k])||input[k]<0||input[k]>1)fail(400,'Ungültige Markierung.');event[k]=input[k];}}
+    const changed=await q("UPDATE reviews SET status='changes',revision=revision+1,updated_at=$1 WHERE id=$2 AND revision=$3 RETURNING id",[at,id,r.revision]);if(!changed.rows.length)fail(409,'Die Freigabe wurde inzwischen geändert. Bitte neu laden.');
+    await q('INSERT INTO review_events(id,review_id,payload,created_at) VALUES($1,$2,$3,$4)',[event.id,id,JSON.stringify(event),at]);
    }else if(action==='resolve'){
     const found=(await q('SELECT payload FROM review_events WHERE id=$1 AND review_id=$2',[text(input.commentId||'',100),id])).rows[0],comment=found&&JSON.parse(found.payload);if(!comment||comment.type!=='comment'||comment.version!==Number(r.version)||r.status==='approved'||r.status==='revoked')fail(400,'Dieser Kommentar kann nicht geändert werden.');
     const event={id:randomUUID(),type:'resolve',commentId:comment.id,name:'Kontaktstoff-Team',version:Number(r.version),at,text:'Änderungswunsch erledigt.'};await q('INSERT INTO review_events(id,review_id,payload,created_at) VALUES($1,$2,$3,$4)',[event.id,id,JSON.stringify(event),at]);

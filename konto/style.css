@@ -10,3 +10,4 @@
 
 /* Keep labels inside the sidebar and make the campaign review action easy to find. */
 .sidebar{min-width:0}.sidebar nav a{min-width:0;overflow-wrap:anywhere}.nav-icon{flex:0 0 21px}.tile-actions{flex-wrap:wrap;gap:12px}.tile-actions .review-entry{flex-basis:100%;order:-1;font-weight:700;color:#354923;background:#f0f5e2;padding:10px 12px;border-radius:7px}
+@media(max-width:700px){.sidebar nav a{flex:0 0 auto;overflow-wrap:normal}.sidebar nav{max-width:100%;padding-bottom:4px}}

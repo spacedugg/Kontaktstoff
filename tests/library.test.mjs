@@ -153,3 +153,25 @@ test('review creation fails atomically if the link encryption key is unavailable
   assert.equal((await db.query('SELECT * FROM reviews')).rows.length,0);
  }finally{await db.close();}
 });
+
+test('authenticated team annotations use the same proof and cannot impersonate clients or edit approved versions',async()=>{
+ const {db,request,register}=await fixture();try{
+  const account=await register('team-review@example.org'),other=await register('other-team@example.org');
+  const design=(await request('/api/library/designs',{method:'POST',account,body:{project:createCampaign()}})).data;
+  const initial=(await request('/api/reviews',{method:'POST',account,body:{sourceKind:'designs',sourceId:design.id,sourceRevision:design.revision}})).data;
+  const route='/api/reviews/'+initial.id+'/comment',body={revision:initial.revision,version:initial.version,side:'back',x:.24,y:.52,text:'QR-Code größer',name:'Fake client',authorRole:'client'};
+  assert.equal((await request(route,{method:'POST',account:other,body})).status,404);
+  assert.equal((await request(route,{method:'POST',account,body:{...body,x:1.1}})).status,400);
+  assert.equal((await request(route,{method:'POST',account,body:{...body,side:'invented'}})).status,400);
+  assert.equal((await request(route,{method:'POST',account,body:{...body,version:99}})).status,409);
+  const r=(await request(route,{method:'POST',account,body})).data;assert.equal(r.status,'changes');assert.equal(r.url,initial.url);
+  assert.equal(r.events[0].authorRole,'team');assert.equal(r.events[0].name,'Kontaktstoff-Team');assert.equal(r.events[0].x,.24);
+  assert.equal((await request(route,{method:'POST',account,body})).status,409);
+  const token=new URLSearchParams(new URL(initial.url).hash.slice(1)).get('token'),headers={authorization:'Bearer '+token};
+  assert.equal((await request('/api/review',{headers})).data.events[0].text,'QR-Code größer');
+  let current=(await request('/api/reviews/'+r.id+'/resolve',{method:'POST',account,body:{revision:r.revision,commentId:r.events[0].id}})).data;
+  current=(await request('/api/review',{method:'POST',headers,body:{type:'approve',name:'Kunde',confirm:true,revision:current.revision,version:current.version}})).data;
+  assert.equal((await request(route,{method:'POST',account,body:{...body,revision:current.revision}})).status,409);
+  assert.equal((await db.query('SELECT * FROM requests')).rows.length,0);
+ }finally{await db.close();}
+});

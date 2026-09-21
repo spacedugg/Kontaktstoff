@@ -52,7 +52,7 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
 }
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
 function renderUI(inspector=true,table=true,guide=true){
- $('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=cloudPath.includes('library')?'Zur Designbibliothek →':'Kampagne anfragen →';
+ $('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=reviewReturn()?'Speichern & zur Abstimmung →':cloudPath.includes('library')?'Zur Designbibliothek →':'Kampagne anfragen →';
  if(!sideNames(campaign).includes(side))side='front';
  document.body.classList.toggle('single-sided',sideNames(campaign).length===1);
  document.documentElement.style.setProperty('--mailing-ratio',format().width+'/'+format().height);
@@ -288,7 +288,8 @@ async function showDashboard(){
  // Render sequentially to keep large local libraries responsive.
  for(const c of dashboardCampaigns){if(view!=='dashboard'||version!==dashboardVersion)break;const canvas=$(`[data-dashboard-thumb="${c.id}"]`);if(canvas)try{await renderCanvas(canvas,c,'front',c.recipients[0]||{company:'Ihr Unternehmen',salutation:'Guten Tag,',chatbot_url:'https://chattastic.de/'},{scale:2});}catch{canvas.replaceWith(document.createTextNode('Vorschau nicht verfügbar'));}}
 }
-const campaignList=async()=>{if(cloudRecord?.id===campaign.id||new URLSearchParams(location.search).has('workspace')){await flushSave();if(!saveFailed)location.href='/konto/';}else await showDashboard();};
+const reviewReturn=()=>{const id=new URLSearchParams(location.search).get('review');return id&&/^[\w-]+$/.test(id)?'/konto/?tab=reviews&review='+encodeURIComponent(id):null;};
+const campaignList=async()=>{if(cloudRecord?.id===campaign.id||new URLSearchParams(location.search).has('workspace')){await flushSave();if(!saveFailed)location.href=reviewReturn()||'/konto/';}else await showDashboard();};
 $('#dashboard-view').onclick=async e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-dashboard-tutorial'))return startTutorial(true);
@@ -477,8 +478,8 @@ $('#tutorial-view').addEventListener('click',async e=>{
 
 });
 
-$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id);};
-$('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(saveFailed)return;location.href=cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?id='+encodeURIComponent(campaign.id):'/konto/';};
+$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=reviewReturn()||(cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id));};
+$('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(saveFailed)return;location.href=reviewReturn()||(cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?id='+encodeURIComponent(campaign.id):'/konto/');};
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
 hydrateIcons();
@@ -487,6 +488,7 @@ $('#example-next').onclick=()=>{recipientIndex=(recipientIndex+1)%Math.max(1,cam
 $('#example-edit').onclick=()=>{side='front';selected=campaign.sides.front.fields.find(f=>f.text==='{{company}}')?.id;setView('design');};
 $('#example-data').onclick=()=>setView('recipients');
 const params=new URLSearchParams(location.search);
+if(reviewReturn()){$('#workspace-link').textContent='Zurück zur Abstimmung';$('#request-campaign').textContent='Speichern & zur Abstimmung →';}
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
  if(params.has('design')){cloudPath='/library/designs/';await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI(cloudPath+encodeURIComponent(params.get('design')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view='design';saveState('In der Designbibliothek gespeichert');}
