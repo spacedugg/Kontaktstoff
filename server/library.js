@@ -75,12 +75,17 @@ export function libraryService(db,{origin,limited}){
    });
   }
   if(path==='/api/compose'&&method==='POST')return db.tx(async q=>{
-   const d=(await q("SELECT * FROM library WHERE id=$1 AND user_id=$2 AND kind='designs' AND deleted_at IS NULL",[input.designId,user.id])).rows[0],a=(await q("SELECT * FROM library WHERE id=$1 AND user_id=$2 AND kind='audiences' AND deleted_at IS NULL",[input.audienceId,user.id])).rows[0];
-   if(!d||!a)fail(404,'Bitte ein Design und eine Zielgruppe aus deinem Konto auswählen.');
-   if(Number(input.designRevision)!==Number(d.revision)||Number(input.audienceRevision)!==Number(a.revision))fail(409,'Design oder Zielgruppe wurde geändert. Bitte neu laden.');
-   const project=JSON.parse(d.payload).project,audience=JSON.parse(a.payload);project.id=randomUUID();project.name=text(input.name||'',120);project.recipients=audience.recipients;project.sample=false;project.updatedAt=Date.now();
-   const value=payload({project,meta:{...input.meta,audience:audience.name,leadSource:'upload',quantity:project.recipients.length||1,designId:d.id,audienceId:a.id,designRevision:Number(d.revision),audienceRevision:Number(a.revision)}});
-   if(!project.recipients.length)fail(400,'Diese Zielgruppe enthält noch keine Kontakte.');
+   // A named draft may start without either resource. Supplied IDs must still belong to this account.
+   const d=input.designId?(await q("SELECT * FROM library WHERE id=$1 AND user_id=$2 AND kind='designs' AND deleted_at IS NULL",[input.designId,user.id])).rows[0]:null;
+   const a=input.audienceId?(await q("SELECT * FROM library WHERE id=$1 AND user_id=$2 AND kind='audiences' AND deleted_at IS NULL",[input.audienceId,user.id])).rows[0]:null;
+   if((input.designId&&!d)||(input.audienceId&&!a))fail(404,'Bitte ein Design oder eine Zielgruppe aus deinem Konto auswählen.');
+   if((d&&Number(input.designRevision)!==Number(d.revision))||(a&&Number(input.audienceRevision)!==Number(a.revision)))fail(409,'Design oder Zielgruppe wurde geändert. Bitte neu laden.');
+   const project=d?JSON.parse(d.payload).project:createCampaign(true),audience=a?JSON.parse(a.payload):null;
+   project.id=randomUUID();project.name=text(input.name||'',120);if(!project.name)fail(400,'Bitte einen Kampagnennamen eingeben.');
+   // Template preview contacts never become actual recipients when the audience is deferred.
+   project.recipients=audience?.recipients||[];project.sample=false;project.updatedAt=Date.now();
+   if(project.onboarding)project.onboarding.active=false;
+   const value=payload({project,meta:{...input.meta,audience:audience?.name||'',leadSource:'upload',quantity:project.recipients.length||250,designId:d?.id||'',audienceId:a?.id||'',designRevision:Number(d?.revision)||0,audienceRevision:Number(a?.revision)||0}});
    await q('INSERT INTO campaigns(id,user_id,payload,revision,updated_at) VALUES($1,$2,$3,1,$4)',[project.id,user.id,JSON.stringify(value),Date.now()]);return {...value,id:project.id,revision:1};
   });
   if(path==='/api/reviews'&&method==='GET'){const rows=(await db.query('SELECT * FROM reviews WHERE user_id=$1 ORDER BY updated_at DESC',[user.id])).rows;const items=[];for(const r of rows)items.push(await reviewResult(db.query,r,true));return {items};}

@@ -26,6 +26,27 @@ test('audiences and designs are isolated, revision protected and composed into i
  assert.equal((await request('/api/library/audiences/'+audience.id,{method:'DELETE',account:a,body:{revision:1}})).status,409);
  }finally{await db.close();}
 });
+test('campaign drafts may defer either resource and be completed later without adopting demo contacts',async()=>{
+ const {db,request,register}=await fixture();try{
+  const account=await register('drafts@example.org'),other=await register('drafts-other@example.org'),project=createCampaign();
+  const d=(await request('/api/library/designs',{method:'POST',account,body:{project}})).data;
+  const a=(await request('/api/library/audiences',{method:'POST',account,body:{name:'Eigene Kontakte',recipients:project.recipients}})).data;
+  for(const [useDesign,useAudience] of [[false,false],[true,false],[false,true]]){
+   const body={name:'Später fertigstellen',...(useDesign?{designId:d.id,designRevision:d.revision}:{}),...(useAudience?{audienceId:a.id,audienceRevision:a.revision}:{})};
+   const response=await request('/api/compose',{method:'POST',account,body});assert.equal(response.status,200);
+   const c=response.data;assert.equal(c.project.recipients.length,useAudience?3:0);assert.equal(c.meta.status,'draft');
+   assert.equal(c.meta.designId,useDesign?d.id:'');assert.equal(c.meta.audienceId,useAudience?a.id:'');
+   assert.equal(c.project.sides.front.fields.length,useDesign?project.sides.front.fields.length:0);
+   c.project.sides=structuredClone(project.sides);c.project.recipients=structuredClone(a.recipients);
+   const saved=await request('/api/campaigns/'+c.id,{method:'PUT',account,body:c});assert.equal(saved.status,200);
+   const reopened=(await request('/api/campaigns/'+c.id,{account})).data;assert.equal(reopened.project.recipients.length,3);assert.deepEqual(reopened.project.sides,project.sides);
+  }
+  assert.equal((await request('/api/compose',{method:'POST',account,body:{name:'   '}})).status,400);
+  assert.equal((await request('/api/compose',{method:'POST',account:other,body:{name:'Foreign',designId:d.id,designRevision:1}})).status,404);
+  assert.equal((await request('/api/compose',{method:'POST',account:other,body:{name:'Foreign',audienceId:a.id,audienceRevision:1}})).status,404);
+  assert.equal((await request('/api/compose',{method:'POST',account,body:{name:'Stale',designId:d.id,designRevision:0}})).status,409);
+ }finally{await db.close();}
+});
 test('review links expose only one chosen proof, support annotations, resolution, approval and immutable new versions',async()=>{
  const {db,request,register}=await fixture();try{
  const a=await register('review@example.org'),b=await register('review-other@example.org'),project=createCampaign();project.recipients[0].email='private@example.org';
