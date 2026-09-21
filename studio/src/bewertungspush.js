@@ -8,17 +8,17 @@ export function createBewertungspush(){
  c.name='BewertungsPush · Echte Erfahrungen zählen';c.templateId='bewertungspush';c.sample=true;c.onboarding={active:false,step:5,personalizationSkipped:false};
  c.brief={sender:'BewertungsPush',audience:'Inhaber und Geschäftsführungen von Hotels, Restaurants und Werkstätten',goal:'website',offer:'Verdächtige Google-Bewertungen prüfen lassen. Zahlung nur bei erfolgreicher Löschung.'};
  c.recipients=[
-  {first_name:'Hannah',last_name:'Seidel',company:'Hotel Lindenhof',segment:'Hotels',salutation:'Guten Tag Frau Seidel,',personal_headline:'Nie Gast gewesen?',personal_note:'Sie kümmern sich um Ihre Gäste. Umso ärgerlicher, wenn eine negative Bewertung auftaucht – und sich der beschriebene Aufenthalt gar nicht zuordnen lässt.'},
-  {first_name:'Marco',last_name:'Berg',company:'Restaurant Abendrot',segment:'Restaurants',salutation:'Guten Tag Herr Berg,',personal_headline:'Nie Gast gewesen?',personal_note:'Sie geben jeden Tag alles für Ihre Gäste. Was, wenn eine negative Bewertung einen Restaurantbesuch beschreibt, der so gar nicht stattgefunden hat?'},
-  {first_name:'Julia',last_name:'Kern',company:'Werkstatt Kern',segment:'Werkstätten',salutation:'Guten Tag Frau Kern,',personal_headline:'Nie Kunde gewesen?',personal_note:'Ihre Kunden vertrauen Ihnen ihr Auto an. Umso ärgerlicher, wenn eine negative Bewertung auftaucht – und sich der beschriebene Auftrag gar nicht zuordnen lässt.'}
+  {first_name:'Hannah',last_name:'Seidel',company:'Hotel Lindenhof',segment:'Hotels',salutation:'Guten Tag Frau Seidel,',personal_note:'Sie kümmern sich um Ihre Gäste. Umso ärgerlicher, wenn eine negative Bewertung auftaucht – und sich der beschriebene Aufenthalt gar nicht zuordnen lässt.'},
+  {first_name:'Marco',last_name:'Berg',company:'Restaurant Abendrot',segment:'Restaurants',salutation:'Guten Tag Herr Berg,',personal_note:'Sie geben jeden Tag alles für Ihre Gäste. Was, wenn eine negative Bewertung einen Restaurantbesuch beschreibt, der so gar nicht stattgefunden hat?'},
+  {first_name:'Julia',last_name:'Kern',company:'Werkstatt Kern',segment:'Werkstätten',salutation:'Guten Tag Frau Kern,',personal_note:'Ihre Kunden vertrauen Ihnen ihr Auto an. Umso ärgerlicher, wenn eine negative Bewertung auftaucht – und sich der beschriebene Auftrag gar nicht zuordnen lässt.'}
  ].map((r,i)=>({...r,id:uid(),industry:r.segment,website:'',street:'',postal_code:'',city:'',country:'Deutschland',chatbot_url:'https://bewertungspush.de/suche?utm_source=kontaktstoff&utm_medium=direct_mail&utm_campaign=profilcheck_pilot&utm_content=beispiel_'+(i+1)}));
  c.sides.front={background:{kind:'blank',color:'#0b1020'},fields:[
   image(reputationArt,128,18,81,101),
   image(brandLogoLight,12,11,70,11.48),
   t('FÜR {{company}}',12,34,126,9,9,'#b7d6ff','700'),
-  t('Schlechte\nBewertung.',12,49,121,37,36,'#ffffff','700'),
-  t('{{personal_headline}}',12,88,177,15,28,'#76adff','700'),
-  t('Wir prüfen, ob sie gegen Googles Richtlinien verstößt.',12,109,177,10,11.5,'#e0e9f7'),
+  t('Ihr guter Ruf',12,48,121,18,33,'#ffffff','700'),
+  t('verdient echte\nBewertungen.',12,68,121,34,32,'#76adff','700'),
+  t('Verdächtige Google-Bewertungen prüfen lassen.\nNur bei erfolgreicher Löschung zahlen.',12,109,177,15,11.5,'#e0e9f7'),
   s(0,128,210,20,'#eaf2ff'),
   t('Für {{first_name}} {{last_name}}',12,134,98,8,10,ink,'700'),
   t('SO FUNKTIONIERT’S →',145,134,54,8,9,ink,'700')
