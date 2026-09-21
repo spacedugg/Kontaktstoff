@@ -1,6 +1,6 @@
 # Kontaktstoff
 
-Editor und Kundenbereich für persönliche B2B-Mailings. Der Branch **`codex/kundenbereich`** ergänzt das bestehende öffentliche Homepage-Design um Studio-/Kontolinks und eine Übergabe aus dem Planungsrechner. Kein Live-Deployment wurde durchgeführt.
+Editor und Kundenbereich für persönliche B2B-Mailings. Der Branch **`codex/kundenbereich`** ergänzt das bestehende öffentliche Homepage-Design um Studio-/Kontolinks und eine Übergabe aus dem Planungsrechner. Der Stand ist seit 21.09.2026 unter https://www.kontaktstoff.com veröffentlicht. Anmeldung und Server-Speicherung sind bis zur Datenbank-Anbindung deaktiviert.
 
 ## Lokal starten
 
@@ -28,7 +28,7 @@ Im Editor bleiben PDF/Bild-Uploads, Gestaltung in Millimetern, Personalisierung,
 
 ## Backend und Grenzen
 
-Lokal läuft SQLite in `.data/`; die Datei und Testkonten werden nicht eingecheckt oder statisch ausgeliefert. Vercel benötigt PostgreSQL (`DATABASE_URL`) und die eigene URL (`PUBLIC_ORIGIN`). Ohne Konfiguration bleibt der lokale Editor nutzbar; Serverfunktionen melden, dass die Anbindung fehlt. Keine externe Datenbank wurde provisioniert und nichts auf Produktion veröffentlicht.
+Lokal läuft SQLite in `.data/`; die Datei und Testkonten werden nicht eingecheckt oder statisch ausgeliefert. Vercel benötigt PostgreSQL (`DATABASE_URL`) und die eigene URL (`PUBLIC_ORIGIN`). Ohne Konfiguration bleibt der lokale Editor nutzbar; Serverfunktionen melden, dass die Anbindung fehlt. Keine externe Datenbank wurde provisioniert. Die veröffentlichten Serverfunktionen melden deshalb aktuell ausdrücklich, dass die Anbindung fehlt.
 
 Keine Zahlung, Versandbuchung, automatische Lead-Recherche oder E-Mail-Versendung. Leistungen werden angefragt. Kontowiederherstellung/E-Mail-Verifikation, Mehrbenutzerrollen und privater separater Dateispeicher sind noch nicht angebunden. Die öffentliche Homepage ist das bestehende Marketingkonzept, kein Nachweis bereits automatisierter Produktionsleistungen.
 

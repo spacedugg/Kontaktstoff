@@ -1,6 +1,6 @@
 # Kundenbereich und Editor
 
-Entwicklungsbranch: `codex/kundenbereich`. Kein Produktionsdeployment durchgeführt.
+Entwicklungsbranch: `codex/kundenbereich`. Produktionsdeployment am 21.09.2026 auf ausdrücklichen Nutzerwunsch durchgeführt: https://www.kontaktstoff.com (auch kontaktstoff.com und kontaktstoff.vercel.app). Veröffentlicht: Commit `82131ce`, Vercel `dpl_4sZk5cQwVs4uTzvzsVYPqQ27nuzB`. Homepage, Editor, Demo und Kundenkonzept live geprüft. DATABASE_URL und PUBLIC_ORIGIN fehlen weiterhin; die Konto-API liefert deshalb bewusst 503.
 
 Die Homepage entspricht dem öffentlich vorhandenen Design. Ergänzt sind Links in Navigation, Hauptaktion und Dashboard-Ansicht sowie die Übergabe aus dem Planungsrechner. Bestehende Geldbeträge im Rechner sind Planungswerte; der Kundenbereich löst keine Zahlung aus.
 
