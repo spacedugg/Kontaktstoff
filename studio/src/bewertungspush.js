@@ -16,9 +16,9 @@ export function createBewertungspush(){
   image(reputationArt,128,18,81,101),
   image(brandLogoLight,12,11,70,11.48),
   t('FÜR {{company}}',12,34,126,9,9,'#b7d6ff','700'),
-  t('Ihr guter Ruf',12,48,121,18,33,'#ffffff','700'),
-  t('verdient echte\nBewertungen.',12,68,121,34,32,'#76adff','700'),
-  t('Verdächtige Google-Bewertungen prüfen lassen.\nNur bei erfolgreicher Löschung zahlen.',12,109,177,15,11.5,'#e0e9f7'),
+  t('Unberechtigte\nBewertungen raus.',12,46,121,35,29,'#ffffff','700'),
+  t('Ihr guter Ruf nach vorn.',12,86,121,14,24,'#76adff','700'),
+  t('Wir kümmern uns um die Löschung.\nKeine Vorkasse. Sie zahlen nur bei Erfolg.',12,108,177,16,11.5,'#e0e9f7'),
   s(0,128,210,20,'#eaf2ff'),
   t('Für {{first_name}} {{last_name}}',12,134,98,8,10,ink,'700'),
   t('SO FUNKTIONIERT’S →',145,134,54,8,9,ink,'700')
@@ -39,4 +39,21 @@ export function createBewertungspush(){
   s(12,135,186,2,'#e0e7ef'),
   t('Keine Vorkasse. Über die Löschung entscheidet Google.',12,139,186,5,8,muted)
  ]};return c;
+}
+
+// Optional sales concept, not an existing offer from the provider.
+export function applyBewertungspushOffer(campaign){
+ const c=structuredClone(campaign);
+ c.name+=' · Angebotsidee';
+ const front=c.sides.front.fields;
+ const intro=front.find(f=>f.type==='text'&&f.text.startsWith('Wir kümmern uns'));
+ if(intro){intro.text='Erste erfolgreiche Löschung gratis.';intro.weight='700';intro.fontSize=15;intro.y=108;intro.h=12;}
+ const footer=front.find(f=>f.type==='text'&&f.text.startsWith('Für {{first_name}}'));
+ if(footer){footer.text='ANGEBOTSENTWURF · Konditionen noch abzustimmen';footer.w=130;footer.fontSize=8;}
+ const back=c.sides.back.fields;
+ const benefit=back.find(f=>f.type==='text'&&f.text==='Sie zahlen nur, wenn Google löscht.');
+ if(benefit){benefit.text='Ihre erste erfolgreiche Löschung: gratis.';benefit.fontSize=12;}
+ const disclaimer=back.find(f=>f.type==='text'&&f.text.startsWith('Keine Vorkasse.'));
+ if(disclaimer){disclaimer.text='Angebotsentwurf · Konditionen noch abzustimmen. Über die Löschung entscheidet Google.';disclaimer.fontSize=7;}
+ return c;
 }
