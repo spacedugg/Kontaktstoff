@@ -1,5 +1,19 @@
 # Persönliche Kundenseiten
 
+## Warenkorb-Rückgewinnung: RehaSleep und ZYVO
+
+`/fuer/reha-sleep/` und `/fuer/zyvo/` enthalten eigenständige DIN-A5-Entwürfe mit Vorder- und Rückseite, 3D, Zoom, PDF und Übergabe an das Studio. RehaSleep verwendet eine ruhige, helle Gestaltung und Sie-Ansprache; ZYVO eine sportliche Produktgestaltung und Du-Ansprache. Grundlage sind die jeweiligen Shops, angesehen am 21.09.2026. Originalbilder und Logos samt Quellen stehen in `assets/clients/cart-sources.json`. Die RehaSleep-Angabe „100 Nächte Probeschlafen“ stammt von der Start- und Komfort-Produktseite; vor einem Versand mit den aktuellen Produktbedingungen abgleichen.
+
+Jeder Entwurf enthält drei fiktive Beispielpersonen und drei Produktvarianten. Die Bildauswahl folgt `product_id`: RehaSleep `komfort`, `deluxe`, `classic`; ZYVO `one`, `rest`, `base`. Bild und Text bleiben im Studio, in der Vorschau und beim PDF-Export personalisiert. Neue Produkte benötigen ein zusätzliches Bild im Variantenfeld. Unbekannte Produkt-IDs meldet die Studio-Prüfung.
+
+Die CSV-Beispiele lassen sich auf der jeweiligen Seite unter „Produktauswahl & Rückkehr-Link anpassen“ herunterladen. Sie enthalten Namen, Anrede, Nachricht, Produkt-ID, Produktname, Variante und `cart_url`. Anschriften sind absichtlich leer. `company` enthält für die bestehende Empfängerzuordnung den vollständigen Personennamen. Optionale Gutscheinspalten: `coupon_code`, `offer_text`, `offer_terms`. Die Standardkarten enthalten keinen zusätzlichen Rabatt; das zuschaltbare Gutscheinlayout erstellt keinen Code im Shop.
+
+**Noch keine Shop-Automation:** Die Beispiel-QR-Codes öffnen öffentliche Produktseiten mit Demo-UTM-Parametern. Für echte Sendungen werden die Wiederherstellungslinks aus dem Shop in `cart_url`, die tatsächliche Produktauswahl und vollständige Postanschriften benötigt. Checkout-Import, laufende Bestellabgleiche, Versand und Kaufzuordnung sind noch nicht angebunden. Keine echten Kundendaten sind in diesen Entwürfen enthalten.
+
+Pilotvorschlag: zunächst 250 geeignete abgebrochene Checkouts mit vorhandener Postanschrift auswählen; Versandzeitpunkt und Laufzeit mit dem Shop abstimmen. Unmittelbar vor Übergabe abgeschlossene Bestellungen, Dubletten und ausgeschlossene Kontakte entfernen. Eine zufällig zurückgehaltene Vergleichsgruppe und ein festes Messfenster helfen, zusätzliche Käufe statt nur QR-Scans zu beurteilen. Gutscheine, falls gewünscht, müssen im Shop eingerichtet und für die Kampagne freigegeben werden.
+
+Ansichts-PDFs unter `output/pdf/{reha-sleep,zyvo}-warenkorb-mailing.pdf`: je zwei Seiten, 210 × 148 mm, RGB ohne Beschnitt. Browserprüfung: `node tests/cart-campaigns.mjs` bei laufendem lokalen Server. Sie prüft Produktwechsel, CSV-Zuordnung, Gutscheinlayout, Studio-Übergabe, Zoom, mobile Breite und die Bildvalidierung.
+
 `/fuer/` listet die Konzepte; `/fuer/money-making-sprint/` ist der erste Kampagnenvorschlag.
 
 - `catalog.js`: Texte, Zielgruppe, Markenfarben, Pilotauflage, Quell- und Zielseite.

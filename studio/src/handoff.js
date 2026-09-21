@@ -15,7 +15,7 @@ export async function auditCampaign(campaign,progress=()=>{},signal){
   progress(i+1,campaign.recipients.length);
   if(i%25===0)await new Promise(r=>setTimeout(r,0));
  }
- for(const [side,label] of [['front','Vorderseite'],['back','Rückseite']])for(const field of campaign.sides[side].fields.filter(f=>f.type==='image')){
+ for(const [side,label] of [['front','Vorderseite'],['back','Rückseite']])for(const original of campaign.sides[side].fields.filter(f=>f.type==='image'))for(const data of new Set([original.data,...Object.values(original.variants||{})])){const field={...original,data};
   const image=await imageFrom(field.data),dpi=(field.fit==='cover'?Math.min:Math.max)(image.width/(field.w/25.4),image.height/(field.h/25.4));
   if(dpi<200)issues.push({level:'warning',text:`${label}: Ein Bildelement erreicht etwa ${Math.round(dpi)} dpi. Für scharfen Druck empfehlen wir 300 dpi.`});
  }
