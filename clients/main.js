@@ -1,3 +1,5 @@
+import {saveCampaign} from '../studio/src/storage.js';
+import {defaults as workspaceDefaults} from '../konto/src/model.js';
 import {CLIENT_PAGES} from './catalog.js';
 import {createClientCampaign} from '../studio/src/client-campaigns.js';
 import {renderCanvas} from '../studio/src/render.js';
@@ -6,7 +8,7 @@ const $=s=>document.querySelector(s),client=CLIENT_PAGES.find(c=>c.id===document
 document.body.style.setProperty('--client-purple',client.color);document.body.style.setProperty('--client-accent',client.accent);
 const campaign=createClientCampaign(client.id),stage=$('#client-stage');
 mountCardPreview({stage,card:$('#client-card'),flip:$('#client-flip'),reset:$('#client-reset')});
-let revision=0,briefUrl=null,selectedPerson=0;
+let revision=0,selectedPerson=0;
 $('#client-note').value=campaign.recipients[0].personal_note;
 const person=()=>({...campaign.recipients[selectedPerson],first_name:$('#client-name').value.trim()||campaign.recipients[selectedPerson].first_name,company:$('#client-company').value.trim()||campaign.recipients[selectedPerson].company,personal_note:$('#client-note').value.trim()||campaign.recipients[selectedPerson].personal_note,salutation:'Hey '+($('#client-name').value.trim()||campaign.recipients[selectedPerson].first_name)+','});
 const snapshot=()=>{const c=structuredClone(campaign);c.recipients=[person()];return c;};
@@ -35,13 +37,9 @@ $('#client-pdf').onclick=async()=>{
  }catch{$('#client-error').hidden=false;$('#client-error').textContent='Der PDF-Export hat nicht geklappt. Bitte versuche es erneut.';}finally{button.disabled=false;button.textContent='Entwurf als PDF ↓';}
 };
 if(client.contactUrl){$('#client-request button').textContent='Kampagne anfragen ↗';$('#request-hint').textContent='Wir bereiten euren Kampagnenbrief vor und öffnen den Kontaktweg zu Kontaktstoff. Es wird noch kein Auftrag ausgelöst.';}
-$('#client-request').addEventListener('submit',event=>{
- event.preventDefault();const data=new FormData(event.currentTarget),quantity=data.get('quantity');
- const content=['KAMPAGNENBRIEF · KONTAKTSTOFF',client.name,'',`Ansprechpartner: ${data.get('name')||'Noch offen'}`,`Gewünschte Auflage: ${quantity} Karten`,'Format: DIN A5, zwei Seiten',`Konzept: Hey ${person().first_name}, wer holt den nächsten Kunden für euch rein?`,`Zielgruppe: ${data.get('audience')||client.audience}`,`Beispielkontakt: ${person().first_name} · ${person().company}`,`Persönlicher Anlass: ${person().personal_note}`,`Zielseite: ${client.target}`,'',`Wünsche: ${data.get('notes')||'Keine ergänzenden Wünsche'}`,'','Gewünschter Leistungsumfang: Konzept, Texte, Design, Personalisierung, QR-Verknüpfung und Vorschau. Druck und Versand separat im Angebot abstimmen.','Preis, Zeitplan und genaue Leistungen sind vor einer Beauftragung gemeinsam abzustimmen.','Dieser Brief ist keine Bestellung.'].join('\n');
- if(briefUrl)URL.revokeObjectURL(briefUrl);briefUrl=URL.createObjectURL(new Blob([content],{type:'text/plain;charset=utf-8'}));
- const result=$('#request-result'),p=document.createElement('p'),link=document.createElement('a');p.textContent='Euer Kampagnenbrief ist vorbereitet. Ladet ihn herunter und gebt ihn eurem Ansprechpartner bei Kontaktstoff.';link.href=briefUrl;link.download=client.id+'-kampagnenbrief.txt';link.textContent='Kampagnenbrief herunterladen ↓';result.replaceChildren(p,link);
- if(client.contactUrl){const contact=document.createElement('a');contact.href=client.contactUrl;contact.target='_blank';contact.rel='noopener noreferrer';contact.textContent='Kontaktstoff kontaktieren ↗';contact.style.display='block';result.append(contact);}
- result.hidden=false;result.scrollIntoView({behavior:'smooth',block:'nearest'});
+$('#client-request').addEventListener('submit',async event=>{
+ event.preventDefault();const button=event.currentTarget.querySelector('button[type=submit]');button.disabled=true;
+ try{const d=new FormData(event.currentTarget),c=snapshot();c.service={...workspaceDefaults(),audience:String(d.get('audience')||client.audience),quantity:Number(d.get('quantity')||250),notes:String(d.get('notes')||''),leadSource:'research',targetURL:client.target};await saveCampaign(c);location.href='/konto/?request='+encodeURIComponent(c.id);}catch{const result=$('#request-result');result.hidden=false;result.textContent='Der Entwurf konnte nicht gespeichert werden. Bitte erneut versuchen.';}finally{button.disabled=false;}
 });
 $('#client-studio').addEventListener('click',event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;try{sessionStorage.setItem('kontaktstoff-client-draft',JSON.stringify(snapshot()));}catch{event.preventDefault();$('#client-error').hidden=false;$('#client-error').textContent='Der Browser konnte den Entwurf nicht übergeben. Bitte sichere ihn als PDF oder öffne das Standardbeispiel im Studio.';}});
 await document.fonts.ready;await render();

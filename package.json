@@ -14,20 +14,26 @@
     "test:example": "node tests/example.mjs",
     "test:tutorial": "node tests/tutorial.mjs",
     "test:promotions": "node tests/promotions.mjs",
-    "test:homepage": "node tests/homepage.mjs",
+    "test:homepage": "node tests/public-homepage.mjs",
     "test:onboarding": "node tests/onboarding.mjs",
     "test:content": "node tests/studio-content.mjs",
-    "test:csv-client": "node tests/csv-client.mjs"
+    "test:csv-client": "node tests/csv-client.mjs",
+    "test:workspace": "node tests/workspace.mjs",
+    "requests": "node scripts/requests.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.3.289",
+    "pg": "^8.23.0",
     "qrcode": "1.5.4"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
     "esbuild": "0.28.2",
     "jsqr": "1.4.0"
+  },
+  "engines": {
+    "node": ">=22.19.0"
   }
 }

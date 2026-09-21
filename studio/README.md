@@ -1,3 +1,5 @@
+> Standhinweis: Der neue Konto-/Backend-Ablauf ist in [KUNDENBEREICH.md](../docs/KUNDENBEREICH.md) dokumentiert. Die folgenden Abschnitte beschreiben den bisherigen lokalen Pilot und gelten für reine lokale Entwürfe.
+
 # Kontaktstoff Kampagnenstudio
 
 Eigenständige Anwendung unter `/studio/`, direkt mit der Homepage verbunden. Der Einstieg zeigt eine Kampagnenübersicht mit lokal gespeicherten Projekten. Ein neuer Browser beginnt leer.

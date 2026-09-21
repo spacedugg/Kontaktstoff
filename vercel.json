@@ -21,6 +21,25 @@
           "value": "noindex, nofollow"
         }
       ]
+    },
+    {
+      "source": "/konto/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/index?route=:path*"
+    },
+    {
+      "source": "/r/:token",
+      "destination": "/api/index?redirect=:token"
     }
   ]
 }

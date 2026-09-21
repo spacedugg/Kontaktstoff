@@ -1,3 +1,4 @@
+import {api as workspaceAPI} from '../../konto/src/api.js';
 import {openCSVImport} from './csv-dialog.js';
 import {startHTML} from './start.js';
 import {CLIENT_CAMPAIGNS,createClientCampaign} from './client-campaigns.js';
@@ -15,6 +16,7 @@ import {auditCampaign,createHandoff} from './handoff.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let campaign=createCampaign(), side='front', selected=campaign.sides.front.fields[0]?.id, recipientIndex=0, view='design', guides=true;
+let cloudRecord=null;
 let previewExtrasContext=null,editorMode='content';
 const editableFields=()=>campaign.sides[side].fields.filter(f=>editorMode==='layout'||['text','qr'].includes(f.type));
 const firstEditable=()=>editableFields().find(f=>f.type==='text'&&f.text.includes('{{'))||editableFields()[0];
@@ -32,7 +34,7 @@ const keys=()=>[...new Set([...Object.keys(KEYS),...Object.values(campaign.sides
 function toast(message,error=false){clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').classList.toggle('error',error);$('#toast').classList.add('show');toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),error?6500:3500);}
 function saveState(text,failed=false){$('#save-state').innerHTML=`<span class="status-dot" style="background:${failed?'#bf7352':'#779767'}"></span>${escape(text)}`;}
 function persist(){try{sessionStorage.setItem('kontaktstoff-active',campaign.id);}catch{}clearTimeout(saveTimer);saveState('Wird gespeichert …');saveTimer=setTimeout(flushSave,350);}
-async function flushSave(){clearTimeout(saveTimer);if(!hasActive)return;const snapshot=clone(campaign);pendingSaves=pendingSaves.catch(()=>{}).then(()=>saveCampaign(snapshot));try{await pendingSaves;saveState('Lokal gespeichert');saveFailed=false;}catch{saveState('Nicht gespeichert',true);if(!saveFailed)toast('Lokales Speichern nicht möglich. Bitte sichere dein Projekt als Datei.',true);saveFailed=true;}}
+async function flushSave(){clearTimeout(saveTimer);if(!hasActive)return;const snapshot=clone(campaign);const cloud=cloudRecord?.id===snapshot.id?cloudRecord:null;pendingSaves=pendingSaves.catch(()=>{}).then(async()=>{if(cloud){if(cloud.conflict)throw Error(cloud.conflict);try{const next=await workspaceAPI('/campaigns/'+cloud.id,{method:'PUT',body:{project:snapshot,meta:cloud.meta,revision:cloud.revision}});Object.assign(cloud,next);}catch(e){if(e.status===409)cloud.conflict=e.message;throw e;}}else await saveCampaign(snapshot);});try{await pendingSaves;saveState(cloud?'Im Konto gespeichert':'Lokal gespeichert');saveFailed=false;}catch(e){saveState('Nicht gespeichert',true);if(!saveFailed)toast(e.message||'Speichern nicht möglich. Bitte sichere dein Projekt als Datei.',true);saveFailed=true;}}
 function checkpoint(){history.push(clone(campaign));if(history.length>40)history.shift();future=[];}
 function changed({inspector=true,table=true,guide=true}={}){hasActive=true;clearAudit();campaign.updatedAt=Date.now();persist();renderUI(inspector,table,guide);}
 function commit(fn,options){checkpoint();fn();changed(options);}
@@ -50,6 +52,8 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
 }
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
 function renderUI(inspector=true,table=true,guide=true){
+ $('#request-campaign').hidden=view!=='preview';
+ $('.steps-note').textContent=cloudRecord?.id===campaign.id?'In deinem Unternehmenskonto gespeichert':'Ohne Anmeldung gestalten';
  document.body.classList.toggle('content-editing',editorMode==='content'&&view==='design');
  $('#editor-mode-bar').hidden=view!=='design';
  $$('[data-editor-mode]').forEach(b=>{b.classList.toggle('active',b.dataset.editorMode===editorMode);b.setAttribute('aria-pressed',String(b.dataset.editorMode===editorMode));});
@@ -60,7 +64,7 @@ function renderUI(inspector=true,table=true,guide=true){
  document.body.classList.toggle('starting-campaign',view==='start');
  $('#start-view').hidden=view!=='start';
  $('#workflow-hint').hidden=!['design','recipients','preview'].includes(view);
- if(!$('#workflow-hint').hidden){const hints={design:['1. Gestalte deine Karte','Wähle einen Text in der Karte und bearbeite ihn im Textfeld. Passe danach die Rückseite an. Dein Design wird automatisch gespeichert.','recipients','Weiter zu den Empfängern →'],recipients:['2. Für wen ist dein Mailing?','Füge deine Kontakte hinzu oder importiere eine CSV. Die Spalten verbinden Namen, Firmen und Links mit deinen Karten.','preview','Mailing ansehen →'],preview:['3. Prüfe dein fertiges Mailing','Wechsle zwischen deinen Empfängern, prüfe beide Seiten und lade anschließend dein PDF oder Kampagnenpaket herunter.','design','Design weiter bearbeiten']},hint=hints[view];$('#workflow-hint').innerHTML=`<div><strong>${hint[0]}</strong><p>${hint[1]}</p></div><button class="button" data-workflow-next="${hint[2]}">${hint[3]}</button>`;}
+ if(!$('#workflow-hint').hidden){const hints={design:['1. Gestalte deine Karte','Wähle einen Text in der Karte und bearbeite ihn im Textfeld. Passe danach die Rückseite an. Dein Design wird automatisch gespeichert.','recipients','Weiter zu den Empfängern →'],recipients:['2. Für wen ist dein Mailing?','Füge deine Kontakte hinzu oder importiere eine CSV. Die Spalten verbinden Namen, Firmen und Links mit deinen Karten.','preview','Mailing ansehen →'],preview:['3. Dein Mailing ist bereit zur Ansicht','Prüfe beide Seiten. Danach kannst du deine Kampagne anfragen oder den Entwurf exportieren.','design','Design weiter bearbeiten']},hint=hints[view];$('#workflow-hint').innerHTML=`<div><strong>${hint[0]}</strong><p>${hint[1]}</p></div><button class="button" data-workflow-next="${hint[2]}">${hint[3]}</button>`;}
  document.body.classList.toggle('tutorial-excursion',!!campaign.tutorial?.active&&view!=='tutorial'&&view!=='dashboard');
  document.body.classList.toggle('dashboard-active',view==='dashboard');
  document.body.classList.toggle('example-focus',view==='preview'&&campaign.sample&&!!campaign.templateId&&!campaign.tutorial?.active);
@@ -277,7 +281,7 @@ async function showDashboard(){
  // Render sequentially to keep large local libraries responsive.
  for(const c of dashboardCampaigns){if(view!=='dashboard'||version!==dashboardVersion)break;const canvas=$(`[data-dashboard-thumb="${c.id}"]`);if(canvas)try{await renderCanvas(canvas,c,'front',c.recipients[0]||{company:'Ihr Unternehmen',salutation:'Guten Tag,',chatbot_url:'https://chattastic.de/'},{scale:2});}catch{canvas.replaceWith(document.createTextNode('Vorschau nicht verfügbar'));}}
 }
-const campaignList=showDashboard;
+const campaignList=async()=>{if(cloudRecord?.id===campaign.id||new URLSearchParams(location.search).has('workspace')){await flushSave();if(!saveFailed)location.href='/konto/';}else await showDashboard();};
 $('#dashboard-view').onclick=async e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-dashboard-tutorial'))return startTutorial(true);
@@ -293,6 +297,7 @@ $('#dashboard-view').onclick=async e=>{
 };
 async function loadExample(id='chattastic'){previewMode='3d';threeD.reset();await activateCampaign(createExampleCampaign(id),'preview');window.scrollTo({top:0,behavior:'instant'});toast('Fertiges Beispiel geladen. Dein vorheriger Entwurf bleibt in deinen Kampagnen.');}
 async function deleteCreation(item){
+ if(cloudRecord?.id===item.id){if(!await confirm('Kampagne löschen?',`„${item.name}“ wird aus deinem Unternehmenskonto entfernt.`,'Löschen'))return;try{await flushSave();await pendingSaves;await workspaceAPI('/campaigns/'+item.id,{method:'DELETE'});hasActive=false;clearTimeout(saveTimer);location.href='/konto/?tab=campaigns';}catch(e){toast(e.message,true);}return;}
  if(!await confirm('Kreation löschen?',`„${item.name}“ wird in den Papierkorb verschoben. Du kannst sie dort jederzeit wiederherstellen.`,'In den Papierkorb'))return;
  try{await flushSave();await pendingSaves;await trashCampaign(item.id);if(campaign.id===item.id){clearTimeout(saveTimer);hasActive=false;history=[];future=[];try{sessionStorage.removeItem('kontaktstoff-active');}catch{}}await showDashboard();toast('Kreation im Papierkorb. Du kannst sie wiederherstellen.');}catch{toast('Löschen war nicht möglich. Deine Kreation bleibt erhalten.',true);}
 }
@@ -465,6 +470,8 @@ $('#tutorial-view').addEventListener('click',async e=>{
 
 });
 
+$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id);};
+$('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(saveFailed)return;location.href=cloudRecord?.id===campaign.id?'/konto/?id='+encodeURIComponent(campaign.id):'/konto/';};
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
 hydrateIcons();
@@ -475,7 +482,9 @@ $('#example-data').onclick=()=>setView('recipients');
 const params=new URLSearchParams(location.search);
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
- if(params.has('tutorial')||params.get('start')==='1'){view='start';}
+ if(params.has('cloud')){await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI('/campaigns/'+encodeURIComponent(params.get('cloud')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('Im Konto gespeichert');}
+ else if(params.has('local')){const local=campaigns.find(c=>c.id===params.get('local'));if(!local)throw Error('Dieser lokale Entwurf wurde nicht gefunden.');campaign=validateCampaign(local);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';}
+ else if(params.has('tutorial')||params.get('start')==='1'){view='start';}
  else if(CLIENT_CAMPAIGNS.some(c=>c.id===params.get('client'))){campaign=createClientCampaign(params.get('client'));try{const draft=sessionStorage.getItem('kontaktstoff-client-draft');if(draft){const candidate=validateCampaign(JSON.parse(draft));if(candidate.templateId===campaign.templateId){campaign=candidate;campaign.id=uid();}sessionStorage.removeItem('kontaktstoff-client-draft');}}catch{}hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.has('example')){campaign=createExampleCampaign(params.get('example'));hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.get('start')==='blank'){view='start';}
@@ -484,7 +493,7 @@ try{
  else if(latest&&sessionStorage.getItem('kontaktstoff-active')===latest.id){campaign=validateCampaign(latest);hasActive=true;view='design';}
  else view='dashboard';
  selected=campaign.sides.front.fields[0]?.id;
-}catch{saveFailed=true;saveState('Speichern nicht verfügbar',true);toast('Lokaler Speicher ist nicht verfügbar. Sichere dein Projekt als Datei.',true);view='dashboard';}
+}catch(e){saveFailed=true;saveState('Speichern nicht verfügbar',true);toast(e.message||'Speicher nicht verfügbar. Sichere dein Projekt als Datei.',true);view='dashboard';}
 if(params.has('client')||params.has('start')||params.has('template')||params.has('example')||params.has('tutorial'))window.history.replaceState({},'',location.pathname);
 if(hasActive)try{sessionStorage.setItem('kontaktstoff-active',campaign.id);}catch{}
 if(campaign.tutorial)campaign.tutorial.active=false;if(campaign.onboarding)campaign.onboarding.active=false;

@@ -1,3 +1,5 @@
+> Standhinweis: Der neue Konto-/Backend-Ablauf ist in [KUNDENBEREICH.md](KUNDENBEREICH.md) dokumentiert. Die folgenden Abschnitte beschreiben den bisherigen lokalen Pilot und gelten für reine lokale Entwürfe.
+
 # Vom Pilotwerkzeug zum öffentlichen Produkt
 
 ## Der heute nutzbare Ablauf
