@@ -13,7 +13,7 @@ export const CLIENT_PAGES=[{
  id:'bewertungspush',name:'BewertungsPush',addressee:'das BewertungsPush-Team',
  title:'Eine verdächtige Bewertung. Ein klarer nächster Schritt.',
  intro:'Euer Service beginnt dort, wo neue Kunden ihren ersten Eindruck gewinnen: beim Google-Profil. Wir bringen die Einladung zur Prüfung direkt zu passenden lokalen Unternehmen – persönlich formuliert und mit einem klaren nächsten Schritt.',
- concept:'Unberechtigte Bewertungen raus. Ihr guter Ruf nach vorn.',
+ concept:'Unberechtigte Bewertungen loswerden. Ohne Vorkasse starten.',
  rationale:'Lokale Betriebe leben von Vertrauen. Die Karte spricht den konkreten Moment vor einer Buchung, Reservierung oder Terminvereinbarung an. Sie stellt keine unbelegte Diagnose zum Empfängerprofil, sondern lädt zur Prüfung verdächtiger Beiträge ein.',
  audience:'Inhaber und Geschäftsführungen lokaler Hotels, Restaurants und Werkstätten',
  source:'https://bewertungspush.de/',target:'https://bewertungspush.de/suche',contactUrl:'',
