@@ -1,6 +1,6 @@
 # Kundenbereich und Editor
 
-Entwicklungsbranch: `codex/kundenbereich`. Produktionsdeployment am 21.09.2026 auf ausdrücklichen Nutzerwunsch durchgeführt: https://www.kontaktstoff.com (auch kontaktstoff.com und kontaktstoff.vercel.app). Veröffentlicht: Commit `82131ce`, Vercel `dpl_4sZk5cQwVs4uTzvzsVYPqQ27nuzB`. Homepage, Editor, Demo und Kundenkonzept live geprüft. DATABASE_URL und PUBLIC_ORIGIN fehlen weiterhin; die Konto-API liefert deshalb bewusst 503.
+Entwicklungsbranch: `codex/kundenbereich`. Live: https://www.kontaktstoff.com. Am 21.09.2026 wurde auf ausdrückliche Zustimmung die Neon-Datenbank `kontaktstoff-production` im Tarif `free_v3` und Standort Frankfurt (`fra1`) angelegt, ausschließlich mit Production verbunden. `DATABASE_URL` wird von der Integration verwaltet, `PUBLIC_ORIGIN` ist https://www.kontaktstoff.com. Keine Produktionsschlüssel lokal heruntergeladen. E-Mail-Versand bleibt auf ausdrücklichen Nutzerwunsch offen.
 
 Die Homepage entspricht dem öffentlich vorhandenen Design. Ergänzt sind Links in Navigation, Hauptaktion und Dashboard-Ansicht sowie die Übergabe aus dem Planungsrechner. Bestehende Geldbeträge im Rechner sind Planungswerte; der Kundenbereich löst keine Zahlung aus.
 
@@ -13,7 +13,7 @@ Die Homepage entspricht dem öffentlich vorhandenen Design. Ergänzt sind Links 
 - `/studio/?start=1&workspace=1`: ohne Konto gestalten; Vorlagen, Bilder/PDF und CSV
 - `/fuer/money-making-sprint/`: persönliche Kundenseite; „Kampagne anfragen“ übernimmt den ausgewählten Entwurf
 
-Selbst gestalten oder Gestaltung anfragen → eigene Kontakte oder Lead-Recherche → Zielgruppe und Kampagnenwunsch → beim Anfragen Konto anlegen/anmelden. Die Anfrage speichert einen unveränderlichen Stand des Designs, der Empfänger, des Briefings und der Unternehmensdaten. Änderungen danach verändern diese Anfrage nicht. Es werden keine E-Mails versendet und keine Aufträge oder Zahlungen ausgelöst.
+Selbst gestalten oder Gestaltung anfragen → eigene Kontakte oder Lead-Recherche → Zielgruppe und Kampagnenwunsch → beim Anfragen Konto anlegen/anmelden. Die Anfrage speichert einen unveränderlichen Stand des Designs, der Empfänger, des Briefings und der Unternehmensdaten. Änderungen danach verändern diese Anfrage nicht. Ohne E-Mail-Konfiguration werden keine E-Mails versendet. Es werden keine Aufträge oder Zahlungen ausgelöst.
 
 ## Daten aus den Homepage-Konzepten
 
@@ -37,17 +37,23 @@ ROI = (gewonnener Deckungsbeitrag − Kampagnenkosten) / Kampagnenkosten. Ohne K
 - Kontentrennung: jede Kampagnenabfrage ist an die angemeldete User-ID gebunden. Ein Konto besitzt einen Unternehmensarbeitsplatz. Keine Rollen/Einladungen für mehrere Mitarbeiter implementiert.
 - Versionsnummern verhindern unbemerktes Überschreiben in mehreren Browserfenstern. Bei Konflikt bleibt der Editorentwurf exportierbar.
 - Bilder sind wie bisher im Projekt enthalten; maximal 4 MB JSON pro Server-Speicherung. Größere lokale Projekte müssen Bilder verkleinern oder als lokale Datei gesichert werden. Separater privater Dateispeicher ist noch nicht eingerichtet.
-- `npm run requests` liest als lokaler Betreiberbefehl eingegangene Anfragen aus der konfigurierten Datenbank. Kein öffentliches Admin-Endpoint. Der Kunde sieht Datum/Status seiner Anfrage im Konto.
+- `/konto/?tab=inbox`: geschützter Anfrage-Eingang für verifizierte Konten aus `OPERATOR_EMAILS`. Liste, unveränderlicher Anfrage-Stand, Projektdownload, Status und interne Notiz. Statusänderungen sind versionsgeschützt; Kunden sehen den Status, niemals interne Notizen. Ohne konfigurierte Team-Adressen ist der Bereich für niemanden freigeschaltet. `npm run requests` bleibt als Betreiberbefehl verfügbar.
 
 Tracking wird ausdrücklich im Bereich Auswertung aktiviert und ändert die QR-Ziele. Danach erneut exportieren. Die tatsächlichen Ziel-URLs bleiben in der Linktabelle. Lokale Links sind nur für Tests geeignet; vor echtem Versand die endgültige Live-Domain verwenden. Im QR-Tracking werden keine IP-Adressen, Cookies oder Browserkennungen gespeichert.
 
 ## Für einen späteren öffentlichen Kontobetrieb noch konfigurieren
 
-1. Separate PostgreSQL-Datenbank für Preview und Produktion bereitstellen, `DATABASE_URL` und passende `PUBLIC_ORIGIN` eintragen. TLS gemäß Datenbankanbieter aktivieren. Keine Datenbank wurde in diesem Auftrag provisioniert.
-2. Absender/Betreiber, Datenschutzhinweise und tatsächlichen Betriebsprozess vervollständigen. Kontowiederherstellung und E-Mail-Verifikation sind noch nicht angebunden; derzeit keine Passwort-Reset-Mails. Verantwortlichen Zugriff auf Anfragen und Datenbank-Backups festlegen.
-3. Gestaltung/Lead-Recherche und Versandpreise festlegen. Die 100-€-Notiz war eine Preisidee, kein bestätigtes Produkt. Es gibt keine bezahlbare Buchung, kein Credit-Wallet und keine Bezahl-/Versandschnittstelle.
-4. DIN A5 ist direkt editierbar. Selfmailer und Sonderformate werden als Angebotswunsch gespeichert; keine editierbare Stanzkontur oder druckfertige CMYK/PDF-X-Ausgabe.
-5. PostgreSQL-Verbindung und Vercel-Deployment in der tatsächlichen Hosting-Umgebung prüfen. Automatisiert geprüft wurde die vollständige lokale SQLite-Variante; die PostgreSQL-Variante ist vorbereitet, aber noch nicht gegen eine bereitgestellte Datenbank getestet.
+1. Produktion ist mit Neon verbunden; Preview und Development besitzen bewusst keine Produktionsverbindung. Für eine Cloud-Preview eine separate Datenbank anlegen. Backups/Wiederherstellung und Kapazitätsgrenzen des Free-Tarifs vor wachsendem Betrieb prüfen.
+2. E-Mail ist vorbereitet, aber bewusst nicht eingerichtet: `RESEND_API_KEY`, verifizierter `MAIL_FROM` und `REQUEST_NOTIFICATION_TO` ergänzen. Keine Schlüssel ins Repository. Solange E-Mail fehlt, bleiben die entsprechenden Schaltflächen ausgeblendet; Registrierung, Entwürfe und Anfragen funktionieren trotzdem.
+3. Team-Adressen als `OPERATOR_EMAILS` hinterlegen. Adminrechte werden niemals aus dem Firmenprofil oder aus einer Registrierung übernommen. Ein Teamkonto muss zusätzlich seine E-Mail bestätigt haben. Noch kein Betreiberkonto wurde berechtigt.
+4. Betreiberangaben/Datenschutzhinweise, tatsächliche Preise und Druck-/Versandprozess sind weiterhin auszufüllen. Kein Zahlungsdienst, Credit-Wallet oder automatischer Druckauftrag. A5 ist direkt editierbar; Sonderformate bleiben Angebotswünsche.
+
+## E-Mail- und Kontoverbindungen
+
+Resend-Adapter ist optional und sendet nur Transaktionsmails. Bestätigungslinks sind 24 Stunden, Passwortlinks 30 Minuten gültig, zufällig, nur gehasht gespeichert und einmal verwendbar. Der geheime Linkteil steht im URL-Fragment statt im Server-Log. Zurücksetzen beendet alle vorhandenen Sitzungen. Kontoabfragen geben bei unbekannten E-Mails dieselbe neutrale Antwort; Limits liegen in der Datenbank.
+
+Kampagnenanfragen werden zuerst dauerhaft gespeichert. Eine optional aktivierte interne E-Mail enthält nur Anfragekennung und den geschützten Dashboard-Link, keine Empfängerlisten. Versandfehler verwerfen die Anfrage nicht. `POST /api/operator/requests/:id/notify` erlaubt dem berechtigten Team einen erneuten Versuch; erfolgreicher Versand wird vermerkt. Es gibt aktuell keinen automatischen Hintergrund-Retry. Keine E-Mails wurden bei der Einrichtung versendet.
+
 
 ## Prüfungen
 

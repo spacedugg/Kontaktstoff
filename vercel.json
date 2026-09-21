@@ -41,5 +41,43 @@
       "source": "/r/:token",
       "destination": "/api/index?redirect=:token"
     }
+  ],
+  "regions": [
+    "fra1"
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "kontaktstoff.com"
+        }
+      ],
+      "destination": "https://www.kontaktstoff.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "kontaktstoff.vercel.app"
+        }
+      ],
+      "destination": "https://www.kontaktstoff.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "kontaktstoff-spaceduggs-projects.vercel.app"
+        }
+      ],
+      "destination": "https://www.kontaktstoff.com/:path*",
+      "permanent": true
+    }
   ]
 }

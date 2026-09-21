@@ -28,7 +28,7 @@ Im Editor bleiben PDF/Bild-Uploads, Gestaltung in Millimetern, Personalisierung,
 
 ## Backend und Grenzen
 
-Lokal läuft SQLite in `.data/`; die Datei und Testkonten werden nicht eingecheckt oder statisch ausgeliefert. Vercel benötigt PostgreSQL (`DATABASE_URL`) und die eigene URL (`PUBLIC_ORIGIN`). Ohne Konfiguration bleibt der lokale Editor nutzbar; Serverfunktionen melden, dass die Anbindung fehlt. Keine externe Datenbank wurde provisioniert. Die veröffentlichten Serverfunktionen melden deshalb aktuell ausdrücklich, dass die Anbindung fehlt.
+Lokal läuft SQLite in `.data/`; die Datei und Testkonten werden nicht eingecheckt oder statisch ausgeliefert. Vercel benötigt PostgreSQL (`DATABASE_URL`) und die eigene URL (`PUBLIC_ORIGIN`). Ohne Konfiguration bleibt der lokale Editor nutzbar; Serverfunktionen melden, dass die Anbindung fehlt. Neon PostgreSQL ist seit 21.09.2026 im kostenlosen Tarif in Frankfurt ausschließlich mit der Produktion verbunden. E-Mail-Versand bleibt auf Nutzerwunsch offen.
 
 Keine Zahlung, Versandbuchung, automatische Lead-Recherche oder E-Mail-Versendung. Leistungen werden angefragt. Kontowiederherstellung/E-Mail-Verifikation, Mehrbenutzerrollen und privater separater Dateispeicher sind noch nicht angebunden. Die öffentliche Homepage ist das bestehende Marketingkonzept, kein Nachweis bereits automatisierter Produktionsleistungen.
 

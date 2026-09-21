@@ -1,18 +1,21 @@
 import {randomBytes,randomUUID,createHash,scrypt as rawScrypt,timingSafeEqual} from 'node:crypto';
 import {promisify} from 'node:util';
 import {HTTPError,text,profile,payload,requestIssues} from './validation.js';
+import {createMailer} from './mail.js';
+import {accountServices} from './account-services.js';
 import {validURL} from '../studio/src/core.js';
 const scrypt=promisify(rawScrypt),hash=v=>createHash('sha256').update(v).digest('hex');
 const send=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
 const packed=row=>({...JSON.parse(row.payload),id:row.id,revision:Number(row.revision),updatedAt:Number(row.updated_at)});
 function jsonObject(value){if(!value||typeof value!=='object'||Array.isArray(value))throw new HTTPError(400,'Bitte ein gültiges JSON-Objekt senden.');return value;}
 async function body(req){if(!String(req.headers['content-type']||'').startsWith('application/json'))throw new HTTPError(415,'JSON erwartet.');if(req.body!==undefined){let parsed;try{parsed=typeof req.body==='string'?JSON.parse(req.body):req.body;}catch{throw new HTTPError(400,'Ungültige Anfrage.');}if(Buffer.byteLength(JSON.stringify(parsed))>4*1024*1024)throw new HTTPError(413,'Das Projekt überschreitet 4 MB. Bitte Bilder verkleinern.');return jsonObject(parsed);}let data='',bytes=0;for await(const chunk of req){bytes+=chunk.length;if(bytes>4*1024*1024)throw new HTTPError(413,'Das Projekt ist zu groß für die Kontospeicherung (max. 4 MB). Bitte Bilder verkleinern oder lokal als Projekt sichern.');data+=chunk;}try{return jsonObject(JSON.parse(data));}catch{throw new HTTPError(400,'Ungültige Anfrage.');}}
-export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.1:4177'}={}){
+export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.1:4177',mailer=createMailer(),operatorEmails=process.env.OPERATOR_EMAILS||'',notificationTo=process.env.REQUEST_NOTIFICATION_TO||''}={}){
  origin=new URL(origin).origin;const cookieName=origin.startsWith('https:')?'__Host-kontaktstoff':'kontaktstoff_session';
+ const services=accountServices(db,{origin,mailer,operatorEmails,notificationTo});
  const cookie=(res,token,maxAge=604800)=>res.setHeader('Set-Cookie',`${cookieName}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${origin.startsWith('https:')?'; Secure':''}`);
  async function limited(key,max=15){const now=Date.now(),result=await db.query('INSERT INTO rate_limits(key,count,expires) VALUES($1,1,$2) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN rate_limits.expires < $3 THEN 1 ELSE rate_limits.count+1 END, expires=CASE WHEN rate_limits.expires < $3 THEN $2 ELSE rate_limits.expires END RETURNING count',[key,now+900000,now]);if(Number(result.rows[0].count)>max)throw new HTTPError(429,'Zu viele Versuche. Bitte in 15 Minuten erneut versuchen.');}
  async function session(req){const token=String(req.headers.cookie||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(cookieName+'='))?.slice(cookieName.length+1);if(!token)return null;const result=await db.query('SELECT users.id,users.email,users.profile,sessions.csrf FROM sessions JOIN users ON users.id=sessions.user_id WHERE sessions.token=$1 AND sessions.expires>$2',[hash(token),Date.now()]);return result.rows[0]||null;}
- async function issueSession(user,res){const token=randomBytes(32).toString('base64url'),csrf=randomBytes(24).toString('base64url');await db.query('INSERT INTO sessions(token,user_id,csrf,expires) VALUES($1,$2,$3,$4)',[hash(token),user.id,csrf,Date.now()+604800000]);cookie(res,token);return {user:{id:user.id,email:user.email,profile:JSON.parse(user.profile)},csrf};}
+ async function issueSession(user,res){const token=randomBytes(32).toString('base64url'),csrf=randomBytes(24).toString('base64url');await db.query('INSERT INTO sessions(token,user_id,csrf,expires) VALUES($1,$2,$3,$4)',[hash(token),user.id,csrf,Date.now()+604800000]);cookie(res,token);return {user:await services.publicUser(user),csrf};}
  const load=async(q,id,user)=>{const result=await q('SELECT * FROM campaigns WHERE id=$1 AND user_id=$2 AND deleted_at IS NULL',[id,user]);if(!result.rows[0])throw new HTTPError(404,'Kampagne nicht gefunden.');return result.rows[0];};
  return async function handle(req,res){
   const url=new URL(req.url,origin),pathname=url.pathname.replace(/\/$/,'');
@@ -26,8 +29,19 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
     if(req.method==='GET'&&!/bot|crawler|spider|preview|slack|facebookexternalhit/i.test(req.headers['user-agent']||''))await db.query('INSERT INTO visits(id,token,created_at) VALUES($1,$2,$3)',[randomUUID(),token,Date.now()]);
     res.writeHead(302,{Location:link.target,'Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow'});res.end();return true;
    }
-   if(pathname==='/api/health'){send(res,200,{available:true,storage:process.env.DATABASE_URL?'postgres':'local',origin});return true;}
+   if(pathname==='/api/health'){send(res,200,{available:true,storage:process.env.DATABASE_URL?'postgres':'local',origin,email:mailer.configured});return true;}
    if(!['GET','HEAD'].includes(req.method)&&req.headers.origin!==origin)throw new HTTPError(403,'Die Anfrage muss aus deinem Kontaktstoff-Arbeitsplatz kommen.');
+   if(['/api/auth/forgot','/api/auth/reset','/api/auth/verify'].includes(pathname)&&req.method==='POST'){
+    const input=await body(req),address=process.env.VERCEL?String(req.headers['x-forwarded-for']||'').split(',')[0]:req.socket?.remoteAddress||'local';await limited('recovery-ip:'+hash(address),30);
+    if(pathname.endsWith('/forgot')){
+     if(!mailer.configured)throw new HTTPError(503,'Passwort-Wiederherstellung per E-Mail ist noch nicht eingerichtet.');
+     const email=text(input.email||'',254).toLowerCase();await limited('recovery-email:'+hash(email),3);
+     const found=(await db.query('SELECT * FROM users WHERE email=$1',[email])).rows[0];
+     if(found)try{await services.sendToken(found,'reset');}catch{}
+     send(res,200,{ok:true,message:'Falls ein Konto mit dieser Adresse besteht, erhältst du einen Link zum Zurücksetzen.'});return true;
+    }
+    const kind=pathname.endsWith('/reset')?'reset':'verify';const result=await services.consume(input,kind);if(kind==='reset')cookie(res,'',0);send(res,200,result);return true;
+   }
    if(['/api/auth/register','/api/auth/login'].includes(pathname)&&req.method==='POST'){
     const input=await body(req),email=text(input.email,254).toLowerCase(),password=input.password;if(typeof password!=='string'||password.length>128)throw new HTTPError(400,'Bitte ein gültiges Passwort eingeben.');
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw new HTTPError(400,'Bitte eine gültige E-Mail-Adresse eingeben.');
@@ -37,15 +51,23 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
      if(password.length<12)throw new HTTPError(400,'Das Passwort braucht mindestens 12 Zeichen.');const company=profile(input.profile||{});if(!company.company||!company.name)throw new HTTPError(400,'Unternehmen und Ansprechpartner fehlen.');
      const salt=randomBytes(16).toString('hex'),digest=(await scrypt(password,salt,64)).toString('hex'),user={id:randomUUID(),email,profile:JSON.stringify(company)};
      try{await db.query('INSERT INTO users(id,email,password,profile,created_at) VALUES($1,$2,$3,$4,$5)',[user.id,email,salt+':'+digest,user.profile,Date.now()]);}catch(e){if(String(e.message).match(/unique|duplicate/i))throw new HTTPError(409,'Mit dieser E-Mail besteht bereits ein Konto. Bitte anmelden.');throw e;}
-     send(res,201,await issueSession(user,res));return true;
+     const result=await issueSession(user,res);if(mailer.configured)try{await services.sendToken(user,'verify');result.verificationSent=true;}catch{result.verificationSent=false;}send(res,201,result);return true;
     }
     const result=await db.query('SELECT * FROM users WHERE email=$1',[email]),user=result.rows[0];const [salt,expected]=(user?.password||'00000000000000000000000000000000:'+''.padEnd(128,'0')).split(':');const actual=await scrypt(password,salt,64);
     if(!user||!timingSafeEqual(actual,Buffer.from(expected,'hex')))throw new HTTPError(401,'E-Mail oder Passwort stimmt nicht.');send(res,200,await issueSession(user,res));return true;
    }
    const user=await session(req);
-   if(pathname==='/api/auth/me'&&req.method==='GET'){send(res,200,user?{user:{id:user.id,email:user.email,profile:JSON.parse(user.profile)},csrf:user.csrf}:{user:null});return true;}
+   if(pathname==='/api/auth/me'&&req.method==='GET'){send(res,200,user?{user:await services.publicUser(user),csrf:user.csrf}:{user:null});return true;}
    if(!user)throw new HTTPError(401,'Bitte melde dich an, um deine Kampagne im Konto zu speichern.');
    if(!['GET','HEAD'].includes(req.method)&&req.headers['x-csrf-token']!==user.csrf)throw new HTTPError(403,'Die Sitzung wurde erneuert. Bitte lade die Seite neu.');
+   if(pathname==='/api/auth/send-verification'&&req.method==='POST'){await limited('verify:'+user.id,3);if(!await services.verified(user))await services.sendToken(user,'verify');send(res,200,{ok:true});return true;}
+   if(pathname==='/api/operator/requests'||pathname.startsWith('/api/operator/requests/')){
+    await services.requireOperator(user);const match=pathname.match(/^\/api\/operator\/requests(?:\/([a-zA-Z0-9-]+))?(?:\/(notify))?$/);if(!match)throw new HTTPError(404,'Anfrage nicht gefunden.');const [,id,action]=match;
+    if(req.method==='GET'&&!action){send(res,200,await services.inbox(id));return true;}
+    if(req.method==='PUT'&&id&&!action){send(res,200,await services.updateRequest(id,await body(req),user));return true;}
+    if(req.method==='POST'&&id&&action==='notify'){await services.inbox(id);await limited('notify:'+user.id,15);send(res,200,await services.notifyRequest(id));return true;}
+    throw new HTTPError(405,'Methode nicht erlaubt.');
+   }
    if(pathname==='/api/auth/logout'&&req.method==='POST'){await db.query('DELETE FROM sessions WHERE user_id=$1 AND csrf=$2',[user.id,user.csrf]);cookie(res,'',0);send(res,200,{ok:true});return true;}
    if(pathname==='/api/profile'&&req.method==='PUT'){const value=profile(await body(req));if(!value.company||!value.name)throw new HTTPError(400,'Unternehmen und Ansprechpartner fehlen.');await db.query('UPDATE users SET profile=$1 WHERE id=$2',[JSON.stringify(value),user.id]);send(res,200,{profile:value});return true;}
    if(pathname==='/api/campaigns'&&req.method==='GET'){const result=await db.query('SELECT * FROM campaigns WHERE user_id=$1 AND deleted_at IS NULL ORDER BY updated_at DESC',[user.id]);send(res,200,{campaigns:result.rows.map(packed)});return true;}
@@ -66,9 +88,9 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
       if(Number(input.revision)!==Number(c.revision))throw new HTTPError(409,'Dein Entwurf wurde geändert. Prüfe bitte den aktuellen Stand.');
       const issues=requestIssues(value.project,value.meta,JSON.parse(user.profile));if(issues.length)throw new HTTPError(400,issues.join(' '));
       const at=Date.now();await q('INSERT INTO requests(id,campaign_id,user_id,payload,created_at) VALUES($1,$2,$3,$4,$5)',[key,id,user.id,JSON.stringify({...value,profile:JSON.parse(user.profile),email:user.email,revision:Number(c.revision)}),at]);
-      value.meta.status='requested';const updated=await q('UPDATE campaigns SET payload=$1,revision=revision+1,updated_at=$2 WHERE id=$3 AND revision=$4 RETURNING id',[JSON.stringify(value),at,id,Number(c.revision)]);if(!updated.rows.length)throw new HTTPError(409,'Der Entwurf wurde geändert. Bitte erneut prüfen.');return {id:key,created_at:at};});send(res,201,result);return true;
+      value.meta.status='requested';const updated=await q('UPDATE campaigns SET payload=$1,revision=revision+1,updated_at=$2 WHERE id=$3 AND revision=$4 RETURNING id',[JSON.stringify(value),at,id,Number(c.revision)]);if(!updated.rows.length)throw new HTTPError(409,'Der Entwurf wurde geändert. Bitte erneut prüfen.');return {id:key,created_at:at};});send(res,201,{...result,...await services.notifyRequest(result.id)});return true;
     }
-    if(action==='stats'&&req.method==='GET'){await load(db.query,id,user.id);const visits=await db.query('SELECT links.recipient_id, COUNT(visits.id) AS count, MIN(visits.created_at) AS first_visit FROM links LEFT JOIN visits ON visits.token=links.token WHERE links.campaign_id=$1 GROUP BY links.recipient_id',[id]);const requests=await db.query('SELECT id,created_at FROM requests WHERE campaign_id=$1 AND user_id=$2 ORDER BY created_at DESC',[id,user.id]);send(res,200,{visits:visits.rows,requests:requests.rows});return true;}
+    if(action==='stats'&&req.method==='GET'){await load(db.query,id,user.id);const visits=await db.query('SELECT links.recipient_id, COUNT(visits.id) AS count, MIN(visits.created_at) AS first_visit FROM links LEFT JOIN visits ON visits.token=links.token WHERE links.campaign_id=$1 GROUP BY links.recipient_id',[id]);const requests=await db.query('SELECT requests.id,requests.created_at,request_workflow.status FROM requests LEFT JOIN request_workflow ON request_workflow.request_id=requests.id WHERE requests.campaign_id=$1 AND requests.user_id=$2 ORDER BY requests.created_at DESC',[id,user.id]);send(res,200,{visits:visits.rows,requests:requests.rows});return true;}
     if(action==='tracking'&&req.method==='POST'){
      const input=await body(req);const result=await db.tx(async q=>{const c=await load(q,id,user.id);if(Number(input.revision)!==Number(c.revision))throw new HTTPError(409,'Bitte den aktuellen Kampagnenstand laden.');const value=JSON.parse(c.payload);if(!value.project.recipients.length)throw new HTTPError(400,'Füge zuerst deine Kontakte hinzu.');
       for(const r of value.project.recipients){const existing=(await q('SELECT * FROM links WHERE campaign_id=$1 AND recipient_id=$2',[id,r.id])).rows[0];const tracked=existing?origin+'/r/'+existing.token:null;let target=r.chatbot_url||value.meta.targetURL;
@@ -80,6 +102,6 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
     }
    }
    throw new HTTPError(404,'Dieser Bereich wurde nicht gefunden.');
-  }catch(e){if(e.status)send(res,e.status,{error:e.message});else{console.error('Kontaktstoff API:',e.message);send(res,500,{error:'Das Speichern hat nicht geklappt. Bitte versuche es erneut.'});}return true;}
+  }catch(e){if(e.status)send(res,e.status,{error:e.message});else{console.error('Kontaktstoff API:',e.code||'internal_error');send(res,500,{error:'Das Speichern hat nicht geklappt. Bitte versuche es erneut.'});}return true;}
  };
 }
