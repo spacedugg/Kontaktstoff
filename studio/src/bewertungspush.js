@@ -1,5 +1,6 @@
 import {createCampaign,uid} from './core.js';
 import {brandLogoDark} from './bewertungspush-art.js';
+import {editorialFront,editorialBack} from './bewertungspush-layout-art.js';
 export function createBewertungspush(){
  const c=createCampaign(true),ink='#0f172a',blue='#4285f4',muted='#52647c';
  const t=(text,x,y,w,h,fontSize=12,color=ink,weight='400')=>({id:uid(),type:'text',text,x,y,w,h,fontSize,color,weight,align:'left',background:'transparent',autoFit:true});
@@ -13,43 +14,40 @@ export function createBewertungspush(){
   {first_name:'Julia',last_name:'Kern',company:'Werkstatt Kern',segment:'Werkstätten',salutation:'Guten Tag Frau Kern,',personal_note:'Wer eine Werkstatt sucht, sucht Vertrauen. Eine Bewertung ohne echten Kundenkontakt sollte nicht über den nächsten Auftrag entscheiden.'}
  ].map((r,i)=>({...r,id:uid(),industry:r.segment,rating_current:'4,2',rating_example:'4,7',website:'',street:'',postal_code:'',city:'',country:'Deutschland',chatbot_url:'https://bewertungspush.de/suche?utm_source=kontaktstoff&utm_medium=direct_mail&utm_campaign=profilcheck_pilot&utm_content=beispiel_'+(i+1)}));
  const stars=(key,x,y,w,h)=>({...t('{{'+key+'}}',x,y,w,h),display:'stars',color:'#efad27'});
- c.sides.front={background:{kind:'blank',color:'#f9fbff'},fields:[
-  image(brandLogoDark,12,11,68,11.15),
-  {...t('{{company}}',116,12,82,7,10,ink,'700'),align:'right'},
-  {...t('Für {{first_name}} {{last_name}}',116,21,82,6,8.5,muted),align:'right'},
-  t('Unberechtigte Bewertungen raus.',12,39,186,17,27,ink,'700'),
-  t('Ihr guter Ruf nach vorn.',12,56,186,16,27,blue,'700'),
-  t('Keine Vorkasse. Sie zahlen nur bei erfolgreicher Löschung.',12,76,186,8,11,muted),
-  s(0,90,210,58,'#eaf2ff'),
-  s(12,96,77,34,'#ffffff'),
-  s(121,96,77,34,'#ffffff'),
-  t('BEISPIEL · AUSGANGSWERT',18,100,66,6,7,muted,'700'),
-  t('{{rating_current}}',18,109,34,17,32,ink,'700'),
-  stars('rating_current',53,112,28,6),
-  t('von 5 Sternen',53,121,30,5,7.5,muted),
-  t('→',95,106,22,18,31,blue,'700'),
-  t('BEISPIEL · NACH LÖSCHUNGEN',127,100,66,6,6.8,muted,'700'),
-  t('{{rating_example}}',127,109,34,17,32,blue,'700'),
-  stars('rating_example',162,112,28,6),
-  t('von 5 Sternen',162,121,30,5,7.5,muted),
-  t('Illustrative Werte, keine Ergebniszusage.',12,138,110,5,7,muted),
-  {...t('Jetzt prüfen lassen →',126,136,72,8,10,'#225ebf','700'),align:'right'}
+ c.sides.front={background:{kind:'blank',color:'#fcfcfa'},fields:[
+  image(editorialFront,0,0,210,148),
+  image(brandLogoDark,12,11,66,10.82),
+  {...t('{{company}}',111,12,87,7,10,ink,'700'),align:'right'},
+  {...t('Für {{first_name}} {{last_name}}',111,21,87,6,8,muted),align:'right'},
+  t('GUTE ARBEIT. GUTER RUF.',12,37,96,6,7.5,muted,'700'),
+  t('Unberechtigte\nBewertungen\nraus.',12,49,96,40,29,ink,'700'),
+  t('Ihr guter Ruf\nnach vorn.',12,94,92,23,24,blue,'700'),
+  t('Wir kümmern uns um die Löschung.',12,123,94,7,9.5,muted),
+  t('BEISPIEL · AUSGANGSWERT',115,99,48,5,6.3,muted,'700'),
+  t('{{rating_current}}',115,106,29,18,30,ink,'700'),
+  stars('rating_current',146,110,18,4.5),
+  t('von 5 Sternen',145,118,20,5,6.5,muted),
+  t('BEISPIEL · NACH LÖSCHUNGEN',143,47,50,5,6.4,muted,'700'),
+  t('{{rating_example}}',143,54,50,25,50,'#286ce3','700'),
+  stars('rating_example',143,79,46,6),
+  t('Illustrative Werte, keine Ergebniszusage.',109,130,90,5,6.5,muted),
+  t('Keine Vorkasse. Sie zahlen nur bei erfolgreicher Löschung.',12,138,139,5,8.5,'#225ebf','700'),
+  {...t('Zur Rückseite →',160,138,38,5,9,ink,'700'),align:'right'}
  ]};
- c.sides.back={background:{kind:'blank',color:'#fffefa'},fields:[
-  t('EIN GUTER RUF IST KEIN ZUFALL.',12,12,120,8,8.5,muted,'700'),
+ c.sides.back={background:{kind:'blank',color:'#fcfcfa'},fields:[
+  image(editorialBack,0,0,210,148),
+  t('PERSÖNLICH FÜR {{company}}',12,12,120,8,8,muted,'700'),
   image(brandLogoDark,145,10,53,8.7),
-  t('{{salutation}}',12,30,123,12,18,ink,'700'),
-  t('{{personal_note}}',12,48,121,26,12,ink),
-  t('Sie wählen die verdächtigen Bewertungen aus. Wir prüfen mögliche Richtlinienverstöße und kümmern uns um den Löschantrag bei Google.',12,78,121,24,11.5,ink),
-  s(12,109,121,12,'#eaf2ff'),
-  t('Keine Vorkasse. Zahlung nur bei Erfolg.',16,113,113,8,11.5,'#17457e','700'),
-  t('Freundliche Grüße\nIhr Team von BewertungsPush',12,128,121,13,10,muted),
-  s(143,30,55,109,'#eaf2ff'),
-  t('Jetzt Bewertungen\nprüfen lassen.',149,37,44,16,14,ink,'700'),
-  {...t('{{chatbot_url}}',152,60,37,37),type:'qr',background:'#ffffff'},
-  t('01  Profil finden\n02  Bewertungen auswählen\n03  Prüfung starten',149,104,44,19,8.5,muted),
-  t('bewertungspush.de/suche',147,130,48,6,8,'#225ebf','700'),
-  t('Über die Löschung entscheidet Google.',12,140,121,5,7,muted)
+  t('{{salutation}}',12,36,121,12,19,ink,'700'),
+  t('{{personal_note}}',12,55,121,25,12,ink),
+  t('Sie wählen die verdächtigen Bewertungen aus. Wir prüfen mögliche Richtlinienverstöße und kümmern uns um den Löschantrag bei Google.',12,84,121,24,11.5,ink),
+  t('Keine Vorkasse. Zahlung nur bei Erfolg.',18,112,115,9,11,'#225ebf','700'),
+  t('Freundliche Grüße\nIhr Team von BewertungsPush',12,128,121,12,9.5,muted),
+  t('Jetzt Bewertungen\nprüfen lassen.',149,39,44,17,14,ink,'700'),
+  {...t('{{chatbot_url}}',153,61,35,35),type:'qr',background:'#ffffff'},
+  t('Profil finden.\nBewertungen auswählen.\nPrüfung starten.',149,104,44,17,9,muted),
+  t('bewertungspush.de/suche',147,124,48,6,8,'#225ebf','700'),
+  t('Über die Löschung entscheidet Google.',12,138,186,5,7,muted)
  ]};return c;
 }
 
@@ -59,12 +57,12 @@ export function applyBewertungspushOffer(campaign){
  c.name+=' · Angebotsidee';
  const front=c.sides.front.fields;
  const offer=front.find(f=>f.text==='Keine Vorkasse. Sie zahlen nur bei erfolgreicher Löschung.');
- if(offer){offer.text='Erste erfolgreiche Löschung gratis.';offer.fontSize=14;offer.weight='700';offer.color='#225ebf';}
+ if(offer){offer.text='Erste erfolgreiche Löschung gratis.';offer.fontSize=10;offer.weight='700';offer.color='#225ebf';}
  const note=front.find(f=>f.text==='Illustrative Werte, keine Ergebniszusage.');
  if(note){note.text='Beispielwerte · Angebotsidee, Konditionen offen';note.fontSize=6.5;}
  const back=c.sides.back.fields;
  const promise=back.find(f=>f.text==='Keine Vorkasse. Zahlung nur bei Erfolg.');
- if(promise){promise.text='Erste erfolgreiche Löschung gratis.';promise.fontSize=11.5;}
+ if(promise){promise.text='Erste erfolgreiche Löschung gratis.';promise.fontSize=11;}
  const disclaimer=back.find(f=>f.text==='Über die Löschung entscheidet Google.');
  if(disclaimer){disclaimer.text='Angebotsentwurf · Konditionen offen. Über die Löschung entscheidet Google.';disclaimer.w=186;disclaimer.fontSize=7;}
  return c;

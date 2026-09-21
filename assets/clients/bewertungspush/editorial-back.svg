@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2520" height="1776" viewBox="0 0 210 148">
+<defs><linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eef5ff"/><stop offset="1" stop-color="#e1edff"/></linearGradient><filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#6b8ebb" flood-opacity=".10"/></filter></defs>
+<rect width="210" height="148" fill="#fcfcfa"/>
+<path d="M12 25H198" stroke="#dfe7ed" stroke-width=".22"/>
+<rect x="142" y="33" width="56" height="99" rx="5" fill="url(#panel)"/>
+<rect x="151" y="59" width="39" height="39" rx="3" fill="#fff" filter="url(#shadow)"/>
+<path d="M17 110H126" stroke="#cfdef4" stroke-width=".3"/>
+<circle cx="13" cy="113" r="1" fill="#4285f4"/>
+<rect x="0" y="142" width="210" height="6" fill="#edf3fc"/>
+</svg>

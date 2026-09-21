@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2520" height="1776" viewBox="0 0 210 148">
+<defs>
+ <radialGradient id="wash"><stop stop-color="#cadfff"/><stop offset=".6" stop-color="#e9f2ff"/><stop offset="1" stop-color="#fcfcfa"/></radialGradient>
+ <linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#f5f9ff"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffefb1"/><stop offset=".4" stop-color="#ffc748"/><stop offset="1" stop-color="#d98e10"/></linearGradient>
+ <linearGradient id="arrow" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#b9d4fc"/><stop offset="1" stop-color="#4285f4"/></linearGradient>
+ <filter id="shadow" x="-40%" y="-40%" width="180%" height="200%"><feDropShadow dx="0" dy="2" stdDeviation="2.6" flood-color="#416694" flood-opacity=".12"/></filter>
+ <filter id="goldshadow" x="-60%" y="-60%" width="220%" height="230%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#be841a" flood-opacity=".18"/></filter>
+</defs>
+<rect width="210" height="148" fill="#fcfcfa"/>
+<ellipse cx="169" cy="84" rx="81" ry="76" fill="url(#wash)"/>
+<path d="M12 31H198" stroke="#dfe7ed" stroke-width=".22"/>
+<circle cx="163" cy="84" r="44" fill="none" stroke="#fff" stroke-width=".6" opacity=".9"/>
+<circle cx="163" cy="84" r="37" fill="none" stroke="#bfd4f3" stroke-width=".25"/>
+<path d="M113 124C139 135 194 123 199 91" fill="none" stroke="#fff" stroke-width=".7"/>
+<rect x="109" y="95" width="59" height="32" rx="4" fill="url(#card)" stroke="#fff" stroke-width=".5" filter="url(#shadow)"/>
+<rect x="137" y="43" width="62" height="46" rx="4.5" fill="url(#card)" stroke="#fff" stroke-width=".6" filter="url(#shadow)"/>
+<path d="M120 87C117 75 120 63 133 63" fill="none" stroke="url(#arrow)" stroke-width="1.6" stroke-linecap="round"/>
+<path d="M129 59L133.5 63L129 67" fill="none" stroke="#4285f4" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<g transform="translate(189 34) rotate(12)" filter="url(#goldshadow)"><path d="M0-8L2.35-2.8L8-.9L3.8 3L4.9 8.5L0 5.7L-4.9 8.5L-3.8 3L-8-.9L-2.35-2.8Z" fill="url(#gold)" stroke="#fff0b5" stroke-width=".35"/></g>
+<g fill="#91b8f7"><circle cx="114" cy="47" r=".9"/><circle cx="193" cy="116" r="1.1"/></g>
+<path d="M180 107h4m-2-2v4" stroke="#91b8f7" stroke-width=".55" stroke-linecap="round"/>
+<rect x="0" y="135" width="210" height="13" fill="#edf3fc"/>
+</svg>
