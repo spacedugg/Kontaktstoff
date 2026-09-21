@@ -88,6 +88,18 @@ test('review links expose only one chosen proof, support annotations, resolution
  r=(await request('/api/reviews/'+r.id+'/resolve',{method:'POST',account:a,body:{revision:r.revision,commentId:r.events[0].id}})).data;
  r=(await request('/api/review',{method:'POST',headers,body:{type:'approve',name:'Kunde',confirm:true,version:1,revision:r.revision}})).data;assert.equal(r.status,'approved');
  assert.equal((await request('/api/review',{method:'POST',headers,body:{type:'comment',name:'Kunde',text:'Late',version:1,revision:r.revision}})).status,409);
+ assert.equal((await request('/api/reviews/'+r.id+'/delete',{method:'POST',account:b,body:{revision:r.revision}})).status,404);
+ assert.equal((await request('/api/reviews/'+r.id+'/delete',{method:'POST',account:a,body:{revision:0}})).status,409);
+ assert.equal((await request('/api/reviews/'+r.id+'/delete',{method:'POST',account:a,body:{revision:r.revision}})).status,200);
+ assert.equal((await request('/api/reviews',{account:a})).data.items.length,0);
+ assert.equal((await request('/api/review',{headers})).status,404);
+ assert.equal((await request('/api/reviews/'+r.id,{account:a})).status,404);
+ const trash=(await request('/api/reviews/trash',{account:a})).data.items;assert.equal(trash.length,1);
+ assert.equal((await request('/api/reviews/trash',{account:b})).data.items.length,0);
+ assert.equal((await request('/api/library/designs/'+d.id,{account:a})).status,200);
+ r=(await request('/api/reviews/'+r.id+'/restore',{method:'POST',account:a,body:{revision:trash[0].revision}})).data;
+ assert.equal(r.status,'approved');assert.equal(r.version,1);assert.equal((await request('/api/review',{headers})).data.status,'approved');
+ assert.equal((await request('/api/reviews/trash',{account:a})).data.items.length,0);
  d.project.name='Überarbeitet';const updated=(await request('/api/library/designs/'+d.id,{method:'PUT',account:a,body:d})).data;
  assert.equal((await request('/api/reviews/'+r.id,{account:a})).data.stale,true);
  r=(await request('/api/reviews/'+r.id+'/publish',{method:'POST',account:a,body:{revision:r.revision,sourceRevision:updated.revision}})).data;assert.equal(r.version,2);assert.equal(r.status,'open');assert.equal(r.events.filter(e=>e.type==='approve')[0].version,1);assert.equal(r.versions.length,2);

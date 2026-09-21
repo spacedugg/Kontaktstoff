@@ -88,7 +88,8 @@ export function libraryService(db,{origin,limited}){
    const value=payload({project,meta:{...input.meta,audience:audience?.name||'',leadSource:'upload',quantity:project.recipients.length||250,designId:d?.id||'',audienceId:a?.id||'',designRevision:Number(d?.revision)||0,audienceRevision:Number(a?.revision)||0}});
    await q('INSERT INTO campaigns(id,user_id,payload,revision,updated_at) VALUES($1,$2,$3,1,$4)',[project.id,user.id,JSON.stringify(value),Date.now()]);return {...value,id:project.id,revision:1};
   });
-  if(path==='/api/reviews'&&method==='GET'){const rows=(await db.query('SELECT * FROM reviews WHERE user_id=$1 ORDER BY updated_at DESC',[user.id])).rows;const items=[];for(const r of rows)items.push(await reviewResult(db.query,r,true));return {items};}
+  if(path==='/api/reviews/trash'&&method==='GET')return {items:(await db.query('SELECT reviews.id,reviews.title,reviews.revision,review_trash.deleted_at FROM reviews JOIN review_trash ON review_trash.review_id=reviews.id WHERE reviews.user_id=$1 ORDER BY review_trash.deleted_at DESC',[user.id])).rows};
+  if(path==='/api/reviews'&&method==='GET'){const rows=(await db.query('SELECT * FROM reviews WHERE user_id=$1 AND id NOT IN (SELECT review_id FROM review_trash) ORDER BY updated_at DESC',[user.id])).rows;const items=[];for(const r of rows)items.push(await reviewResult(db.query,r,true));return {items};}
   if(path==='/api/reviews'&&method==='POST')return db.tx(async q=>{
    const s=await source(q,input.sourceKind,input.sourceId,user.id);if(Number(input.sourceRevision)!==Number(s.revision))fail(409,'Das Design wurde geändert. Bitte neu laden.');
    const index=Number(input.recipientIndex||0),project=JSON.parse(s.payload).project;if(!Number.isInteger(index)||index<0||index>=Math.max(1,project.recipients.length))fail(400,'Ungültiger Vorschaukontakt.');
@@ -98,11 +99,18 @@ export function libraryService(db,{origin,limited}){
    await q('INSERT INTO review_versions(review_id,version,payload,created_at) VALUES($1,1,$2,$3)',[id,JSON.stringify(snapshot),at]);
    return {...await reviewResult(q,await review(q,id,user.id),true),url:origin+'/freigabe/#token='+token};
   });
-  const match=path.match(/^\/api\/reviews\/([\w-]+)(?:\/(publish|revoke|link|resolve))?$/);
+  const match=path.match(/^\/api\/reviews\/([\w-]+)(?:\/(publish|revoke|link|resolve|delete|restore))?$/);
   if(match){const [,id,action]=match;return db.tx(async q=>{
-   const r=await review(q,id,user.id);if(method==='GET'&&!action)return reviewResult(q,r,true);
+   const r=await review(q,id,user.id),trash=(await q('SELECT * FROM review_trash WHERE review_id=$1',[id])).rows[0];if(trash&&action!=='restore')fail(404,'Diese Freigabe liegt im Papierkorb.');if(method==='GET'&&!action)return reviewResult(q,r,true);
    if(method!=='POST')fail(405,'Methode nicht erlaubt.');if(Number(input.revision)!==Number(r.revision))fail(409,'Die Freigabe wurde geändert. Bitte neu laden.');let extra={};const at=Date.now();
-   if(action==='publish'){
+   if(action==='delete'){
+    const changed=await q("UPDATE reviews SET status='revoked',revision=revision+1,updated_at=$1 WHERE id=$2 AND revision=$3 RETURNING id",[at,id,r.revision]);if(!changed.rows.length)fail(409,'Bitte neu laden.');
+    await q('INSERT INTO review_trash(review_id,previous_status,deleted_at) VALUES($1,$2,$3)',[id,r.status,at]);return {ok:true};
+   }else if(action==='restore'){
+    if(!trash)fail(400,'Diese Freigabe liegt nicht im Papierkorb.');
+    const changed=await q('UPDATE reviews SET status=$1,revision=revision+1,updated_at=$2 WHERE id=$3 AND revision=$4 RETURNING id',[trash.previous_status,at,id,r.revision]);if(!changed.rows.length)fail(409,'Bitte neu laden.');
+    await q('DELETE FROM review_trash WHERE review_id=$1',[id]);
+   }else if(action==='publish'){
     if(r.status==='revoked')fail(409,'Bitte zuerst einen neuen Freigabelink erstellen.');
     const s=await source(q,r.source_kind,r.source_id,user.id);if(Number(input.sourceRevision)!==Number(s.revision))fail(409,'Bitte das aktuelle Design laden.');const snapshot=proof(JSON.parse(s.payload).project,Number(r.recipient_index)),version=Number(r.version)+1;
     await q('INSERT INTO review_versions(review_id,version,payload,created_at) VALUES($1,$2,$3,$4)',[id,version,JSON.stringify(snapshot),at]);
