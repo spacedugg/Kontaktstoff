@@ -12,7 +12,7 @@ import {createCampaign} from '../studio/src/core.js';
 import {defaults,metrics} from '../konto/src/model.js';
 import {createMailer} from '../server/mail.js';
 const origin='http://localhost:9000';
-async function fixture(options={}){const db=await connectDB({file:':memory:'}),handle=createAPI(db,{origin,...options});async function request(route,{method='GET',body,account,prepared=false,headers={}}={}){const req=Readable.from(body?[Buffer.from(JSON.stringify(body))]:[]);Object.assign(req,{url:route,method,headers:{origin,'content-type':'application/json',...(account?{cookie:account.cookie,'x-csrf-token':account.csrf}:{}),...headers},socket:{remoteAddress:'127.0.0.1'},...(prepared?{body}:{})});let status,raw;const received={};const res={setHeader:(k,v)=>received[k]=v,writeHead:(s,h)=>{status=s;Object.assign(received,h);},end:data=>raw=data};await handle(req,res);return {status,headers:received,data:raw?JSON.parse(raw):null};}async function register(email){const r=await request('/api/auth/register',{method:'POST',body:{email,password:'a-test-password-123',profile:{company:'Test GmbH',name:'Mara Test'}}});assert.equal(r.status,201);return {cookie:r.headers['Set-Cookie'].split(';')[0],csrf:r.data.csrf};}return {db,request,register};}
+async function fixture(options={}){const db=await connectDB({file:':memory:'}),handle=createAPI(db,{origin,reviewLinkKey:'ab'.repeat(32),...options});async function request(route,{method='GET',body,account,prepared=false,headers={}}={}){const req=Readable.from(body?[Buffer.from(JSON.stringify(body))]:[]);Object.assign(req,{url:route,method,headers:{origin,'content-type':'application/json',...(account?{cookie:account.cookie,'x-csrf-token':account.csrf}:{}),...headers},socket:{remoteAddress:'127.0.0.1'},...(prepared?{body}:{})});let status,raw;const received={};const res={setHeader:(k,v)=>received[k]=v,writeHead:(s,h)=>{status=s;Object.assign(received,h);},end:data=>raw=data};await handle(req,res);return {status,headers:received,data:raw?JSON.parse(raw):null};}async function register(email){const r=await request('/api/auth/register',{method:'POST',body:{email,password:'a-test-password-123',profile:{company:'Test GmbH',name:'Mara Test'}}});assert.equal(r.status,201);return {cookie:r.headers['Set-Cookie'].split(';')[0],csrf:r.data.csrf};}return {db,request,register};}
 test('internal admin uses a server secret, preserves its workspace, and rejects guest and customer access',async()=>{
  const encode=password=>'0123456789abcdef0123456789abcdef:'+scryptSync(password,'0123456789abcdef0123456789abcdef',64).toString('hex');
  const password='admin-test-only-passphrase',adminPasswordHash=encode(password),{db,request,register}=await fixture({adminPasswordHash});
@@ -110,3 +110,46 @@ test('review links expose only one chosen proof, support annotations, resolution
  }finally{await db.close();}
 });
 test('cart recovery tracking changes the QR field actually used by the design',async()=>{const {db,request,register}=await fixture();try{const account=await register('cart-track@example.org'),project=createCampaign();for(const side of Object.values(project.sides))for(const field of side.fields)if(field.type==='qr')field.text='{{cart_url}}';for(const r of project.recipients)r.cart_url='https://example.org/recover/'+r.id;const c=(await request('/api/campaigns',{method:'POST',account,body:{project,meta:defaults()}})).data;const tracked=await request('/api/campaigns/'+c.id+'/tracking',{method:'POST',account,body:{revision:c.revision}});assert.equal(tracked.status,200);assert.match(tracked.data.project.recipients[0].cart_url,/\/r\//);assert.equal((await request(new URL(tracked.data.project.recipients[0].cart_url).pathname)).headers.Location,project.recipients[0].cart_url);}finally{await db.close();}});
+
+test('owner can recover the same encrypted link and migrate legacy tokens without invalidating customer access',async()=>{
+ const {db,request,register}=await fixture();try{
+  const account=await register('stable-link@example.org'),other=await register('link-other@example.org');
+  const d=(await request('/api/library/designs',{method:'POST',account,body:{project:createCampaign()}})).data;
+  const r=(await request('/api/reviews',{method:'POST',account,body:{sourceKind:'designs',sourceId:d.id,sourceRevision:d.revision}})).data;
+  const token=new URLSearchParams(new URL(r.url).hash.slice(1)).get('token');
+  const headers={authorization:'Bearer '+token};
+  assert.equal((await request('/api/reviews/'+r.id,{account})).data.url,r.url);
+  assert.equal((await request('/api/reviews',{account})).data.items[0].url,r.url);
+  assert.equal((await request('/api/review',{headers})).data.url,undefined);
+  const sealed=(await db.query('SELECT sealed FROM review_link_secrets')).rows[0].sealed;assert.ok(!sealed.includes(token));
+  // Simulate a legacy review. Migration proves possession of its current token and preserves state.
+  await db.query('DELETE FROM review_link_secrets WHERE review_id=$1',[r.id]);
+  assert.equal((await request('/api/reviews/'+r.id,{account})).data.url,null);
+  const route='/api/reviews/'+r.id+'/remember-link',body={revision:r.revision,token};
+  assert.equal((await request(route,{method:'POST',account:other,body})).status,404);
+  assert.equal((await request(route,{method:'POST',account,body:{...body,token:'x'.repeat(43)}})).status,400);
+  const restored=(await request(route,{method:'POST',account,body})).data;
+  assert.equal(restored.url,r.url);assert.equal(restored.revision,r.revision);assert.equal(restored.expiresAt,r.expiresAt);
+  assert.equal((await request(route,{method:'POST',account,body})).data.url,r.url);
+  assert.equal((await request('/api/review',{headers})).status,200);
+  // A distinct service instance recovers from the database with no browser storage.
+  const {libraryService}=await import('../server/library.js');
+  const owner=(await db.query('SELECT user_id FROM reviews WHERE id=$1',[r.id])).rows[0].user_id;
+  const fresh=libraryService(db,{origin,limited:async()=>{},reviewLinkKey:'ab'.repeat(32)});
+  assert.equal((await fresh.owner('/api/reviews/'+r.id,'GET',{}, {id:owner})).url,r.url);
+  const rotated=(await request('/api/reviews/'+r.id+'/link',{method:'POST',account,body:{revision:r.revision}})).data;
+  assert.notEqual(rotated.url,r.url);assert.equal((await request('/api/reviews/'+r.id,{account})).data.url,rotated.url);
+  assert.equal((await request('/api/review',{headers})).status,404);
+  const revoked=(await request('/api/reviews/'+r.id+'/revoke',{method:'POST',account,body:{revision:rotated.revision}})).data;
+  assert.equal(revoked.url,null);
+  assert.equal((await request(route,{method:'POST',account,body:{revision:revoked.revision,token:new URLSearchParams(new URL(rotated.url).hash.slice(1)).get('token')}})).status,409);
+ }finally{await db.close();}
+});
+test('review creation fails atomically if the link encryption key is unavailable',async()=>{
+ const {db,request,register}=await fixture({reviewLinkKey:''});try{
+  const account=await register('missing-key@example.org');
+  const d=(await request('/api/library/designs',{method:'POST',account,body:{project:createCampaign()}})).data;
+  assert.equal((await request('/api/reviews',{method:'POST',account,body:{sourceKind:'designs',sourceId:d.id,sourceRevision:d.revision}})).status,503);
+  assert.equal((await db.query('SELECT * FROM reviews')).rows.length,0);
+ }finally{await db.close();}
+});

@@ -6,6 +6,7 @@ const schema=[
  'CREATE TABLE IF NOT EXISTS library (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), kind TEXT NOT NULL, payload TEXT NOT NULL, revision INTEGER NOT NULL, updated_at BIGINT NOT NULL, deleted_at BIGINT)',
  'CREATE TABLE IF NOT EXISTS reviews (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), source_kind TEXT NOT NULL, source_id TEXT NOT NULL, recipient_index INTEGER NOT NULL, title TEXT NOT NULL, token_hash TEXT NOT NULL UNIQUE, fingerprint TEXT NOT NULL, version INTEGER NOT NULL, revision INTEGER NOT NULL, status TEXT NOT NULL, expires_at BIGINT NOT NULL, updated_at BIGINT NOT NULL)',
  'CREATE TABLE IF NOT EXISTS review_versions (review_id TEXT NOT NULL REFERENCES reviews(id), version INTEGER NOT NULL, payload TEXT NOT NULL, created_at BIGINT NOT NULL, PRIMARY KEY(review_id,version))',
+ 'CREATE TABLE IF NOT EXISTS review_link_secrets (review_id TEXT PRIMARY KEY REFERENCES reviews(id), sealed TEXT NOT NULL)',
  'CREATE TABLE IF NOT EXISTS review_trash (review_id TEXT PRIMARY KEY REFERENCES reviews(id), previous_status TEXT NOT NULL, deleted_at BIGINT NOT NULL)',
  'CREATE TABLE IF NOT EXISTS review_events (id TEXT PRIMARY KEY, review_id TEXT NOT NULL REFERENCES reviews(id), payload TEXT NOT NULL, created_at BIGINT NOT NULL)',
  'CREATE INDEX IF NOT EXISTS library_owner ON library(user_id,kind)',

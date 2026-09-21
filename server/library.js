@@ -1,4 +1,4 @@
-import {randomUUID,randomBytes,createHash} from 'node:crypto';
+import {randomUUID,randomBytes,createHash,createCipheriv,createDecipheriv} from 'node:crypto';
 import {HTTPError,text,payload} from './validation.js';
 import {createCampaign,validateCampaign,sideNames} from '../studio/src/core.js';
 const hash=v=>createHash('sha256').update(v).digest('hex');
@@ -19,7 +19,23 @@ function proof(project,index=0){
  const sides=structuredClone(project.sides);if(sideNames(project).length===1)sides.back={background:{kind:'blank',color:'#ffffff'},fields:[]};for(const s of Object.values(sides))for(const f of s.fields)if(f.variants){f.data=f.variants[r[f.variantKey]]||f.data;delete f.variants;delete f.variantKey;}
  return {version:1,id:'proof',name:project.name,format:project.format,updatedAt:0,sample:project.sample===true,sides,recipients:[recipient]};
 }
-export function libraryService(db,{origin,limited}){
+export function libraryService(db,{origin,limited,reviewLinkKey}){
+ // The hash authenticates public requests; encrypted storage lets only the owner recover the same URL.
+ const key=/^[a-f0-9]{64}$/i.test(reviewLinkKey||'')?Buffer.from(reviewLinkKey,'hex'):null;
+ async function rememberLink(q,id,token){
+  if(!key)fail(503,'Kundenlinks können gerade nicht gespeichert werden. Bitte später erneut versuchen.');
+  const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,iv);cipher.setAAD(Buffer.from(id));
+  const data=Buffer.concat([cipher.update(token,'utf8'),cipher.final()]);
+  const sealed=[iv,cipher.getAuthTag(),data].map(b=>b.toString('base64url')).join('.');
+  await q('INSERT INTO review_link_secrets(review_id,sealed) VALUES($1,$2) ON CONFLICT(review_id) DO UPDATE SET sealed=excluded.sealed',[id,sealed]);
+ }
+ async function customerURL(q,r){
+  if(r.status==='revoked'||Number(r.expires_at)<Date.now()||!key)return null;
+  const row=(await q('SELECT sealed FROM review_link_secrets WHERE review_id=$1',[r.id])).rows[0];if(!row)return null;
+  try{const [iv,tag,data]=row.sealed.split('.').map(v=>Buffer.from(v,'base64url')),cipher=createDecipheriv('aes-256-gcm',key,iv);cipher.setAAD(Buffer.from(r.id));cipher.setAuthTag(tag);
+   const token=Buffer.concat([cipher.update(data),cipher.final()]).toString('utf8');return hash(token)===r.token_hash?origin+'/freigabe/#token='+token:null;
+  }catch{return null;}
+ }
  async function source(q,kind,id,user){
   if(!['designs','campaigns'].includes(kind))fail(400,'Ungültige Designquelle.');
   const sql=kind==='campaigns'?'SELECT * FROM campaigns WHERE id=$1 AND user_id=$2 AND deleted_at IS NULL':"SELECT * FROM library WHERE id=$1 AND user_id=$2 AND kind='designs' AND deleted_at IS NULL";
@@ -31,7 +47,7 @@ export function libraryService(db,{origin,limited}){
   const events=(await q('SELECT payload FROM review_events WHERE review_id=$1 ORDER BY created_at,id',[r.id])).rows.map(e=>JSON.parse(e.payload));
   const current=versions.find(v=>Number(v.version)===version);let stale=false;
   if(owner){try{const s=await source(q,r.source_kind,r.source_id,r.user_id);stale=hash(JSON.stringify(proof(JSON.parse(s.payload).project,Number(r.recipient_index))))!==r.fingerprint;}catch{stale=true;}}
-  return {id:r.id,title:r.title,status:r.status,version,revision:Number(r.revision),project:JSON.parse(current.payload),events,versions:versions.map(v=>({version:Number(v.version),createdAt:Number(v.created_at)})),...(owner?{sourceKind:r.source_kind,sourceId:r.source_id,stale,expiresAt:Number(r.expires_at)}:{})};
+  return {id:r.id,title:r.title,status:r.status,version,revision:Number(r.revision),project:JSON.parse(current.payload),events,versions:versions.map(v=>({version:Number(v.version),createdAt:Number(v.created_at)})),...(owner?{url:await customerURL(q,r),sourceKind:r.source_kind,sourceId:r.source_id,stale,expiresAt:Number(r.expires_at)}:{})};
  }
  return {
  async public(req,input){
@@ -97,13 +113,19 @@ export function libraryService(db,{origin,limited}){
    const snapshot=proof(project,index),at=Date.now(),id=randomUUID(),token=randomBytes(32).toString('base64url');
    await q("INSERT INTO reviews(id,user_id,source_kind,source_id,recipient_index,title,token_hash,fingerprint,version,revision,status,expires_at,updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,1,'open',$9,$10)",[id,user.id,input.sourceKind,input.sourceId,index,project.name,hash(token),hash(JSON.stringify(snapshot)),at+90*86400000,at]);
    await q('INSERT INTO review_versions(review_id,version,payload,created_at) VALUES($1,1,$2,$3)',[id,JSON.stringify(snapshot),at]);
-   return {...await reviewResult(q,await review(q,id,user.id),true),url:origin+'/freigabe/#token='+token};
+   await rememberLink(q,id,token);
+   return await reviewResult(q,await review(q,id,user.id),true);
   });
-  const match=path.match(/^\/api\/reviews\/([\w-]+)(?:\/(publish|revoke|link|resolve|delete|restore))?$/);
+  const match=path.match(/^\/api\/reviews\/([\w-]+)(?:\/(publish|revoke|link|resolve|delete|restore|remember-link))?$/);
   if(match){const [,id,action]=match;return db.tx(async q=>{
    const r=await review(q,id,user.id),trash=(await q('SELECT * FROM review_trash WHERE review_id=$1',[id])).rows[0];if(trash&&action!=='restore')fail(404,'Diese Freigabe liegt im Papierkorb.');if(method==='GET'&&!action)return reviewResult(q,r,true);
-   if(method!=='POST')fail(405,'Methode nicht erlaubt.');if(Number(input.revision)!==Number(r.revision))fail(409,'Die Freigabe wurde geändert. Bitte neu laden.');let extra={};const at=Date.now();
-   if(action==='delete'){
+   if(method!=='POST')fail(405,'Methode nicht erlaubt.');if(Number(input.revision)!==Number(r.revision))fail(409,'Die Freigabe wurde geändert. Bitte neu laden.');const at=Date.now();
+   if(action==='remember-link'){
+    if(r.status==='revoked'||Number(r.expires_at)<at)fail(409,'Dieser Kundenlink ist nicht aktiv.');
+    const token=String(input.token||'');if(!/^[\w-]{43}$/.test(token)||hash(token)!==r.token_hash)fail(400,'Dieser Link gehört nicht zur aktuellen Freigabe.');
+    const unchanged=await q('UPDATE reviews SET token_hash=token_hash WHERE id=$1 AND revision=$2 AND token_hash=$3 RETURNING id',[id,r.revision,hash(token)]);if(!unchanged.rows.length)fail(409,'Der Kundenlink wurde inzwischen geändert. Bitte neu laden.');
+    await rememberLink(q,id,token);
+   }else if(action==='delete'){
     const changed=await q("UPDATE reviews SET status='revoked',revision=revision+1,updated_at=$1 WHERE id=$2 AND revision=$3 RETURNING id",[at,id,r.revision]);if(!changed.rows.length)fail(409,'Bitte neu laden.');
     await q('INSERT INTO review_trash(review_id,previous_status,deleted_at) VALUES($1,$2,$3)',[id,r.status,at]);return {ok:true};
    }else if(action==='restore'){
@@ -121,9 +143,9 @@ export function libraryService(db,{origin,limited}){
     const changed=await q('UPDATE reviews SET revision=revision+1,updated_at=$1 WHERE id=$2 AND revision=$3 RETURNING id',[at,id,r.revision]);if(!changed.rows.length)fail(409,'Bitte neu laden.');
    }else if(action==='revoke'||action==='link'){
     const token=action==='link'?randomBytes(32).toString('base64url'):null;
-    const changed=await q('UPDATE reviews SET token_hash=$1,status=$2,revision=revision+1,expires_at=$3,updated_at=$4 WHERE id=$5 AND revision=$6 RETURNING id',[token?hash(token):r.token_hash,action==='revoke'?'revoked':r.status==='revoked'?'open':r.status,at+90*86400000,at,id,r.revision]);if(!changed.rows.length)fail(409,'Bitte neu laden.');if(token)extra.url=origin+'/freigabe/#token='+token;
+    const changed=await q('UPDATE reviews SET token_hash=$1,status=$2,revision=revision+1,expires_at=$3,updated_at=$4 WHERE id=$5 AND revision=$6 RETURNING id',[token?hash(token):r.token_hash,action==='revoke'?'revoked':r.status==='revoked'?'open':r.status,at+90*86400000,at,id,r.revision]);if(!changed.rows.length)fail(409,'Bitte neu laden.');if(token)await rememberLink(q,id,token);
    }else fail(404,'Aktion nicht gefunden.');
-   return {...await reviewResult(q,await review(q,id,user.id),true),...extra};
+   return await reviewResult(q,await review(q,id,user.id),true);
   });}
   fail(404,'Bereich nicht gefunden.');
  }
