@@ -13,7 +13,7 @@ $('#client-note').value=campaign.recipients[0].personal_note;
 const person=()=>({...campaign.recipients[selectedPerson],first_name:$('#client-name').value.trim()||campaign.recipients[selectedPerson].first_name,company:$('#client-company').value.trim()||campaign.recipients[selectedPerson].company,personal_note:$('#client-note').value.trim()||campaign.recipients[selectedPerson].personal_note,salutation:$('#client-salutation').value.trim()||campaign.recipients[selectedPerson].salutation});
 const snapshot=()=>{const c=structuredClone(campaign);c.recipients=[person()];return c;};
 async function render(){
- const version=++revision,c=snapshot(),showPlaceholders=$('#client-placeholders').checked,r=showPlaceholders?{...c.recipients[0],first_name:'{{first_name}}',last_name:'{{last_name}}',company:'{{company}}',personal_note:'{{personal_note}}',salutation:'{{salutation}}'}:c.recipients[0];
+ const version=++revision,c=snapshot(),showPlaceholders=$('#client-placeholders').checked,r=showPlaceholders?{...c.recipients[0],first_name:'{{first_name}}',last_name:'{{last_name}}',company:'{{company}}',personal_note:'{{personal_note}}',personal_headline:'{{personal_headline}}',salutation:'{{salutation}}'}:c.recipients[0];
  stage.setAttribute('aria-busy','true');$('#client-status').textContent='Vorschau wird aktualisiert …';
  try{
   const canvases=await Promise.all(['front','back'].map(async side=>{const canvas=document.createElement('canvas');await renderCanvas(canvas,c,side,r,{scale:6});return {side,canvas};}));
