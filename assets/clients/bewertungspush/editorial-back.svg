@@ -1,10 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2520" height="1776" viewBox="0 0 210 148">
-<defs><linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eef5ff"/><stop offset="1" stop-color="#e1edff"/></linearGradient><filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#6b8ebb" flood-opacity=".10"/></filter></defs>
+<defs>
+ <radialGradient id="wash"><stop stop-color="#dceaff"/><stop offset=".65" stop-color="#f1f6fe"/><stop offset="1" stop-color="#fcfcfa"/></radialGradient>
+ <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f1f7ff"/><stop offset="1" stop-color="#e1edff"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffefb1"/><stop offset=".4" stop-color="#ffc748"/><stop offset="1" stop-color="#d98e10"/></linearGradient>
+ <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#6b8ebb" flood-opacity=".10"/></filter>
+ <filter id="goldshadow" x="-60%" y="-60%" width="220%" height="230%"><feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#be841a" flood-opacity=".18"/></filter>
+ <path id="star" d="M0-8L2.35-2.8L8-.9L3.8 3L4.9 8.5L0 5.7L-4.9 8.5L-3.8 3L-8-.9L-2.35-2.8Z"/>
+</defs>
 <rect width="210" height="148" fill="#fcfcfa"/>
+<ellipse cx="185" cy="83" rx="59" ry="66" fill="url(#wash)"/>
+<ellipse cx="179" cy="83" rx="43" ry="54" fill="none" stroke="#d9e7fb" stroke-width=".35"/>
+<ellipse cx="179" cy="83" rx="48" ry="59" fill="none" stroke="#ffffff" stroke-width=".6"/>
 <path d="M12 25H198" stroke="#dfe7ed" stroke-width=".22"/>
-<rect x="142" y="33" width="56" height="99" rx="5" fill="url(#panel)"/>
+<rect x="142" y="33" width="56" height="99" rx="5" fill="url(#panel)" stroke="#ffffff" stroke-width=".5" filter="url(#shadow)"/>
 <rect x="151" y="59" width="39" height="39" rx="3" fill="#fff" filter="url(#shadow)"/>
+<g transform="translate(193 30) rotate(12) scale(.85)" filter="url(#goldshadow)"><use href="#star" fill="url(#gold)" stroke="#fff0b5" stroke-width=".35"/></g>
 <path d="M17 110H126" stroke="#cfdef4" stroke-width=".3"/>
-<circle cx="13" cy="113" r="1" fill="#4285f4"/>
+<g transform="translate(13 114) scale(.24)"><use href="#star" fill="url(#gold)"/></g>
+<g fill="#aac7f4"><circle cx="136" cy="50" r=".65"/><circle cx="199" cy="117" r=".8"/></g>
+<path d="M202 105h3m-1.5-1.5v3" stroke="#a4c2f0" stroke-width=".45" stroke-linecap="round"/>
 <rect x="0" y="142" width="210" height="6" fill="#edf3fc"/>
 </svg>
