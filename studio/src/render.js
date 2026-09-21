@@ -1,5 +1,5 @@
 import QRCode from 'qrcode';
-import {FORMATS,resolveText,validURL} from './core.js';
+import {FORMATS,resolveText,validURL,ratingValue} from './core.js';
 const images=new Map(), codes=new Map();
 export function imageFrom(src){if(images.size>=32&&!images.has(src))images.delete(images.keys().next().value);if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>{images.delete(src);reject(new Error('Das Bild konnte nicht gelesen werden.'));};image.src=src;}));return images.get(src);}
 function rect(ctx,x,y,w,h,color,r=0){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
@@ -32,6 +32,15 @@ function template(ctx,side,w,h){
 }
 export function wrap(ctx,text,width){const result=[];for(const paragraph of text.split('\n')){let line='';for(const word of paragraph.split(' ')){const test=line?line+' '+word:word;if(ctx.measureText(test).width>width&&line){result.push(line);line=word;}else line=test;}result.push(line);}return result;}
 export function layoutText(ctx,field,value){let size=field.fontSize*25.4/72;let lines;const min=Math.min(size,6*25.4/72);do{ctx.font=`${field.weight} ${size}px Kontakt, sans-serif`;lines=wrap(ctx,value,field.w-1);if(!field.autoFit||(lines.length*size*1.3<=field.h&&lines.every(s=>ctx.measureText(s).width<=field.w-1))||size<=min)break;size=Math.max(min,size-.15);}while(true);return{size,lines,overflow:lines.length*size*1.3>field.h+.01||lines.some(s=>ctx.measureText(s).width>field.w-1)};}
+export function drawRatingStars(ctx,field,value){
+ const rating=ratingValue(value),size=Math.min(field.h,field.w/5.5),gap=size*.125;
+ for(let i=0;i<5;i++){
+  const x=field.x+i*(size+gap),y=field.y+(field.h-size)/2;
+  const path=()=>{ctx.beginPath();for(let j=0;j<10;j++){const angle=-Math.PI/2+j*Math.PI/5,r=j%2?size*.22:size*.5;const px=x+size/2+Math.cos(angle)*r,py=y+size/2+Math.sin(angle)*r;j?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();};
+  path();ctx.fillStyle='#dce4ee';ctx.fill();const fraction=rating===null?0:Math.max(0,Math.min(1,rating-i));
+  if(fraction){ctx.save();ctx.beginPath();ctx.rect(x,y,size*fraction,size);ctx.clip();path();ctx.fillStyle=field.color;ctx.fill();ctx.restore();}
+ }
+}
 export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,fields=true}={}){
   await document.fonts.ready;
   const format=FORMATS.find(f=>f.id===campaign.format),{width:w,height:h}=format;
@@ -46,6 +55,7 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
     const value=resolveText(field.text,recipient);
     if(field.background!=='transparent')rect(ctx,field.x,field.y,field.w,field.h,field.background);
     if(field.type==='shape'){continue;}
+    if(field.type==='text'&&field.display==='stars'){drawRatingStars(ctx,field,value);continue;}
     if(field.type==='image'){const img=await imageFrom(field.data);const ratio=(field.fit==='cover'?Math.max:Math.min)(field.w/img.width,field.h/img.height);ctx.save();ctx.beginPath();ctx.rect(field.x,field.y,field.w,field.h);ctx.clip();ctx.drawImage(img,field.x+(field.w-img.width*ratio)/2,field.y+(field.h-img.height*ratio)/2,img.width*ratio,img.height*ratio);ctx.restore();continue;}
     if(field.type==='qr'){
       if(validURL(value)&&value.length<=1000){let code=codes.get(value);if(!code){code=await QRCode.toDataURL(value,{errorCorrectionLevel:'M',margin:4,width:800,color:{dark:'#101820',light:'#ffffff'}});if(codes.size>=128)codes.delete(codes.keys().next().value);codes.set(value,code);}const img=await imageFrom(code);const size=Math.min(field.w,field.h);ctx.drawImage(img,field.x,field.y,size,size);}

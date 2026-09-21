@@ -9,7 +9,7 @@ export async function auditCampaign(campaign,progress=()=>{},signal){
   if(signal?.aborted)throw new Error('Prüfung abgebrochen.');
   const recipient=campaign.recipients[i];
   for(const [side,label] of [['front','Vorderseite'],['back','Rückseite']])for(const field of campaign.sides[side].fields){
-   if(field.type==='text'&&layoutText(ctx,field,resolveText(field.text,recipient)).overflow)issues.push({level:'error',text:`${label} · ${recipient.company||'Empfänger '+(i+1)}: Text „${field.text.slice(0,50)}“ passt nicht in das Feld.`,recipientId:recipient.id,side});
+   if(field.type==='text'&&field.display!=='stars'&&layoutText(ctx,field,resolveText(field.text,recipient)).overflow)issues.push({level:'error',text:`${label} · ${recipient.company||'Empfänger '+(i+1)}: Text „${field.text.slice(0,50)}“ passt nicht in das Feld.`,recipientId:recipient.id,side});
   }
   if(!recipient.company?.trim())issues.push({level:'error',text:`Empfänger ${i+1}: Firmenname fehlt.`});
   progress(i+1,campaign.recipients.length);

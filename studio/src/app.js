@@ -29,7 +29,7 @@ let history=[], future=[], saveTimer, toastTimer, renderVersion=0, drawingIssues
 const format=()=>FORMATS.find(f=>f.id===campaign.format);
 const recipient=()=>campaign.recipients[recipientIndex]||{};
 const selectedField=()=>campaign.sides[side].fields.find(f=>f.id===selected);
-const fieldName=f=>f.type==='image'?'Logo / Bild':f.type==='shape'?'Farbfläche':f.type==='qr'?'Persönlicher QR-Code':KEYS[f.text.match(/^\{\{(\w+)\}\}$/)?.[1]]|| (f.text.includes('{{first_name}}')?'Persönliche Ansprache':f.text.replace(/\n/g,' ').slice(0,55)||'Eigener Text');
+const fieldName=f=>f.display==='stars'?'Sterneskala · '+(KEYS[f.text.match(/^\{\{(\w+)\}\}$/)?.[1]]||f.text):f.type==='image'?'Logo / Bild':f.type==='shape'?'Farbfläche':f.type==='qr'?'Persönlicher QR-Code':KEYS[f.text.match(/^\{\{(\w+)\}\}$/)?.[1]]|| (f.text.includes('{{first_name}}')?'Persönliche Ansprache':f.text.replace(/\n/g,' ').slice(0,55)||'Eigener Text');
 const keys=()=>[...new Set([...Object.keys(KEYS),...Object.values(campaign.sides).flatMap(s=>s.fields.flatMap(f=>[...f.text.matchAll(/\{\{\s*([\w-]+)\s*\}\}/g)].map(m=>m[1]))),...campaign.recipients.flatMap(r=>Object.keys(r)).filter(k=>!['id','__proto__','constructor','prototype'].includes(k))])].filter(k=>!['id','__proto__','constructor','prototype'].includes(k));
 function toast(message,error=false){clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').classList.toggle('error',error);$('#toast').classList.add('show');toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),error?6500:3500);}
 function saveState(text,failed=false){$('#save-state').innerHTML=`<span class="status-dot" style="background:${failed?'#bf7352':'#779767'}"></span>${escape(text)}`;}

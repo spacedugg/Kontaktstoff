@@ -1,5 +1,6 @@
+export function ratingValue(value){const raw=String(value).trim().replace(',','.');if(!/^[0-5](?:\.\d+)?$/.test(raw))return null;const number=Number(raw);return number<=5?number:null;}
 export const FORMATS = [{ id:'a5-landscape', name:'DIN A5 · Querformat', width:210, height:148 }];
-export const KEYS = { company:'Firmenname', first_name:'Vorname',last_name:'Nachname',contact_role:'Funktion',email:'E-Mail',phone:'Telefon',industry:'Branche',employee_count:'Mitarbeiterzahl',source_url:'Kontaktquelle', salutation:'Ansprache', personal_note:'Persönliche Nachricht', personal_headline:'Persönliche Überschrift', website:'Website', chatbot_url:'Ziel-Link',street:'Straße & Hausnummer',postal_code:'PLZ',city:'Ort',country:'Land' };
+export const KEYS = { company:'Firmenname', first_name:'Vorname',last_name:'Nachname',contact_role:'Funktion',email:'E-Mail',phone:'Telefon',industry:'Branche',employee_count:'Mitarbeiterzahl',source_url:'Kontaktquelle', salutation:'Ansprache', personal_note:'Persönliche Nachricht', personal_headline:'Persönliche Überschrift',rating_current:'Sterne: Ausgangswert',rating_example:'Sterne: Beispielwert danach', website:'Website', chatbot_url:'Ziel-Link',street:'Straße & Hausnummer',postal_code:'PLZ',city:'Ort',country:'Land' };
 export const uid = () => crypto.randomUUID();
 export const clone = value => structuredClone(value);
 export const clamp = (n,min,max) => Math.min(max,Math.max(min,n));
@@ -51,6 +52,7 @@ export function validateCampaign(value) {
     if(s.background.color!==undefined&&!/^#[0-9a-f]{6}$/i.test(s.background.color))throw new Error('Ungültige Flächenfarbe.');
     if(s.background.kind==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s.background.data)||s.background.data.length>16000000||![s.background.width,s.background.height].every(n=>Number.isFinite(n)&&n>0)))throw new Error('Ungültige Bilddatei im Projekt.');
     for(const f of s.fields){
+      if(f.display!==undefined&&(f.display!=='stars'||f.type!=='text'))throw new Error('Ungültige Felddarstellung.');
       if(f.fit!==undefined&&!['contain','cover'].includes(f.fit))throw new Error('Ungültige Bildanpassung.');
       if(f.type==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f.data)||f.data.length>16000000))throw new Error('Ungültiges Bildelement.');
       if(!f||!/^[-a-zA-Z0-9_]{1,100}$/.test(f.id)||!['text','qr','image','shape'].includes(f.type)||typeof f.text!=='string'||f.text.length>5000||![f.x,f.y,f.w,f.h,f.fontSize].every(Number.isFinite)||f.x<0||f.y<0||f.w<2||f.h<2||f.x+f.w>format.width+.1||f.y+f.h>format.height+.1||f.fontSize<6||f.fontSize>80||!/^#[0-9a-f]{6}$/i.test(f.color)||!['400','700'].includes(f.weight)||!['left','center','right'].includes(f.align)||!(f.background==='transparent'||/^#[0-9a-f]{6}$/i.test(f.background))) throw new Error('Ungültige Personalisierungsfelder.');
@@ -85,6 +87,7 @@ export function checks(campaign) {
       if(f.type!=='shape'&&(f.x<5||f.y<5||f.x+f.w>format.width-5||f.y+f.h>format.height-5))issues.push({level:'warning',text:`${label}: Ein Feld liegt außerhalb des 5-mm-Sicherheitsabstands.`});
       if(f.type==='qr'&&Math.min(f.w,f.h)<20)issues.push({level:'warning',text:`${label}: Ein QR-Code ist kleiner als 20 mm.`});
       if(f.type==='shape'||f.type==='image')continue;
+      if(f.display==='stars'&&campaign.recipients.some(r=>ratingValue(resolveText(f.text,r))===null))issues.push({level:'error',text:`${label}: Sterne benötigen einen Wert zwischen 0 und 5.`});
       const missing=campaign.recipients.filter(r=>missingKeys(f.text,r).length);
       if(missing.length)issues.push({level:'error',text:`${label}: ${missing.length} Empfänger ohne Wert für „${f.text}“.`});
       if(f.type==='qr'){
