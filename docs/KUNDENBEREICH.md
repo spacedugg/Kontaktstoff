@@ -68,3 +68,7 @@ npm run test:homepage
 ```
 
 Die Browsertests prüfen Gast → Anfrage → Registrierung → Konto, zweites Gerät, CSV in den Server-Editor, Status/ROI, echte Redirects, responsive Ansichten und Money-Making-Sprint-Übernahme. Testkonten und Testkontakte liegen ausschließlich in der separaten ignorierten Testdatenbank.
+
+## Veröffentlichungsprüfung 21.09.2026
+
+Deployment `dpl_GQKj8Va5Une3CA6yZZ2x8SBCdhYJ`, Commit `0455462`, API-Region `fra1`. Live liefert `/api/health` HTTP 200 mit `storage: postgres` und `email: false`; `/api/auth/me` liefert als Gast HTTP 200. 33 automatisierte Tests, kompletter lokaler Workspace-Browsertest und gezielter UI-Test für Team-Eingang/Passwortlinks erfolgreich. Der zusätzliche produktive Schreibtest benötigt eigene Freigabe, da er dauerhafte synthetische Testdatensätze hinterlässt.

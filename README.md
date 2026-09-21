@@ -1,6 +1,6 @@
 # Kontaktstoff
 
-Editor und Kundenbereich für persönliche B2B-Mailings. Der Branch **`codex/kundenbereich`** ergänzt das bestehende öffentliche Homepage-Design um Studio-/Kontolinks und eine Übergabe aus dem Planungsrechner. Der Stand ist seit 21.09.2026 unter https://www.kontaktstoff.com veröffentlicht. Anmeldung und Server-Speicherung sind bis zur Datenbank-Anbindung deaktiviert.
+Editor und Kundenbereich für persönliche B2B-Mailings. Der Branch **`codex/kundenbereich`** ergänzt das bestehende öffentliche Homepage-Design um Studio-/Kontolinks und eine Übergabe aus dem Planungsrechner. Der Stand ist seit 21.09.2026 unter https://www.kontaktstoff.com veröffentlicht. Anmeldung und Server-Speicherung nutzen Neon PostgreSQL in Frankfurt. E-Mail-Versand bleibt vorerst deaktiviert.
 
 ## Lokal starten
 
