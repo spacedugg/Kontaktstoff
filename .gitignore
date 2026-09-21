@@ -8,3 +8,7 @@ dist/
 !.env.example
 .vercel
 .env*.local
+
+output/
+
+tmp/

@@ -18,3 +18,9 @@ Nach Änderungen `npm run build` ausführen. Das erzeugt die lokalen Seiten und 
 Konzept auf Grundlage von https://www.money-making-sprint.de/ (angesehen am 17.09.2026): Zielgruppe Agenturen, Freelancer und B2B-Dienstleister; schwarzer Auftritt mit Violett/Neongelb; Termin-CTA unter `/termin`. Eigene Mailing-Texte; keine Übernahme von Kundenbildern, Erfolgszahlen oder Umsatzgarantien. Der QR-Code enthält sichtbare Demo-Kampagnenparameter und führt auf die echte Terminseite. Der Vorschlag ist kein bereits beauftragtes Projekt.
 
 Die Seiten tragen `noindex,nofollow`, sind aber nicht zugriffsgeschützt. Die Entwicklungsbranch-Vorschau ist für die Prüfung gedacht; eine öffentliche Veröffentlichung und ein funktionierender Anfragekanal sind gesonderte Schritte.
+
+## BewertungsPush
+
+`/fuer/bewertungspush/` zeigt einen DIN-A5-Konzeptentwurf im Namen von BewertungsPush für lokale Betriebe. Eigene Illustration, editierbare Texte und personenbezogene Felder; keine echte Profilanalyse, keine erfundenen Bewertungen oder Erfolgsquoten. Drei ausdrücklich fiktive Beispielkontakte (Hotel, Restaurant, Werkstatt). Die formelle Anrede ist direkt bearbeitbar. Grundlage: https://bewertungspush.de/, angesehen am 21.09.2026. QR-Ziel: die verlinkte Unternehmenssuche `/suche`, ergänzt um Demo-UTM-Parameter. Zahlungen, Prüfaufträge und Nachrichten werden durch die Vorschau nicht ausgelöst.
+
+Ansichts-PDF: `output/pdf/bewertungspush-dina5-mailing.pdf`, zwei Seiten im Endformat 210 × 148 mm, 300-dpi-RGB-Rendering ohne Beschnitt. Native Gestaltung unter `studio/src/bewertungspush.js`, Illustration unter `assets/clients/bewertungspush/`. Für einen echten Druckauftrag werden Beschnitt, Papier und Druckvorgaben separat abgestimmt.

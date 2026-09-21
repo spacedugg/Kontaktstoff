@@ -1,6 +1,8 @@
 import {createCampaign,uid} from './core.js';
-export const CLIENT_CAMPAIGNS=[{id:'money-making-sprint',name:'Money Making Sprint',source:'https://www.money-making-sprint.de/',target:'https://www.money-making-sprint.de/termin',description:'Persönliche Einladung zum Strategiegespräch für Agenturinhaber.'}];
+import {createBewertungspush} from './bewertungspush.js';
+export const CLIENT_CAMPAIGNS=[{id:'bewertungspush',name:'BewertungsPush',source:'https://bewertungspush.de/',target:'https://bewertungspush.de/suche',description:'Persönliche Profilprüfungs-Einladung für lokale Betriebe.'},{id:'money-making-sprint',name:'Money Making Sprint',source:'https://www.money-making-sprint.de/',target:'https://www.money-making-sprint.de/termin',description:'Persönliche Einladung zum Strategiegespräch für Agenturinhaber.'}];
 export function createClientCampaign(id){
+ if(id==='bewertungspush')return createBewertungspush();
  const client=CLIENT_CAMPAIGNS.find(c=>c.id===id);if(!client)throw new Error('Unbekanntes Kundenkonzept.');
  const c=createCampaign(true),black='#131216',white='#faf8f2',lime='#dbff00',purple='#7338ea';
  const text=(value,x,y,w,h,size=12,color=black,weight='400')=>({id:uid(),type:'text',text:value,x,y,w,h,fontSize:size,color,weight,align:'left',background:'transparent',autoFit:true});

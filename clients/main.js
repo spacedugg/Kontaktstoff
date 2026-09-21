@@ -10,10 +10,10 @@ const campaign=createClientCampaign(client.id),stage=$('#client-stage');
 mountCardPreview({stage,card:$('#client-card'),flip:$('#client-flip'),reset:$('#client-reset')});
 let revision=0,selectedPerson=0;
 $('#client-note').value=campaign.recipients[0].personal_note;
-const person=()=>({...campaign.recipients[selectedPerson],first_name:$('#client-name').value.trim()||campaign.recipients[selectedPerson].first_name,company:$('#client-company').value.trim()||campaign.recipients[selectedPerson].company,personal_note:$('#client-note').value.trim()||campaign.recipients[selectedPerson].personal_note,salutation:'Hey '+($('#client-name').value.trim()||campaign.recipients[selectedPerson].first_name)+','});
+const person=()=>({...campaign.recipients[selectedPerson],first_name:$('#client-name').value.trim()||campaign.recipients[selectedPerson].first_name,company:$('#client-company').value.trim()||campaign.recipients[selectedPerson].company,personal_note:$('#client-note').value.trim()||campaign.recipients[selectedPerson].personal_note,salutation:$('#client-salutation').value.trim()||campaign.recipients[selectedPerson].salutation});
 const snapshot=()=>{const c=structuredClone(campaign);c.recipients=[person()];return c;};
 async function render(){
- const version=++revision,c=snapshot(),showPlaceholders=$('#client-placeholders').checked,r=showPlaceholders?{...c.recipients[0],first_name:'{{first_name}}',company:'{{company}}',personal_note:'{{personal_note}}',salutation:'Hey {{first_name}},'}:c.recipients[0];
+ const version=++revision,c=snapshot(),showPlaceholders=$('#client-placeholders').checked,r=showPlaceholders?{...c.recipients[0],first_name:'{{first_name}}',last_name:'{{last_name}}',company:'{{company}}',personal_note:'{{personal_note}}',salutation:'{{salutation}}'}:c.recipients[0];
  stage.setAttribute('aria-busy','true');$('#client-status').textContent='Vorschau wird aktualisiert …';
  try{
   const canvases=await Promise.all(['front','back'].map(async side=>{const canvas=document.createElement('canvas');await renderCanvas(canvas,c,side,r,{scale:6});return {side,canvas};}));
@@ -23,8 +23,10 @@ async function render(){
  }catch(error){if(version===revision){$('#client-error').textContent='Die Vorschau konnte nicht geladen werden. Bitte lade die Seite erneut.';$('#client-error').hidden=false;$('#client-status').textContent='Vorschau nicht verfügbar';}}
  finally{if(version===revision)stage.setAttribute('aria-busy','false');}
 }
-document.querySelectorAll('[data-client-person]').forEach(button=>button.onclick=()=>{selectedPerson=Number(button.dataset.clientPerson);const r=campaign.recipients[selectedPerson];$('#client-request [name=audience]').selectedIndex=selectedPerson;$('#client-name').value=r.first_name;$('#client-company').value=r.company;$('#client-note').value=r.personal_note;document.querySelectorAll('[data-client-person]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();});
-for(const id of ['client-name','client-company','client-note'])$('#'+id).addEventListener('input',render);
+document.querySelectorAll('[data-client-person]').forEach(button=>button.onclick=()=>{selectedPerson=Number(button.dataset.clientPerson);const r=campaign.recipients[selectedPerson];$('#client-request [name=audience]').selectedIndex=selectedPerson;$('#client-name').value=r.first_name;previousName=r.first_name;$('#client-company').value=r.company;$('#client-note').value=r.personal_note;$('#client-salutation').value=r.salutation;document.querySelectorAll('[data-client-person]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));render();});
+let previousName=$('#client-name').value;
+$('#client-name').addEventListener('input',()=>{const value=$('#client-name').value;if(previousName&&$('#client-salutation').value.includes(previousName))$('#client-salutation').value=$('#client-salutation').value.replace(previousName,value);previousName=value;});
+for(const id of ['client-name','client-company','client-note','client-salutation'])$('#'+id).addEventListener('input',render);
 $('#client-placeholders').addEventListener('change',render);
 document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{const flat=button.dataset.view==='flat';stage.hidden=flat;$('#client-flat').hidden=!flat;$('.client-preview-controls').hidden=flat;document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));});
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}

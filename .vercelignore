@@ -9,3 +9,7 @@ test-results/
 tests/
 .agents/
 skills-lock.json
+
+output/
+
+tmp/
