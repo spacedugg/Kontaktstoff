@@ -22,7 +22,8 @@
     "requests": "node scripts/requests.mjs",
     "test:workflow": "node tests/workflow.mjs",
     "test:builder": "node tests/builder.mjs",
-    "test:sales": "node tests/sales.mjs"
+    "test:sales": "node tests/sales.mjs",
+    "test:proposals": "node tests/proposals.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

@@ -78,18 +78,37 @@ Prüfung: `npm test`, `npm run test:builder`, `npm run test:workflow` und
 ### Verkaufsseite und persönliche Links
 
 `/mailings/` zeigt Angebot, drei fiktive Kampagnenbeispiele, Ablauf und ein
-Anfrageformular ohne Registrierung. Betreiber erstellen unter
-`/konto/?tab=sales-links` Links mit Firmenname, Kampagnenziel und optionalem
-Loom-Freigabelink. Das Video wird verlinkt, nicht automatisch eingebettet.
-Die Angaben sind sichtbar im Link enthalten; dort gehören keine internen Daten hin.
+Anfrageformular ohne Registrierung. Unter `/konto/?tab=sales-links` erstellen
+Betreiber gespeicherte Kundenseiten aus einer Website oder einem manuellen Entwurf.
+Der Import übernimmt öffentliche Metadaten und geeignete Rasterbilder und erzeugt
+einen regelbasierten, bearbeitbaren Text-/Layoutvorschlag. Es ist kein angebundener
+LLM-Dienst. Money Making Sprint besitzt einen eigens ausgearbeiteten Ausgangsentwurf.
+Logo, Foto, Farbe, Texte, Zielgruppe, QR-Ziel und Loom lassen sich anpassen.
+
+`/mailings/?vorschau=<id>` zeigt den gespeicherten Entwurf nur angemeldeten Betreibern.
+`/mailings/?konzept=<slug>` zeigt den explizit veröffentlichten Stand. Der Link
+bleibt bei Updates gleich und kann deaktiviert werden. Entwürfe und veröffentlichte
+Snapshots sind getrennt und revisionsgesichert. Öffentliche Vorschläge enthalten
+keine internen Herkunftsnotizen; Suchmaschinen sollen sie nicht indexieren.
+Der optionale Loom-Freigabelink öffnet das Video extern. Die bisherigen einfachen
+Links mit `fuer`, `ziel` und `video` funktionieren weiterhin.
+
+Website-Abrufe sind auf öffentliche IPv4-Adressen und HTTP(S) begrenzt. DNS wird pro
+Weiterleitung geprüft und an die Verbindung gebunden; Zeit-, Größen- und
+Dekomprimierungslimits gelten auch für Bilder. HTML wird als Daten gelesen, nicht
+ausgeführt. Bei gesperrten Websites kann man manuell beginnen. SVG-Logos werden
+nicht importiert; PNG/JPG/WebP können hochgeladen werden.
 
 Anfragen werden serverseitig gespeichert und unter
-`/konto/?tab=sales-inquiries` mit Status und interner Notiz bearbeitet.
-Wiederholte Übermittlungen derselben Anfrage sind idempotent. Herkunftsprüfung,
-Rate-Limits, Honeypot und Betreiberberechtigungen schützen den Endpunkt.
-Es erfolgt keine automatische E-Mail, Zahlung oder Bestellung.
+`/konto/?tab=sales-inquiries` mit Status und interner Notiz bearbeitet. Persönliche
+Kundenseiten werden der Anfrage zugeordnet. Wiederholte Übermittlungen derselben
+Anfrage sind idempotent. Herkunftsprüfung, Rate-Limits, Honeypot und
+Betreiberberechtigungen schützen die Endpunkte. Es erfolgt keine automatische
+E-Mail, Zahlung oder Bestellung.
 
 Offen bleiben vollständige Betreiber-/Datenschutzhinweise, E-Mail-Anbindung,
-Shop-Ereignisse und Druck-/Versanddienst-Anbindung. `npm test` prüft unter anderem
-Validierung, Parallelzugriffe und Berechtigungen; `npm run test:sales` prüft den
-Browserablauf mit einem getrennten Testserver auf Port 4183.
+Shop-Ereignisse und Druck-/Versanddienst-Anbindung. `npm test` prüft Validierung,
+Berechtigungen und Veröffentlichung; `npm run test:sales` und
+`npm run test:proposals` prüfen die Browserabläufe mit einem getrennten Testserver
+auf Port 4183. `node tests/proposal-import.mjs` prüft zusätzlich den Import gegen
+öffentliche Websites und benötigt Netzwerkzugriff.

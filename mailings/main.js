@@ -2,6 +2,9 @@ import {createBrandTemplate,applyBrandText,PREVIEW_PERSON} from '../studio/src/b
 import {renderCanvas} from '../studio/src/render.js';
 import {Mailing3D} from '../studio/src/three-d.js';
 import {salesConfig} from './config.js';
+import {mountProposalPage} from './proposal-page.js';
+if(new URLSearchParams(location.search).has('konzept')||new URLSearchParams(location.search).has('vorschau'))await mountProposalPage();else await genericPage();
+async function genericPage(){
 const $=s=>document.querySelector(s),config=salesConfig(new URLSearchParams(location.search));
 const cases={
  b2b:{template:'stacked-note',brand:'chattastic.',headline:'Mehr Zeit für\ndeine Interessenten.',message:'Fragen zu Exposés, zur Lage oder zum nächsten Besichtigungstermin: Ein Website-Assistent könnte dein Team bei den ersten Antworten unterstützen.',cta:'Deine Demo kennenlernen →',kicker:'NEUE GESCHÄFTSKUNDEN',title:'Ein konkreter Anlass statt einer Massenansprache.',body:'Zeige deinen Wunschkunden, warum dein Angebot zu ihrem Alltag passt. Die Karte führt direkt zu einer Demo, einem Termin oder einer persönlichen Landingpage.',points:['Unternehmen und Ansprechpartner einsetzen','Eine relevante Idee auf der Karte zeigen','Direkt zur passenden Zielseite führen']},
@@ -23,3 +26,5 @@ document.querySelectorAll('[data-privacy]').forEach(b=>b.onclick=()=>$('#privacy
 const form=$('#sales-inquiry');let requestId='',lastPayload='';
 form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('[type=submit]');button.disabled=true;$('#form-error').hidden=true;try{const data=Object.fromEntries(new FormData(form));Object.assign(data,{sourceCompany:config.company,loom:config.loom});const serialized=JSON.stringify(data);if(serialized!==lastPayload||!requestId){requestId=crypto.randomUUID();lastPayload=serialized;}const response=await fetch('/api/sales-inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,id:requestId})});let result;try{result=await response.json();}catch{throw Error('Die Verbindung hat nicht geklappt. Deine Angaben bleiben stehen; bitte erneut versuchen.');}if(!response.ok)throw Error(result.error||'Bitte erneut versuchen.');for(const child of form.children)child.hidden=true;$('#form-success').hidden=false;$('#form-success').focus();}catch(e){$('#form-error').hidden=false;$('#form-error').textContent=e.message;button.disabled=false;}};
 await document.fonts.ready;const hero=createBrandTemplate('personal-letter');applyBrandText(hero,'brand','kontaktstoff.');applyBrandText(hero,'headline','Eine gute Idee.\nPersönlich für dich.');applyBrandText(hero,'cta','Dein nächster Kontakt beginnt hier →');await renderCanvas($('#hero-card'),hero,'front',PREVIEW_PERSON,{scale:4});await paint();
+
+}

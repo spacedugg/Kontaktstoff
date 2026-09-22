@@ -1,6 +1,7 @@
 import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
 const schema=[
+ "CREATE TABLE IF NOT EXISTS sales_proposals (id TEXT PRIMARY KEY, slug TEXT NOT NULL UNIQUE, draft TEXT NOT NULL, published TEXT, revision INTEGER NOT NULL, updated_at BIGINT NOT NULL)",
  "CREATE TABLE IF NOT EXISTS sales_inquiries (id TEXT PRIMARY KEY, payload TEXT NOT NULL, digest TEXT NOT NULL, created_at BIGINT NOT NULL, status TEXT NOT NULL, note TEXT NOT NULL, revision INTEGER NOT NULL)",
  "CREATE INDEX IF NOT EXISTS sales_inquiries_date ON sales_inquiries(created_at)",
 

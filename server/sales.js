@@ -8,7 +8,7 @@ export function salesService(db){
  async create(input){
   if(input.website_extra)throw new HTTPError(400,'Die Anfrage konnte nicht gespeichert werden.');
   const id=text(input.id||'',100);if(!/^[a-f0-9-]{36}$/i.test(id))throw new HTTPError(400,'Bitte die Seite neu laden.');
-  const value={name:text(input.name||'',100),company:text(input.company||'',150),email:text(input.email||'',254).toLowerCase(),website:text(input.website||'',300),useCase:text(input.useCase||'',30),quantity:Number(input.quantity||0),message:text(input.message||'',2000),sourceCompany:text(input.sourceCompany||'',100),loom:loomURL(input.loom||''),source:'mailings'};
+  const value={name:text(input.name||'',100),company:text(input.company||'',150),email:text(input.email||'',254).toLowerCase(),website:text(input.website||'',300),useCase:text(input.useCase||'',30),quantity:Number(input.quantity||0),message:text(input.message||'',2000),sourceCompany:text(input.sourceCompany||'',100),loom:loomURL(input.loom||''),proposalSlug:text(input.proposalSlug||'',100),source:'mailings'};
   if(!value.name||!value.company||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email))throw new HTTPError(400,'Bitte Name, Unternehmen und eine gültige E-Mail-Adresse angeben.');
   if(!Object.hasOwn(SALES_CASES,value.useCase)||!Number.isInteger(value.quantity)||value.quantity<0||value.quantity>100000)throw new HTTPError(400,'Bitte Ziel und Kontaktzahl prüfen.');
   if(value.website&&(!validURL(value.website)||new URL(value.website).username||new URL(value.website).password))throw new HTTPError(400,'Bitte eine gültige Website eintragen.');

@@ -94,3 +94,16 @@ test('public sales inquiries do not need accounts but remain operator-only and o
  assert.equal((await request('/api/sales-inquiries')).status,401);
  }finally{await db.close();}
 });
+test('sales proposals require operator and CSRF, expose published fields only, and attribute inquiries',async()=>{
+ const {db,request,register}=await fixture({operatorEmails:'proposal-admin@example.org'});try{
+ const admin=await register('proposal-admin@example.org'),member=await register('proposal-member@example.org');await db.query('INSERT INTO email_verifications(user_id,verified_at) SELECT id,$1 FROM users WHERE email=$2',[Date.now(),'proposal-admin@example.org']);
+ const {MMS_PROPOSAL}=await import('../mailings/proposal-config.js');
+ assert.equal((await request('/api/operator/proposals')).status,401);assert.equal((await request('/api/operator/proposals',{account:member})).status,403);
+ assert.equal((await request('/api/operator/proposals',{account:admin,method:'POST',body:{draft:MMS_PROPOSAL},headers:{'x-csrf-token':'wrong'}})).status,403);
+ const created=await request('/api/operator/proposals',{account:admin,method:'POST',body:{draft:MMS_PROPOSAL}});assert.equal(created.status,201);let r=created.data;
+ assert.equal((await request('/api/proposal?slug='+r.slug)).status,404);r=(await request('/api/operator/proposals/'+r.id,{account:admin,method:'PUT',body:{draft:r.draft,revision:r.revision,publish:true}})).data;
+ const publicPage=await request('/api/proposal?slug='+r.slug);assert.equal(publicPage.status,200);assert.equal(publicPage.data.proposal.sourceDescription,undefined);
+ const inquiry=await request('/api/sales-inquiries',{method:'POST',body:{id:crypto.randomUUID(),name:'Test',email:'test@example.org',company:'Test',useCase:'b2b',proposalSlug:r.slug,sourceCompany:'Spoof'}});assert.equal(inquiry.status,201);const leads=(await request('/api/operator/sales',{account:admin})).data.items;assert.equal(leads[0].sourceCompany,'Money Making Sprint');assert.equal(leads[0].proposalSlug,r.slug);
+ assert.equal((await request('/api/operator/proposals/'+r.id+'/disable',{method:'POST',account:member,body:{revision:r.revision}})).status,403);
+ }finally{await db.close();}
+});
