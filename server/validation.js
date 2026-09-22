@@ -1,3 +1,4 @@
+import {campaignReadiness} from '../konto/src/builder-model.js';
 import {validateCampaign,validURL,FORMATS,sideNames} from '../studio/src/core.js';
 import {defaults,SALES,SHIPPING} from '../konto/src/model.js';
 export class HTTPError extends Error{constructor(status,message){super(message);this.status=status;}}
@@ -18,6 +19,7 @@ export function payload(input){
  for(const r of project.recipients){const o=data.outcomes?.[r.id];if(!o)continue;const contribution=Number(o.contribution||0);if(!Number.isFinite(contribution)||contribution<0||contribution>100000000||!Object.hasOwn(SALES,o.sales)||!Object.hasOwn(SHIPPING,o.shipping))throw new HTTPError(400,'Ungültiger Kontaktstatus.');const wonAt=text(o.wonAt||'',10);if(wonAt&&!/^\d{4}-\d{2}-\d{2}$/.test(wonAt))throw new HTTPError(400,'Ungültiges Abschlussdatum.');meta.outcomes[r.id]={sales:o.sales,shipping:o.shipping,contribution,wonAt,note:text(o.note||'',1000),nextStep:text(o.nextStep||'',300)};}
  for(const key of ['designId','audienceId'])meta[key]=text(data[key]||'',100);
  for(const key of ['designRevision','audienceRevision'])meta[key]=Math.max(0,Math.floor(Number(data[key])||0));
+ if(data.builder){if(data.builder.version!==1||!Number.isInteger(data.builder.step)||data.builder.step<0||data.builder.step>3)throw new HTTPError(400,'Ungültiger Kampagnenschritt.');meta.builder={version:1,step:data.builder.step};}
  delete project.service;return {project,meta};
 }
 export function requestIssues(project,meta,company){
@@ -27,5 +29,5 @@ export function requestIssues(project,meta,company){
  if(meta.leadSource==='upload'&&!project.recipients.length)issues.push('Kontaktliste hochladen oder Lead-Recherche wählen.');
  if(!meta.designService&&sideNames(project).some(side=>project.sides[side].background.kind==='blank'&&!project.sides[side].fields.length))issues.push('Beide Kartenseiten gestalten oder Gestaltung anfragen.');
  if(project.sample&&meta.leadSource==='upload')issues.push('Die fiktiven Beispielkontakte durch eigene Kontakte ersetzen oder Lead-Recherche wählen.');
- return issues;
+ if(meta.builder)issues.push(...campaignReadiness(project,meta).errors);return [...new Set(issues)];
 }

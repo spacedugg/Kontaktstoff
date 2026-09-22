@@ -20,7 +20,8 @@
     "test:csv-client": "node tests/csv-client.mjs",
     "test:workspace": "node tests/workspace.mjs",
     "requests": "node scripts/requests.mjs",
-    "test:workflow": "node tests/workflow.mjs"
+    "test:workflow": "node tests/workflow.mjs",
+    "test:builder": "node tests/builder.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

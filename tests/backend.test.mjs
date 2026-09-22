@@ -68,3 +68,17 @@ test('mailer uses provider idempotency and never exposes provider errors or cred
  await mailer.send({to:'recipient@example.org',subject:'Test',text:'Private message',id:'unique-request'});assert.equal(sent.options.headers['Idempotency-Key'],'unique-request');assert.equal(JSON.parse(sent.options.body).to[0],'recipient@example.org');
  const broken=createMailer({key:'secret',from:'test@example.org',fetcher:async()=>({ok:false})});await assert.rejects(()=>broken.send({id:'test'}),/E-Mail-Dienst/);
 });
+
+test('guided handoff records the checked revision and tracking daily counts are isolated',async()=>{
+ const {db,request,register}=await fixture();try{
+ const {createBrandTemplate,PREVIEW_PERSON}=await import('../studio/src/brand-templates.js');const a=await register('builder@example.org'),b=await register('builder-other@example.org'),project=createBrandTemplate('stacked-note');
+ project.recipients=[{id:'person-1',...PREVIEW_PERSON,street:'Testweg 1',postal_code:'01234',city:'Teststadt',country:'Deutschland'}];
+ let c=(await request('/api/campaigns',{method:'POST',account:a,body:{project,meta:{...defaults(),audience:'Testkunden',builder:{version:1,step:3}}}})).data;
+ const key=crypto.randomUUID();assert.equal((await request('/api/campaigns/'+c.id+'/request',{method:'POST',account:a,body:{key,revision:c.revision}})).status,400);
+ const submitted=await request('/api/campaigns/'+c.id+'/request',{method:'POST',account:a,body:{key,revision:c.revision,confirmed:true}});assert.equal(submitted.status,201);
+ const snapshot=JSON.parse((await db.query('SELECT payload FROM requests WHERE id=$1',[key])).rows[0].payload);assert.equal(snapshot.submission.scope,'design-and-data-review');assert.equal(snapshot.revision,1);
+ c=(await request('/api/campaigns/'+c.id,{account:a})).data;c=(await request('/api/campaigns/'+c.id+'/tracking',{method:'POST',account:a,body:{revision:c.revision}})).data;
+ const url=new URL(c.project.recipients[0].chatbot_url);await request(url.pathname);await request(url.pathname);
+ const stats=(await request('/api/campaigns/'+c.id+'/stats',{account:a})).data;assert.equal(stats.scanDays.reduce((n,d)=>n+Number(d.count),0),2);assert.deepEqual(stats.trackedRecipientIds,['person-1']);assert.equal((await request('/api/campaigns/'+c.id+'/stats',{account:b})).status,404);
+ }finally{await db.close();}
+});

@@ -52,7 +52,7 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
 }
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
 function renderUI(inspector=true,table=true,guide=true){
- $('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=reviewReturn()?'Speichern & zur Abstimmung →':cloudPath.includes('library')?'Zur Designbibliothek →':'Kampagne anfragen →';
+ $('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=reviewReturn()?'Speichern & zur Abstimmung →':builderReturn()?'Speichern & zurück zur Kampagne →':cloudPath.includes('library')?'Zur Designbibliothek →':'Kampagne anfragen →';
  if(!sideNames(campaign).includes(side))side='front';
  document.body.classList.toggle('single-sided',sideNames(campaign).length===1);
  document.documentElement.style.setProperty('--mailing-ratio',format().width+'/'+format().height);
@@ -288,8 +288,9 @@ async function showDashboard(){
  // Render sequentially to keep large local libraries responsive.
  for(const c of dashboardCampaigns){if(view!=='dashboard'||version!==dashboardVersion)break;const canvas=$(`[data-dashboard-thumb="${c.id}"]`);if(canvas)try{await renderCanvas(canvas,c,'front',c.recipients[0]||{company:'Ihr Unternehmen',salutation:'Guten Tag,',chatbot_url:'https://chattastic.de/'},{scale:2});}catch{canvas.replaceWith(document.createTextNode('Vorschau nicht verfügbar'));}}
 }
+const builderReturn=()=>{const p=new URLSearchParams(location.search),id=p.get('build');return id&&/^[\w-]+$/.test(id)?'/konto/?tab=build&id='+encodeURIComponent(id)+'&step='+(p.get('view')==='recipients'?'2':'1'):null;};
 const reviewReturn=()=>{const id=new URLSearchParams(location.search).get('review');return id&&/^[\w-]+$/.test(id)?'/konto/?tab=reviews&review='+encodeURIComponent(id):null;};
-const campaignList=async()=>{if(cloudRecord?.id===campaign.id||new URLSearchParams(location.search).has('workspace')){await flushSave();if(!saveFailed)location.href=reviewReturn()||'/konto/';}else await showDashboard();};
+const campaignList=async()=>{if(cloudRecord?.id===campaign.id||new URLSearchParams(location.search).has('workspace')){await flushSave();if(!saveFailed)location.href=reviewReturn()||builderReturn()||'/konto/';}else await showDashboard();};
 $('#dashboard-view').onclick=async e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-dashboard-tutorial'))return startTutorial(true);
@@ -478,8 +479,8 @@ $('#tutorial-view').addEventListener('click',async e=>{
 
 });
 
-$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=reviewReturn()||(cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id));};
-$('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(saveFailed)return;location.href=reviewReturn()||(cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?id='+encodeURIComponent(campaign.id):'/konto/');};
+$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=reviewReturn()||builderReturn()||(cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id));};
+$('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(saveFailed)return;location.href=reviewReturn()||builderReturn()||(cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?id='+encodeURIComponent(campaign.id):'/konto/');};
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
 hydrateIcons();
@@ -508,3 +509,5 @@ if(params.has('client')||params.has('start')||params.has('template')||params.has
 if(hasActive)try{sessionStorage.setItem('kontaktstoff-active',campaign.id);}catch{}
 if(campaign.tutorial)campaign.tutorial.active=false;if(campaign.onboarding)campaign.onboarding.active=false;
 await document.fonts.ready;if(view==='dashboard')await showDashboard();else if(view==='start')await newCampaign();else renderUI();
+
+if(builderReturn()&&!reviewReturn()){$('#workspace-link').textContent='Zurück zur Kampagne';$('#request-campaign').textContent='Speichern & zurück zur Kampagne →';}

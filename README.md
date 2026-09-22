@@ -55,3 +55,22 @@ npm run test:homepage
 Die Tests prüfen unter anderem Kontentrennung, CSRF, revisionssicheres Speichern, Anfrage-Snapshots, QR-Redirects, CSV, Editor, Anmeldung auf einem zweiten Gerät, responsive Ansichten und Übergaben von Homepage/Kundenkonzept. PostgreSQL ist vorbereitet, aber mangels bereitgestellter Datenbank noch nicht in einer Hosting-Umgebung getestet.
 
 `npm run requests` ist ein lokaler Betreiberbefehl zum Lesen eingegangener Anfragen. Es gibt dafür kein öffentliches Admin-Endpoint.
+
+### Geführter Kampagnenablauf
+
+`/konto/?tab=new-campaign` startet einen benannten Entwurf. Der Arbeitsplatz unter
+`?tab=build&id=…` führt durch Layout, Design, Personalisierung und Übergabe. Zehn
+native A5-Vorlagen liegen in `studio/src/brand-templates.js`; ihre Branding-Felder
+bleiben auch im vollständigen Editor bearbeitbar. Andere Formate und PDF-Uploads
+sind weiterhin im Detail-Editor verfügbar. Gastentwürfe werden lokal gespeichert,
+Kontentwürfe revisionsgesichert im Backend. Beim Absenden wird der bestätigte
+Entwurfsstand als unveränderlicher Anfrage-Snapshot gespeichert. Das Team sieht
+Bestätigung und Bearbeitungsstatus im Anfragen-Eingang. Dies ist keine automatische
+Druckbestellung und ersetzt nicht die Abstimmung druckfertiger Produktionsdaten.
+
+Das Tracking zeigt tatsächliche QR-Aufrufe samt täglichem Verlauf (UTC).
+Versandstatus, Vertriebsergebnisse und Kosten werden manuell gepflegt; es gibt
+keine automatische Shop-Conversion- oder Versanddienst-Anbindung.
+
+Prüfung: `npm test`, `npm run test:builder`, `npm run test:workflow` und
+`node tests/template-render.mjs`. Browser-Tests nutzen den lokalen Server auf Port 4183.
