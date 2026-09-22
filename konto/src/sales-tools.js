@@ -6,7 +6,7 @@ const statuses={new:'Neu',contacted:'Kontaktiert',qualified:'Pilot planen',close
 const date=v=>new Date(v).toLocaleString('de-DE',{dateStyle:'medium',timeStyle:'short'});
 export async function mountSales(root,{view,notice}){
  const $=s=>root.querySelector(s);let items=[],selected=null,filter='active';
- const nav=()=>`<nav class="campaign-mode"><a href="/konto/?tab=sales-inquiries" data-view="sales-inquiries" ${view==='sales-inquiries'?'aria-current="page"':''}>Interessenten</a><a href="/konto/?tab=inbox" data-view="inbox">Kampagnenanfragen</a><a href="/konto/?tab=sales-links" data-view="sales-links" ${view==='sales-links'?'aria-current="page"':''}>Verkaufslinks</a></nav>`;
+ const nav=()=>`<nav class="campaign-mode"><a href="/konto/?tab=sales-inquiries" data-view="sales-inquiries" ${view==='sales-inquiries'?'aria-current="page"':''}>Interessenten</a><a href="/konto/?tab=inbox" data-view="inbox">Kampagnenanfragen</a><a href="/konto/?tab=sales-links" data-view="sales-links" ${view==='sales-links'?'aria-current="page"':''}>Verkaufsseiten</a></nav>`;
  if(view==='sales-links'){await mountProposalTools(root,{notice});return;}
  async function refresh(){items=(await api('/operator/sales')).items;if(root.isConnected)draw();}
  function draw(){if(!root.isConnected)return;if(selected)selected=items.find(i=>i.id===selected.id);root.innerHTML=`<div class="page-heading"><div><h1>${selected?h(selected.company):'Neue Interessenten.'}</h1><p>${selected?'Anfrage über die Verkaufsseite · '+h(date(selected.createdAt)):'Anfragen ohne Konto. Der Einstieg in die nächste Kampagne.'}</p></div><button class="button" data-refresh>Aktualisieren ↻</button></div>${nav()}${selected?detail():list()}`;bind();}
