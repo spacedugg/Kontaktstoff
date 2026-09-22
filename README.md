@@ -52,9 +52,9 @@ npm run test:workspace
 npm run test:homepage
 ```
 
-Die Tests prüfen unter anderem Kontentrennung, CSRF, revisionssicheres Speichern, Anfrage-Snapshots, QR-Redirects, CSV, Editor, Anmeldung auf einem zweiten Gerät, responsive Ansichten und Übergaben von Homepage/Kundenkonzept. PostgreSQL ist vorbereitet, aber mangels bereitgestellter Datenbank noch nicht in einer Hosting-Umgebung getestet.
+Die Tests prüfen unter anderem Kontentrennung, CSRF, revisionssicheres Speichern, Anfrage-Snapshots, QR-Redirects, CSV, Editor, Anmeldung auf einem zweiten Gerät, responsive Ansichten und Übergaben von Homepage/Kundenkonzept. Die Produktion nutzt Neon PostgreSQL; lokale Tests verwenden eine getrennte SQLite-Datenbank.
 
-`npm run requests` ist ein lokaler Betreiberbefehl zum Lesen eingegangener Anfragen. Es gibt dafür kein öffentliches Admin-Endpoint.
+`npm run requests` ist ein lokaler Betreiberbefehl zum Lesen eingegangener Anfragen. Die Betreiber-API ist durch Anmeldung und serverseitige Rollenprüfung geschützt.
 
 ### Geführter Kampagnenablauf
 
@@ -74,3 +74,22 @@ keine automatische Shop-Conversion- oder Versanddienst-Anbindung.
 
 Prüfung: `npm test`, `npm run test:builder`, `npm run test:workflow` und
 `node tests/template-render.mjs`. Browser-Tests nutzen den lokalen Server auf Port 4183.
+
+### Verkaufsseite und persönliche Links
+
+`/mailings/` zeigt Angebot, drei fiktive Kampagnenbeispiele, Ablauf und ein
+Anfrageformular ohne Registrierung. Betreiber erstellen unter
+`/konto/?tab=sales-links` Links mit Firmenname, Kampagnenziel und optionalem
+Loom-Freigabelink. Das Video wird verlinkt, nicht automatisch eingebettet.
+Die Angaben sind sichtbar im Link enthalten; dort gehören keine internen Daten hin.
+
+Anfragen werden serverseitig gespeichert und unter
+`/konto/?tab=sales-inquiries` mit Status und interner Notiz bearbeitet.
+Wiederholte Übermittlungen derselben Anfrage sind idempotent. Herkunftsprüfung,
+Rate-Limits, Honeypot und Betreiberberechtigungen schützen den Endpunkt.
+Es erfolgt keine automatische E-Mail, Zahlung oder Bestellung.
+
+Offen bleiben vollständige Betreiber-/Datenschutzhinweise, E-Mail-Anbindung,
+Shop-Ereignisse und Druck-/Versanddienst-Anbindung. `npm test` prüft unter anderem
+Validierung, Parallelzugriffe und Berechtigungen; `npm run test:sales` prüft den
+Browserablauf mit einem getrennten Testserver auf Port 4183.

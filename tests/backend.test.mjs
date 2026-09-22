@@ -82,3 +82,15 @@ test('guided handoff records the checked revision and tracking daily counts are 
  const stats=(await request('/api/campaigns/'+c.id+'/stats',{account:a})).data;assert.equal(stats.scanDays.reduce((n,d)=>n+Number(d.count),0),2);assert.deepEqual(stats.trackedRecipientIds,['person-1']);assert.equal((await request('/api/campaigns/'+c.id+'/stats',{account:b})).status,404);
  }finally{await db.close();}
 });
+
+test('public sales inquiries do not need accounts but remain operator-only and origin-protected',async()=>{
+ const {db,request,register}=await fixture({operatorEmails:'sales-operator@example.org'});try{const input={id:crypto.randomUUID(),name:'Mara',company:'Test GmbH',email:'mara@example.org',useCase:'b2b',quantity:100};
+ assert.equal((await request('/api/sales-inquiries',{method:'POST',body:input,headers:{origin:'https://evil.example'}})).status,403);
+ const posted=await request('/api/sales-inquiries',{method:'POST',body:input});assert.equal(posted.status,201);assert.deepEqual(Object.keys(posted.data).sort(),['id','ok']);assert.equal((await db.query('SELECT * FROM users')).rows.length,0);
+ const regular=await register('sales-normal@example.org'),operator=await register('sales-operator@example.org');const user=(await db.query('SELECT id FROM users WHERE email=$1',['sales-operator@example.org'])).rows[0];await db.query('INSERT INTO email_verifications(user_id,verified_at) VALUES($1,$2)',[user.id,Date.now()]);
+ assert.equal((await request('/api/operator/sales')).status,401);assert.equal((await request('/api/operator/sales',{account:regular})).status,403);
+ const list=await request('/api/operator/sales',{account:operator});assert.equal(list.status,200);assert.equal(list.data.items[0].email,'mara@example.org');assert.equal((await request('/api/operator/sales/'+input.id,{method:'PUT',account:operator,headers:{'x-csrf-token':'bad'},body:{status:'contacted',revision:1}})).status,403);
+ assert.equal((await request('/api/operator/sales/'+input.id,{method:'PUT',account:operator,body:{status:'contacted',note:'Nur intern',revision:1}})).status,200);
+ assert.equal((await request('/api/sales-inquiries')).status,401);
+ }finally{await db.close();}
+});

@@ -1,3 +1,4 @@
+import {salesService} from './sales.js';
 import {ADMIN_ID,ADMIN_EMAIL,validAdminHash,adminLogin} from './admin-auth.js';
 import {libraryService} from './library.js';
 import {randomBytes,randomUUID,createHash,scrypt as rawScrypt,timingSafeEqual} from 'node:crypto';
@@ -19,6 +20,7 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
  async function session(req){const token=String(req.headers.cookie||'').split(';').map(s=>s.trim()).find(s=>s.startsWith(cookieName+'='))?.slice(cookieName.length+1);if(!token)return null;const result=await db.query('SELECT users.id,users.email,users.profile,users.password,sessions.csrf FROM sessions JOIN users ON users.id=sessions.user_id WHERE sessions.token=$1 AND sessions.expires>$2',[hash(token),Date.now()]);const user=result.rows[0];if(user?.id===ADMIN_ID&&(!validAdminHash(adminPasswordHash)||user.password!==adminPasswordHash))return null;return user||null;}
  async function issueSession(user,res){const token=randomBytes(32).toString('base64url'),csrf=randomBytes(24).toString('base64url');await db.query('INSERT INTO sessions(token,user_id,csrf,expires) VALUES($1,$2,$3,$4)',[hash(token),user.id,csrf,Date.now()+604800000]);cookie(res,token);return {user:await services.publicUser(user),csrf};}
  const load=async(q,id,user)=>{const result=await q('SELECT * FROM campaigns WHERE id=$1 AND user_id=$2 AND deleted_at IS NULL',[id,user]);if(!result.rows[0])throw new HTTPError(404,'Kampagne nicht gefunden.');return result.rows[0];};
+ const sales=salesService(db);
  const libraries=libraryService(db,{origin,limited,reviewLinkKey});
  return async function handle(req,res){
   const url=new URL(req.url,origin),pathname=url.pathname.replace(/\/$/,'');
@@ -34,6 +36,11 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
    }
    if(pathname==='/api/health'){send(res,200,{available:true,storage:process.env.DATABASE_URL?'postgres':'local',origin,email:mailer.configured});return true;}
    if(!['GET','HEAD'].includes(req.method)&&req.headers.origin!==origin)throw new HTTPError(403,'Die Anfrage muss aus deinem Kontaktstoff-Arbeitsplatz kommen.');
+   if(pathname==='/api/sales-inquiries'&&req.method==='POST'){
+    const address=process.env.VERCEL?String(req.headers['x-forwarded-for']||'').split(',')[0]:req.socket?.remoteAddress||'local';
+    await limited('sales-ip:'+hash(address),8);const input=await body(req);await limited('sales-email:'+hash(String(input.email||'').trim().toLowerCase()),4);
+    send(res,201,await sales.create(input));return true;
+   }
    if(pathname==='/api/auth/admin'&&req.method==='POST'){
     const address=process.env.VERCEL?String(req.headers['x-forwarded-for']||'').split(',')[0]:req.socket?.remoteAddress||'local';
     await limited('admin-ip:'+hash(address),10);await limited('admin-total',100);
@@ -72,6 +79,11 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
    if(!['GET','HEAD'].includes(req.method)&&req.headers['x-csrf-token']!==user.csrf)throw new HTTPError(403,'Die Sitzung wurde erneuert. Bitte lade die Seite neu.');
    if(pathname.startsWith('/api/library/')||pathname==='/api/compose'||pathname==='/api/reviews'||pathname.startsWith('/api/reviews/')){send(res,200,await libraries.owner(pathname,req.method,['GET','HEAD'].includes(req.method)?{}:await body(req),user));return true;}
    if(pathname==='/api/auth/send-verification'&&req.method==='POST'){await limited('verify:'+user.id,3);if(!await services.verified(user))await services.sendToken(user,'verify');send(res,200,{ok:true});return true;}
+   if(pathname==='/api/operator/sales'||pathname.startsWith('/api/operator/sales/')){
+    await services.requireOperator(user);if(pathname==='/api/operator/sales'&&req.method==='GET'){send(res,200,await sales.list());return true;}
+    const m=pathname.match(/^\/api\/operator\/sales\/([a-f0-9-]{36})$/i);if(m&&req.method==='PUT'){send(res,200,await sales.update(m[1],await body(req)));return true;}
+    throw new HTTPError(405,'Methode nicht erlaubt.');
+   }
    if(pathname==='/api/operator/requests'||pathname.startsWith('/api/operator/requests/')){
     await services.requireOperator(user);const match=pathname.match(/^\/api\/operator\/requests(?:\/([a-zA-Z0-9-]+))?(?:\/(notify))?$/);if(!match)throw new HTTPError(404,'Anfrage nicht gefunden.');const [,id,action]=match;
     if(req.method==='GET'&&!action){send(res,200,await services.inbox(id));return true;}
