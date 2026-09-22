@@ -74,7 +74,7 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
     const result=await db.query('SELECT * FROM users WHERE email=$1',[email]),user=result.rows[0];const [salt,expected]=(user?.password||'00000000000000000000000000000000:'+''.padEnd(128,'0')).split(':');const actual=await scrypt(password,salt,64);
     if(!user||!timingSafeEqual(actual,Buffer.from(expected,'hex')))throw new HTTPError(401,'E-Mail oder Passwort stimmt nicht.');send(res,200,await issueSession(user,res));return true;
    }
-   if(pathname==='/api/proposal'&&req.method==='GET'){send(res,200,await proposals.public(text(url.searchParams.get('slug')||'',100)));return true;}
+   if(pathname==='/api/proposal'&&req.method==='GET'){send(res,200,await proposals.public(text(url.searchParams.get('slug')||req.query?.slug||'',100)));return true;}
    if(pathname==='/api/review'){send(res,200,await libraries.public(req,req.method==='GET'?{}:await body(req)));return true;}
    const user=await session(req);
    if(pathname==='/api/auth/me'&&req.method==='GET'){send(res,200,user?{user:await services.publicUser(user),csrf:user.csrf}:{user:null});return true;}
