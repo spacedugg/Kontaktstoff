@@ -1,5 +1,5 @@
 export function ratingValue(value){const raw=String(value).trim().replace(',','.');if(!/^[0-5](?:\.\d+)?$/.test(raw))return null;const number=Number(raw);return number<=5?number:null;}
-import {FORMATS,sideNames} from './formats.js';
+import {FORMATS,sideNames,sideLabel,isSelfmailer,POSTAL_ZONES} from './formats.js';
 export {FORMATS,sideNames} from './formats.js';
 export const KEYS = { company:'Firmenname', first_name:'Vorname',last_name:'Nachname',contact_role:'Funktion',email:'E-Mail',phone:'Telefon',industry:'Branche',employee_count:'Mitarbeiterzahl',source_url:'Kontaktquelle', salutation:'Ansprache', personal_note:'Persönliche Nachricht', personal_headline:'Persönliche Überschrift',product_id:'Produkt-ID',product_name:'Produktname',product_variant:'Größe / Variante',product_url:'Produktseite',cart_url:'Warenkorb-Link',checkout_id:'Checkout-ID',coupon_code:'Gutscheincode',offer_text:'Gutschein-Angebot',offer_terms:'Gutscheinbedingungen',rating_current:'Sterne: Ausgangswert',rating_example:'Sterne: Beispielwert danach', website:'Website', chatbot_url:'Ziel-Link',street:'Straße & Hausnummer',postal_code:'PLZ',city:'Ort',country:'Land' };
 export const uid = () => crypto.randomUUID();
@@ -49,7 +49,7 @@ export function validateCampaign(value) {
   const format=FORMATS.find(f=>f.id===value.format);
   for(const side of ['front','back']){
     const s=value.sides?.[side];
-    if(!s||!['blank','template','image'].includes(s.background?.kind)||!Array.isArray(s.fields)||s.fields.length>40)throw new Error('Ungültige Designseite.');
+    if(!s||!['blank','template','image'].includes(s.background?.kind)||!Array.isArray(s.fields)||s.fields.length>(value.format==='selfmailer-dl-4'?80:40))throw new Error('Ungültige Designseite.');
     if(s.background.color!==undefined&&!/^#[0-9a-f]{6}$/i.test(s.background.color))throw new Error('Ungültige Flächenfarbe.');
     if(s.background.kind==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s.background.data)||s.background.data.length>16000000||![s.background.width,s.background.height].every(n=>Number.isFinite(n)&&n>0)))throw new Error('Ungültige Bilddatei im Projekt.');
     for(const f of s.fields){
@@ -73,9 +73,13 @@ export function validateCampaign(value) {
 }
 export function checks(campaign) {
   const issues=[];const format=FORMATS.find(f=>f.id===campaign.format);
+  if(isSelfmailer(campaign)){
+    issues.push({level:'info',text:'Selfmailer: 4 Flächen auf 2 Druckseiten. Falz bei 99 mm. Druckdaten benötigen rundum 3 mm Beschnitt; die Ansichts-PDF ist noch keine Druckfreigabe.'});
+    for(const f of campaign.sides.front.fields){if(f.type==='shape'&&f.background==='#ffffff')continue;for(const z of POSTAL_ZONES){if(f.x<z.x+z.w&&f.x+f.w>z.x&&f.y<z.y+z.h&&f.y+f.h>z.y&&!(z.id==='address'&&f.postalAddress))issues.push({level:'error',text:'Außenseite: Ein Element überlagert die Zone „'+z.name+'“. Bitte im Layout verschieben.'});}}
+  }
   if(campaign.sample)issues.push({level:'info',text:'Beispielkampagne: Empfänger sind fiktiv. Die QR-Codes enthalten Demo-Links; vor dem Einsatz durch eigene Ziele ersetzen.'});
   if(!campaign.recipients.length)issues.push({level:'error',text:'Noch keine Empfänger vorhanden.'});
-  for(const side of sideNames(campaign)){const label=side==='front'?'Vorderseite':'Rückseite';
+  for(const side of sideNames(campaign)){const label=sideLabel(campaign,side);
     const s=campaign.sides[side];
     if(s.background.kind==='blank'&&!s.fields.length)issues.push({level:'error',text:`${label}: Das Design ist noch leer.`});
     if(s.background.kind==='image'){

@@ -1,5 +1,6 @@
 import QRCode from 'qrcode';
 import {FORMATS,resolveText,validURL,ratingValue} from './core.js';
+import {isSelfmailer,POSTAL_ZONES} from './formats.js';
 const images=new Map(), codes=new Map();
 export function imageFrom(src){if(images.size>=32&&!images.has(src))images.delete(images.keys().next().value);if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>{images.delete(src);reject(new Error('Das Bild konnte nicht gelesen werden.'));};image.src=src;}));return images.get(src);}
 function rect(ctx,x,y,w,h,color,r=0){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
@@ -41,7 +42,7 @@ export function drawRatingStars(ctx,field,value){
   if(fraction){ctx.save();ctx.beginPath();ctx.rect(x,y,size*fraction,size);ctx.clip();path();ctx.fillStyle=field.color;ctx.fill();ctx.restore();}
  }
 }
-export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,fields=true}={}){
+export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,fields=true,panel=null,guides=false}={}){
   await document.fonts.ready;
   const format=FORMATS.find(f=>f.id===campaign.format),{width:w,height:h}=format;
   const temp=document.createElement('canvas');temp.width=Math.round(w*scale);temp.height=Math.round(h*scale);
@@ -52,7 +53,8 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
   if(background.kind==='image'){const img=await imageFrom(background.data);const ratio=Math.min(w/img.width,h/img.height);ctx.drawImage(img,(w-img.width*ratio)/2,(h-img.height*ratio)/2,img.width*ratio,img.height*ratio);}
   const overflow=[];
   if(fields)for(const field of campaign.sides[side].fields){
-    const value=resolveText(field.text,recipient);
+    const fullName=[recipient.first_name,recipient.last_name].filter(Boolean).join(' ');
+    const value=field.postalAddress?[recipient.company,fullName===recipient.company?'':fullName,recipient.street,[recipient.postal_code,recipient.city].filter(Boolean).join(' ')].filter(Boolean).join('\n'):resolveText(field.text,recipient);
     if(field.background!=='transparent')rect(ctx,field.x,field.y,field.w,field.h,field.background);
     if(field.type==='shape'){continue;}
     if(field.type==='text'&&field.display==='stars'){drawRatingStars(ctx,field,value);continue;}
@@ -68,5 +70,12 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
       layout.lines.forEach((line,i)=>ctx.fillText(line,x,field.y+i*layout.size*1.3));ctx.restore();
     }
   }
-  canvas.width=temp.width;canvas.height=temp.height;canvas.getContext('2d').drawImage(temp,0,0);return overflow;
+  if(guides&&isSelfmailer(campaign)){
+   ctx.save();ctx.strokeStyle='#748579';ctx.lineWidth=.25;ctx.setLineDash([2,2]);ctx.beginPath();ctx.moveTo(0,99);ctx.lineTo(210,99);ctx.stroke();
+   if(side==='front')for(const zone of POSTAL_ZONES){ctx.strokeRect(zone.x+.3,zone.y+.3,zone.w-.6,zone.h-.6);label(ctx,zone.name,zone.x+2,zone.y+3,2,'#52647c');}
+   ctx.restore();
+  }
+  const crop=isSelfmailer(campaign)&&panel;
+  canvas.width=temp.width;canvas.height=crop?Math.round(99*scale):temp.height;
+  canvas.getContext('2d').drawImage(temp,0,crop&&panel==='cover'?Math.round(99*scale):0,temp.width,canvas.height,0,0,canvas.width,canvas.height);return overflow;
 }

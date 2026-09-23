@@ -25,7 +25,9 @@ test('proposal draft/publish lifecycle keeps link stable and isolates unpublishe
 });
 test('proposal payload refuses unsafe URLs/assets and personalized render data carries the offer',()=>{
  for(const patch of [{company:''},{target:'javascript:alert(1)'},{logo:'data:image/svg+xml,<svg>'},{loom:'https://evil.org'},{website:'http://localhost'}])assert.throws(()=>validateProposal({...MMS_PROPOSAL,...patch}));
- const d=validateProposal(MMS_PROPOSAL),p=proposalProject(d),person=proposalPerson(d);assert.equal(p.sides.front.fields[5].text,d.cardHeadline);assert.equal(person.personal_note,d.cardBody);assert.equal(person.chatbot_url,d.target);assert.equal(p.sides.back.fields[4].text,d.offer);
+ const d=validateProposal(MMS_PROPOSAL),p=proposalProject({...d,format:'a5-landscape'}),person=proposalPerson(d);assert.equal(p.sides.front.fields[5].text,d.cardHeadline);assert.equal(person.personal_note,d.cardBody);assert.equal(person.chatbot_url,d.target);assert.equal(p.sides.back.fields[4].text,d.offer);
 });
 
 test('compressed website responses are decoded with a strict output limit',()=>{const b=gzipSync(Buffer.from('a'.repeat(10000)));assert.equal(decodeResponse(b,'gzip',12000).length,10000);assert.throws(()=>decodeResponse(b,'gzip',1000),e=>e.status===422);});
+
+test('selfmailer proposal retains custom offer, branding and personalized CTA',()=>{const d=validateProposal({...MMS_PROPOSAL,cardCta:'Mein Termin',color:'#123456'}),p=proposalProject(d);assert.equal(p.format,'selfmailer-dl-4');assert.ok(p.sides.back.fields.some(f=>f.text===d.offer));assert.ok(p.sides.back.fields.some(f=>f.brandRole==='cta'&&f.text===d.cardCta));assert.ok(p.sides.front.fields.some(f=>f.background===d.color));});

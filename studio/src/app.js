@@ -1,3 +1,5 @@
+import {toSelfmailer} from './selfmailer.js';
+import {isSelfmailer,sideLabel,formatCaption,POSTAL_ZONES} from './formats.js';
 import {api as workspaceAPI} from '../../konto/src/api.js';
 import {openCSVImport} from './csv-dialog.js';
 import {startHTML} from './start.js';
@@ -56,8 +58,8 @@ function renderUI(inspector=true,table=true,guide=true){
  if(!sideNames(campaign).includes(side))side='front';
  document.body.classList.toggle('single-sided',sideNames(campaign).length===1);
  document.documentElement.style.setProperty('--mailing-ratio',format().width+'/'+format().height);
- $$('.proof-format').forEach(el=>el.textContent=format().name);$('.export-card>p').textContent=`${sideNames(campaign).length} ${sideNames(campaign).length===1?'Seite':'Seiten'} im Originalformat, mit den Daten des ausgewählten Empfängers.`;
- $('.mailing-3d-card').style.width=`min(${Math.min(72,70*format().width/format().height)}%, 580px)`;
+ $$('.proof-label').forEach((el,i)=>{el.firstElementChild.textContent=(i+1)+' / '+sideLabel(campaign,i===0?'front':'back').toUpperCase();});$$('.proof-format').forEach(el=>el.textContent=format().name);$('.export-card>p').textContent=`${sideNames(campaign).length} ${sideNames(campaign).length===1?'Seite':'Seiten'} im Originalformat, mit den Daten des ausgewählten Empfängers.`;
+ $('.mailing-3d-card').style.aspectRatio=isSelfmailer(campaign)?'210/99':format().width+'/'+format().height;$('.mailing-3d-card').style.width=`min(${Math.min(72,70*format().width/format().height)}%, 580px)`;
  $('.steps-note').textContent=cloudRecord?.id===campaign.id?'In deinem Unternehmenskonto gespeichert':'Ohne Anmeldung gestalten';
  document.body.classList.toggle('library-editor',cloudPath.includes('library'));
  document.body.classList.toggle('content-editing',editorMode==='content'&&view==='design');
@@ -91,7 +93,7 @@ function renderUI(inspector=true,table=true,guide=true){
  $('#rename-campaign').textContent=campaign.name;$('#recipient-count').textContent=campaign.recipients.length;
  $$('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===view);b.setAttribute('aria-current',b.dataset.tab===view?'step':'false');});
  for(const name of ['tutorial','setup','design','recipients','preview'])$('#'+name+'-view').hidden=name!==view;
- $$('[data-side]').forEach(b=>{b.classList.toggle('active',b.dataset.side===side);b.setAttribute('aria-pressed',String(b.dataset.side===side));});
+ $$('[data-side]').forEach(b=>{(b.querySelector(':scope > span')||b).textContent=sideLabel(campaign,b.dataset.side);b.classList.toggle('active',b.dataset.side===side);b.setAttribute('aria-pressed',String(b.dataset.side===side));});
  $('#start-tutorial').textContent='So geht’s';
  $('#tutorial-tab').hidden=true;
  $('#tutorial-return').hidden=!campaign.tutorial?.active||view==='tutorial';
@@ -103,11 +105,11 @@ function renderUI(inspector=true,table=true,guide=true){
  $('#three-d-view').hidden=previewMode!=='3d';$('#proof-spread').hidden=previewMode!=='2d';
  for(const mode of ['2d','3d']){const b=$('#preview-mode-'+mode);b.classList.toggle('active',previewMode===mode);b.setAttribute('aria-pressed',String(previewMode===mode));}
  $('#format-short').textContent=format().name;$('#format-select').innerHTML=FORMATS.map(f=>`<option value="${f.id}">${escape(f.name)}</option>`).join('');
- $('#side-title').textContent=side==='front'?'Vorderseite':'Rückseite';$('#format-select').value=campaign.format;
- $('#dimensions').textContent=`${format().width} × ${format().height} mm`;$('#width-label').textContent=`${format().width} mm`;$('#design-scale').textContent=format().name;
+ $('#side-title').textContent=sideLabel(campaign,side);$('#format-select').value=campaign.format;
+ $('#dimensions').textContent=formatCaption(campaign);$('#width-label').textContent=`${format().width} mm`;$('#design-scale').textContent=format().name;
  $('#artboard').style.aspectRatio=`${format().width}/${format().height}`;
  $('#safe-guide').style.inset=`${5/format().height*100}% ${5/format().width*100}%`;
- $('#safe-guide').hidden=!guides;$('#guides-toggle').classList.toggle('active',guides);$('#guides-toggle').setAttribute('aria-pressed',String(guides));
+ let fold=$('#selfmailer-guides');if(!fold){fold=document.createElement('div');fold.id='selfmailer-guides';$('#artboard').append(fold);}fold.hidden=!guides||!isSelfmailer(campaign);fold.innerHTML=isSelfmailer(campaign)?`<div class="fold-guide"><span>Falz · 99 mm</span></div>${side==='front'?POSTAL_ZONES.map(z=>`<div class="postal-guide" style="left:${z.x/210*100}%;top:${z.y/198*100}%;width:${z.w/210*100}%;height:${z.h/198*100}%"><span>${z.name}</span></div>`).join(''):''}`:'';$('#safe-guide').hidden=!guides;$('#guides-toggle').classList.toggle('active',guides);$('#guides-toggle').setAttribute('aria-pressed',String(guides));
  $('#undo').disabled=!history.length;$('#redo').disabled=!future.length;
  const bg=campaign.sides[side].background;
  $('#background-info').textContent=bg.kind==='template'?'chattastic-Muster · Hintergrund fest, Felder bearbeitbar':bg.kind==='blank'?(campaign.sides[side].fields.length?'Dein Design · alle Inhalte bearbeitbar':'Leere Seite · bereit für dein Design'):bg.name;
@@ -158,7 +160,7 @@ function renderInspector(){
  }
  $('#field-background').oninput=e=>{commit(()=>f.background=e.target.value,{inspector:false});$('#field-transparent').checked=false;};
  $('#field-transparent').onchange=e=>commit(()=>f.background=e.target.checked?'transparent':'#ffffff');
- $('#duplicate-field').onclick=()=>{if(campaign.sides[side].fields.length>=40)return toast('Maximal 40 Felder pro Seite.',true);commit(()=>{const copy={...f,id:uid(),x:Math.min(f.x+4,format().width-f.w),y:Math.min(f.y+4,format().height-f.h)};campaign.sides[side].fields.push(copy);selected=copy.id;});};
+ $('#duplicate-field').onclick=()=>{if(campaign.sides[side].fields.length>=(isSelfmailer(campaign)?80:40))return toast(`Maximal ${isSelfmailer(campaign)?80:40} Felder pro Druckseite.`,true);commit(()=>{const copy={...f,id:uid(),x:Math.min(f.x+4,format().width-f.w),y:Math.min(f.y+4,format().height-f.h)};campaign.sides[side].fields.push(copy);selected=copy.id;});};
  $('#delete-field').onclick=deleteField;
 }
 function deleteField(){if(!selectedField())return;commit(()=>{campaign.sides[side].fields=campaign.sides[side].fields.filter(f=>f.id!==selected);selected=null;});}
@@ -170,7 +172,7 @@ async function requestRender(){
  const version=++renderVersion;const snapshot=clone(campaign),person=clone(view==='design'?designRecipient():recipient());
  const targets=view==='tutorial'?['front','back'].filter(s=>$('#tutorial-'+s)).map(s=>[s,'#tutorial-'+s]):view==='setup'?(campaign.onboarding?.step===2?[['front','#guide-front'],['back','#guide-back']]:campaign.onboarding?.step===5?[['front','#guide-finish-front']]:[]):view==='preview'?[['front','#proof-front'],['back','#proof-back'],['front','#three-d-front'],['back','#three-d-back']]:[[side,'#design-canvas'],['front','#thumb-front'],['back','#thumb-back']];
  try{
-   const results=await Promise.all(targets.map(async([s,target])=>{const cvs=document.createElement('canvas');const overflow=await renderCanvas(cvs,snapshot,s,person,{scale:target.includes('thumb')?1.2:5});return{cvs,target,overflow,side:s};}));
+   const results=await Promise.all(targets.map(async([s,target])=>{const cvs=document.createElement('canvas');const closed=isSelfmailer(snapshot)&&target.includes('three-d');const overflow=await renderCanvas(cvs,snapshot,closed?'front':s,person,{scale:target.includes('thumb')?1.2:5,panel:closed?(s==='front'?'cover':'address'):null});return{cvs,target,overflow,side:s};}));
    if(version!==renderVersion)return;
    drawingIssues=[];
    for(const{cvs,target,overflow,side:s}of results){const dest=$(target);dest.width=cvs.width;dest.height=cvs.height;dest.getContext('2d').drawImage(cvs,0,0);if(!target.includes('thumb')&&!target.includes('three-d')&&overflow.length)drawingIssues.push({level:'error',text:`${s==='front'?'Vorderseite':'Rückseite'}: ${overflow.length} Textfeld(er) zu klein für diesen Empfänger. Bitte größer ziehen.`});}
@@ -178,9 +180,9 @@ async function requestRender(){
    if(view==='preview')renderChecks();
  }catch(e){if(version===renderVersion)toast(e.message,true);}
 }
-function renderChecks(){const issues=[...checks(campaign),...drawingIssues];const errors=issues.filter(i=>i.level==='error');$('#check-count').textContent=errors.length?`${errors.length} offene Punkte`:'Keine blockierenden Fehler';$('#check-list').innerHTML=[{level:'success',text:`${format().width} × ${format().height} mm · Vorder- und Rückseite`},{level:'success',text:`${campaign.recipients.length} Empfänger · ${campaign.sides.front.fields.length+campaign.sides.back.fields.length} Designelemente`},...issues].map(i=>`<div class="check-item ${i.level}">${icon(i.level==='success'?'check':i.level==='info'?'info':'warning')}<span>${escape(i.text)}</span></div>`).join('');$('#pdf-export').disabled=!!errors.length;$('#png-export').disabled=!!errors.length;}
+function renderChecks(){const issues=[...checks(campaign),...drawingIssues];const errors=issues.filter(i=>i.level==='error');$('#check-count').textContent=errors.length?`${errors.length} offene Punkte`:'Keine blockierenden Fehler';$('#check-list').innerHTML=[{level:'success',text:`${formatCaption(campaign)} · ${sideLabel(campaign,'front')} und ${sideLabel(campaign,'back')}`},{level:'success',text:`${campaign.recipients.length} Empfänger · ${campaign.sides.front.fields.length+campaign.sides.back.fields.length} Designelemente`},...issues].map(i=>`<div class="check-item ${i.level}">${icon(i.level==='success'?'check':i.level==='info'?'info':'warning')}<span>${escape(i.text)}</span></div>`).join('');$('#pdf-export').disabled=!!errors.length;$('#png-export').disabled=!!errors.length;}
 function defaultTextColor(){const bg=campaign.sides[side].background;if(bg.kind==='template'&&side==='front')return '#ffffff';if(bg.kind==='blank'&&bg.color){const rgb=bg.color.slice(1).match(/../g).map(v=>parseInt(v,16));return rgb[0]*.299+rgb[1]*.587+rgb[2]*.114<145?'#ffffff':'#202321';}return '#202321';}
-function addField(type){if(campaign.sides[side].fields.length>=40)return toast('Maximal 40 Felder pro Seite.',true);commit(()=>{const f={id:uid(),type:type==='qr'?'qr':'text',text:type==='qr'?'{{chatbot_url}}':type==='company'?'{{company}}':type==='salutation'?'{{salutation}}':'Ihr persönlicher Text',x:type==='qr'?160:15,y:type==='qr'?100:20+Math.min(campaign.sides[side].fields.filter(f=>f.type==='text').length,5)*20,w:type==='qr'?28:75,h:type==='qr'?28:15,fontSize:16,weight:'700',align:'left',color:defaultTextColor(),background:type==='qr'?'#ffffff':'transparent',autoFit:true};campaign.sides[side].fields.push(f);selected=f.id;});toast(type==='qr'?'QR-Code hinzugefügt. Ziehe ihn an die passende Stelle.':'Feld hinzugefügt. Du kannst es direkt im Design verschieben.');}
+function addField(type){if(campaign.sides[side].fields.length>=(isSelfmailer(campaign)?80:40))return toast(`Maximal ${isSelfmailer(campaign)?80:40} Felder pro Druckseite.`,true);commit(()=>{const f={id:uid(),type:type==='qr'?'qr':'text',text:type==='qr'?'{{chatbot_url}}':type==='company'?'{{company}}':type==='salutation'?'{{salutation}}':'Ihr persönlicher Text',x:type==='qr'?160:15,y:type==='qr'?100:20+Math.min(campaign.sides[side].fields.filter(f=>f.type==='text').length,5)*20,w:type==='qr'?28:75,h:type==='qr'?28:15,fontSize:16,weight:'700',align:'left',color:defaultTextColor(),background:type==='qr'?'#ffffff':'transparent',autoFit:true};campaign.sides[side].fields.push(f);selected=f.id;});toast(type==='qr'?'QR-Code hinzugefügt. Ziehe ihn an die passende Stelle.':'Feld hinzugefügt. Du kannst es direkt im Design verschieben.');}
 function renderRecipients(){
  $('#contact-import-start').hidden=campaign.recipients.length>0;$('#contact-columns-row').hidden=!campaign.recipients.length;
  const cols=keys();$('#data-count').textContent=`${campaign.recipients.length} Empfänger`;$('#sample-label').hidden=!campaign.sample;$('#sample-notice').hidden=!campaign.sample;
@@ -246,6 +248,7 @@ for(const element of [$('#upload-button'),$('#canvas-scroll')]){
 $('#background-remove').onclick=async()=>{if(await confirm('Hintergrund entfernen?','Deine persönlichen Felder bleiben erhalten. Den Hintergrund kannst du anschließend neu hochladen.','Entfernen'))commit(()=>campaign.sides[side].background={kind:'blank'});};
 $('#format-select').onchange=async e=>{
  const next=FORMATS.find(f=>f.id===e.target.value),old=format();if(!next||next.id===old.id)return;
+ if(next.id==='selfmailer-dl-4'){if(await confirm('Als Selfmailer gestalten?','Aus dem bisherigen Design werden vier Flächen: Titel und Anschrift außen, Nachricht und Angebot innen. Prüfe anschließend Texte und Postanschriften. Rückgängig ist möglich.','Selfmailer übernehmen'))commit(()=>{campaign=toSelfmailer(campaign);side='front';selected=null;});else e.target.value=campaign.format;return;}
  if(await confirm('Format ändern?',`Das Mailing wird auf ${next.width} × ${next.height} mm umgestellt. Positionen werden proportional angepasst. Prüfe danach beide Seiten und lade bei Bedarf passende Designs hoch.`,'Format übernehmen'))commit(()=>{for(const s of Object.values(campaign.sides))for(const f of s.fields){f.x=f.x/old.width*next.width;f.y=f.y/old.height*next.height;f.w=f.w/old.width*next.width;f.h=f.h/old.height*next.height;if(f.type==='qr')f.w=f.h=Math.min(f.w,f.h);}campaign.format=next.id;});else e.target.value=campaign.format;
 };
 $$('[data-side]').forEach(b=>b.onclick=()=>setSide(b.dataset.side));$$('[data-tab]').forEach(b=>b.onclick=()=>setView(b.dataset.tab));$$('[data-add]').forEach(b=>b.onclick=()=>addField(b.dataset.add));
@@ -316,7 +319,7 @@ $('#start-view').addEventListener('change',()=>{$('.start-template').hidden=$('#
 $('#start-view').addEventListener('submit',async e=>{
  if(e.target.id!=='campaign-start-form')return;e.preventDefault();const data=new FormData(e.target),name=String(data.get('name')||'').trim();if(!name){$('#start-name').focus();return;}
  const button=e.target.querySelector('[type="submit"]');button.disabled=true;
- try{const next=data.get('mode')==='template'?createTemplate(data.get('template')):createCampaign(true);next.name=name.slice(0,120);next.onboarding.active=false;next.startMode=data.get('mode');await activateCampaign(next,'design');if(data.get('mode')==='upload'){$('#upload-button').focus();toast('Lade jetzt dein Design über „Eigenes Design hochladen“ hoch.');}}
+ try{const next=toSelfmailer(data.get('mode')==='template'?createTemplate(data.get('template')):createCampaign(true));next.name=name.slice(0,120);next.onboarding.active=false;next.startMode=data.get('mode');await activateCampaign(next,'design');if(data.get('mode')==='upload'){$('#upload-button').focus();toast('Lade jetzt dein Design über „Eigenes Design hochladen“ hoch.');}}
  finally{button.disabled=false;}
 });
 $('#editor-mode-bar').onclick=e=>{const button=e.target.closest('[data-editor-mode]');if(!button)return;editorMode=button.dataset.editorMode;selected=firstEditable()?.id;renderUI();};
@@ -383,7 +386,7 @@ $('#image-upload').onclick=()=>{imageReplaceTarget=null;$('#image-file').click()
 $('#image-file').onchange=async e=>{
  const file=e.target.files[0];e.target.value='';if(!file)return;
  const replacement=campaign.sides[side].fields.find(f=>f.id===imageReplaceTarget&&f.type==='image');imageReplaceTarget=null;
- if(!replacement&&campaign.sides[side].fields.length>=40)return toast('Maximal 40 Elemente pro Seite.',true);
+ if(!replacement&&campaign.sides[side].fields.length>=(isSelfmailer(campaign)?80:40))return toast(`Maximal ${isSelfmailer(campaign)?80:40} Elemente pro Druckseite.`,true);
  if(file.size>20*1024*1024)return toast('Bitte ein Bild mit maximal 20 MB verwenden.',true);
  if(!['image/png','image/jpeg','image/webp'].includes(file.type))return toast('Bitte PNG, JPG oder WebP verwenden.',true);
  await busy('Dein Bildelement wird vorbereitet …',async()=>{
@@ -395,7 +398,7 @@ $('#image-file').onchange=async e=>{
   commit(()=>{const f={id:uid(),type:'image',text:'',data:canvas.toDataURL('image/png'),x:15,y:15,w:Math.max(2,w),h:Math.max(2,h),fontSize:12,weight:'400',align:'left',color:'#202321',background:'transparent',autoFit:true};campaign.sides[side].fields.push(f);selected=f.id;});toast('Bild eingefügt. Ziehen und Größe rechts anpassen.');
  });
 };
-$('#add-shape').onclick=()=>{if(campaign.sides[side].fields.length>=40)return toast('Maximal 40 Elemente pro Seite.',true);commit(()=>{const f={id:uid(),type:'shape',text:'',x:15,y:15,w:70,h:30,fontSize:12,weight:'400',align:'left',color:'#202321',background:'#e2ff54',autoFit:true};campaign.sides[side].fields.push(f);selected=f.id;});};
+$('#add-shape').onclick=()=>{if(campaign.sides[side].fields.length>=(isSelfmailer(campaign)?80:40))return toast(`Maximal ${isSelfmailer(campaign)?80:40} Elemente pro Druckseite.`,true);commit(()=>{const f={id:uid(),type:'shape',text:'',x:15,y:15,w:70,h:30,fontSize:12,weight:'400',align:'left',color:'#202321',background:'#e2ff54',autoFit:true};campaign.sides[side].fields.push(f);selected=f.id;});};
 async function runJob(label,fn){
  jobController=new AbortController();$('#cancel-job').hidden=false;
  try{await busy(label,()=>fn(jobController.signal));}finally{$('#cancel-job').hidden=true;jobController=null;}

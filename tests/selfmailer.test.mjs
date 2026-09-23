@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {toSelfmailer} from '../studio/src/selfmailer.js';
+import {FORMATS,POSTAL_ZONES} from '../studio/src/formats.js';
+import {createClientCampaign,CLIENT_CAMPAIGNS} from '../studio/src/client-campaigns.js';
+import {createBrandTemplate,BRAND_TEMPLATES} from '../studio/src/brand-templates.js';
+import {createPromotion,PROMOTIONS} from '../studio/src/promotions.js';
+import {validateCampaign,checks} from '../studio/src/core.js';
+const cases=[...CLIENT_CAMPAIGNS.map(t=>[t.id,()=>createClientCampaign(t.id)]),...BRAND_TEMPLATES.map(t=>[t.id,()=>createBrandTemplate(t.id)]),...PROMOTIONS.map(t=>[t.id,()=>createPromotion(t.id)])];
+for(const [name,make] of cases)test('selfmailer: '+name+' keeps recipients, editable fields and postal geometry',()=>{
+ const original=make(),before=JSON.stringify(original),p=toSelfmailer(original);
+ assert.equal(JSON.stringify(original),before);assert.deepEqual(p.recipients,original.recipients);assert.equal(p.format,'selfmailer-dl-4');validateCampaign(p);
+ assert.ok(p.sides.front.fields.some(f=>f.postalAddress));assert.ok(p.sides.back.fields.some(f=>f.type==='qr'));
+ assert.equal(checks(p).filter(i=>i.text.includes('überlagert')).length,0);
+ assert.deepEqual(toSelfmailer(p),p);
+ if(['reha-sleep','zyvo'].includes(name)){assert.ok(p.sides.front.fields.some(f=>f.variantKey==='product_id'));assert.equal(p.sides.back.fields.find(f=>f.type==='qr').text,'{{cart_url}}');}
+});
+test('exact 4-panel print geometry; postal collisions fail preflight',()=>{
+ const f=FORMATS.find(f=>f.id==='selfmailer-dl-4');assert.deepEqual([f.width,f.height,f.closedWidth,f.closedHeight,f.bleed,f.pages,f.panels],[210,198,210,99,3,2,4]);
+ const p=toSelfmailer(createClientCampaign('money-making-sprint'));
+ const field=p.sides.front.fields.find(f=>f.type==='text'&&!f.postalAddress);field.x=140;field.y=8;field.w=40;
+ assert.ok(checks(p).some(i=>i.level==='error'&&i.text.includes('Frankierung')));
+});
