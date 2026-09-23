@@ -301,7 +301,7 @@ $('#dashboard-view').onclick=async e=>{
  if(b.hasAttribute('data-dashboard-new'))return newCampaign();
  if(b.dataset.dashboardRestore){try{await restoreCampaign(b.dataset.dashboardRestore);await showDashboard();toast('Kreation wiederhergestellt.');}catch{toast('Wiederherstellen war nicht möglich.',true);}return;}
  if(b.hasAttribute('data-dashboard-import'))return $('#project-file').click();
- if(b.dataset.dashboardTemplate){const next=createTemplate(b.dataset.dashboardTemplate);next.onboarding.active=false;return activateCampaign(next,'design');}
+ if(b.dataset.dashboardTemplate){const next=toSelfmailer(createTemplate(b.dataset.dashboardTemplate));next.onboarding.active=false;return activateCampaign(next,'design');}
  const id=b.dataset.dashboardOpen||b.dataset.dashboardCopy||b.dataset.dashboardDelete,c=dashboardCampaigns.find(c=>c.id===id);if(!c)return;
  if(b.dataset.dashboardOpen)return activateCampaign(c);
  if(b.dataset.dashboardCopy){const copy=clone(c);copy.id=uid();copy.name=(c.name+' · Kopie').slice(0,120);copy.updatedAt=Date.now();try{await saveCampaign(copy);toast('Eine unabhängige Kopie wurde erstellt.');return showDashboard();}catch{toast('Die Kopie konnte nicht gespeichert werden. Bitte sichere dein Projekt als Datei.',true);return;}}
@@ -313,7 +313,7 @@ async function deleteCreation(item){
  if(!await confirm('Kreation löschen?',`„${item.name}“ wird in den Papierkorb verschoben. Du kannst sie dort jederzeit wiederherstellen.`,'In den Papierkorb'))return;
  try{await flushSave();await pendingSaves;await trashCampaign(item.id);if(campaign.id===item.id){clearTimeout(saveTimer);hasActive=false;history=[];future=[];try{sessionStorage.removeItem('kontaktstoff-active');}catch{}}await showDashboard();toast('Kreation im Papierkorb. Du kannst sie wiederherstellen.');}catch{toast('Löschen war nicht möglich. Deine Kreation bleibt erhalten.',true);}
 }
-async function newCampaign(){await flushSave();view='start';renderVersion++;$('#start-view').innerHTML=startHTML();renderUI();window.scrollTo({top:0,behavior:'instant'});await Promise.all(PROMOTIONS.map(async p=>{const canvas=$(`[data-start-thumb="${p.id}"]`),c=createExampleCampaign(p.id);if(canvas)await renderCanvas(canvas,c,'front',c.recipients[0],{scale:3});}));}
+async function newCampaign(){await flushSave();view='start';renderVersion++;$('#start-view').innerHTML=startHTML();renderUI();window.scrollTo({top:0,behavior:'instant'});await Promise.all(PROMOTIONS.map(async p=>{const canvas=$(`[data-start-thumb="${p.id}"]`),c=toSelfmailer(createExampleCampaign(p.id));if(canvas)await renderCanvas(canvas,c,'front',c.recipients[0],{scale:3,panel:isSelfmailer(c)?'cover':null});}));}
 $('#start-view').addEventListener('click',e=>{if(e.target.closest('[data-start-back]'))showDashboard();});
 $('#start-view').addEventListener('change',()=>{$('.start-template').hidden=$('#campaign-start-form input[name="mode"]:checked').value!=='template';});
 $('#start-view').addEventListener('submit',async e=>{
@@ -456,7 +456,7 @@ $('#tutorial-view').addEventListener('click',async e=>{
  const action=e.target.closest('[data-tutorial-action]')?.dataset.tutorialAction;if(!action)return;
  if(action==='fresh'){await startTutorial(true);return;}
  if(action==='own'){
-  const own=clone(campaign);own.id=uid();own.name='Meine erste Kampagne';own.sample=false;own.recipients=[];const greeting=own.sides.back.fields.find(f=>f.id===own.tutorial.fieldId);if(greeting?.text==='Hallo {{first_name}},')greeting.text='{{salutation}}';delete own.tutorial;
+  const own=toSelfmailer(campaign);own.id=uid();own.name='Meine erste Kampagne';own.sample=false;own.recipients=[];const greeting=own.sides.back.fields.find(f=>f.id===own.tutorial.fieldId);if(greeting?.text==='Hallo {{first_name}},')greeting.text='{{salutation}}';delete own.tutorial;
   own.onboarding={active:true,step:4,personalizationSkipped:false,designReady:true};
   own.brief={...own.brief,audience:'',offer:''};
   commit(()=>campaign.tutorial.active=false);
@@ -464,7 +464,7 @@ $('#tutorial-view').addEventListener('click',async e=>{
  }
  if(action==='skip'||action==='blank'){
   commit(()=>campaign.tutorial.active=false);
-  const blank=createCampaign(true);blank.onboarding.active=false;
+  const blank=toSelfmailer(createCampaign(true));blank.onboarding.active=false;
   await activateCampaign(blank,'design');window.scrollTo({top:0,behavior:'instant'});
   toast('Deine leere Kampagne ist bereit. Die Anleitung und das Tutorial bleiben erreichbar.');return;
  }
@@ -487,7 +487,7 @@ $('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(s
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
 hydrateIcons();
-$('#example-use').onclick=async()=>{const button=$('#example-use');button.disabled=true;try{const own=clone(campaign);own.id=uid();own.name=('Meine Kampagne · '+(CLIENT_CAMPAIGNS.find(p=>p.id===own.templateId)?.name||PROMOTIONS.find(p=>p.id===own.templateId)?.name||'Mein Design')).slice(0,120);own.sample=false;own.recipients=[];own.updatedAt=Date.now();delete own.tutorial;own.onboarding={active:false,step:0,personalizationSkipped:false};await activateCampaign(own,'design');window.scrollTo({top:0,behavior:'instant'});toast('Deine eigene Kopie. Klicke auf einen Text in der Karte, um ihn zu ändern.');}finally{button.disabled=false;}};
+$('#example-use').onclick=async()=>{const button=$('#example-use');button.disabled=true;try{const own=toSelfmailer(campaign);own.id=uid();own.name=('Meine Kampagne · '+(CLIENT_CAMPAIGNS.find(p=>p.id===own.templateId)?.name||PROMOTIONS.find(p=>p.id===own.templateId)?.name||'Mein Design')).slice(0,120);own.sample=false;own.recipients=[];own.updatedAt=Date.now();delete own.tutorial;own.onboarding={active:false,step:0,personalizationSkipped:false};await activateCampaign(own,'design');window.scrollTo({top:0,behavior:'instant'});toast('Deine eigene Kopie. Klicke auf einen Text in der Karte, um ihn zu ändern.');}finally{button.disabled=false;}};
 $('#example-next').onclick=()=>{recipientIndex=(recipientIndex+1)%Math.max(1,campaign.recipients.length);renderUI();};
 $('#example-edit').onclick=()=>{side='front';selected=campaign.sides.front.fields.find(f=>f.text==='{{company}}')?.id;setView('design');};
 $('#example-data').onclick=()=>setView('recipients');
@@ -502,7 +502,7 @@ try{
  else if(CLIENT_CAMPAIGNS.some(c=>c.id===params.get('client'))){campaign=createClientCampaign(params.get('client'));try{const draft=sessionStorage.getItem('kontaktstoff-client-draft');if(draft){const candidate=validateCampaign(JSON.parse(draft));if(candidate.templateId===campaign.templateId){campaign=candidate;campaign.id=uid();}sessionStorage.removeItem('kontaktstoff-client-draft');}}catch{}hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.has('example')){campaign=createExampleCampaign(params.get('example'));hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.get('start')==='blank'){view='start';}
- else if(params.has('template')){campaign=createTemplate(params.get('template'));campaign.onboarding.active=false;hasActive=true;view='design';await saveCampaign(campaign);}
+ else if(params.has('template')){campaign=toSelfmailer(createTemplate(params.get('template')));campaign.onboarding.active=false;hasActive=true;view='design';await saveCampaign(campaign);}
  else if(params.has('demo')){hasActive=true;if(latest)campaign=validateCampaign(latest);else await saveCampaign(campaign);view='design';}
  else if(latest&&sessionStorage.getItem('kontaktstoff-active')===latest.id){campaign=validateCampaign(latest);hasActive=true;view='design';}
  else view='dashboard';

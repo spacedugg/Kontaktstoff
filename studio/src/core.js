@@ -7,6 +7,7 @@ export const clone = value => structuredClone(value);
 export const clamp = (n,min,max) => Math.min(max,Math.max(min,n));
 export const validURL = value => { try { const u=new URL(value); return ['https:','http:'].includes(u.protocol) && !!u.hostname; } catch { return false; } };
 export const resolveText = (template,recipient={}) => String(template).replace(/\{\{\s*([\w-]+)\s*\}\}/g,(_,key)=>String(recipient[key] ?? ''));
+export function resolveField(field,recipient={}){const text=resolveText(field.text,recipient);if(!field.postalAddress)return text;return text.split('\n').map(v=>v.trim()).filter((v,i,lines)=>v&&(i===0||v!==lines[i-1])).join('\n');}
 export const missingKeys = (template,recipient={}) => [...String(template).matchAll(/\{\{\s*([\w-]+)\s*\}\}/g)].map(m=>m[1]).filter(key=>!String(recipient[key]??'').trim());
 export function createCampaign(blank=false) {
   const field=(type,text,x,y,w,h,color='#ffffff',fontSize=12)=>({id:uid(),type,text,x,y,w,h,color,fontSize,weight:'700',align:'left',background:'transparent',autoFit:true});
@@ -95,7 +96,7 @@ export function checks(campaign) {
       if(f.type==='image'&&f.variantKey&&campaign.recipients.some(r=>!Object.hasOwn(f.variants||{},r[f.variantKey])))issues.push({level:'error',text:`${label}: Für mindestens eine Produkt-ID fehlt das passende Bild.`});
       if(f.type==='shape'||f.type==='image')continue;
       if(f.display==='stars'&&campaign.recipients.some(r=>ratingValue(resolveText(f.text,r))===null))issues.push({level:'error',text:`${label}: Sterne benötigen einen Wert zwischen 0 und 5.`});
-      const missing=campaign.recipients.filter(r=>missingKeys(f.text,r).length);
+      const missing=campaign.recipients.filter(r=>f.postalAddress?(![r.company,r.first_name,r.last_name].some(v=>v?.trim())||missingKeys(f.text,r).some(k=>!['company','first_name','last_name'].includes(k))):missingKeys(f.text,r).length);
       if(missing.length)issues.push({level:'error',text:`${label}: ${missing.length} Empfänger ohne Wert für „${f.text}“.`});
       if(f.type==='qr'){
         const invalid=campaign.recipients.filter(r=>!validURL(resolveText(f.text,r))||resolveText(f.text,r).length>1000);

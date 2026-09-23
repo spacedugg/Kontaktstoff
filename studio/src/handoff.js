@@ -1,7 +1,7 @@
 import {sideLabel,isSelfmailer} from './formats.js';
 import {zipSync,strToU8} from 'fflate';
 import {PDFDocument} from 'pdf-lib';
-import {FORMATS,sideNames,checks,csvString,resolveText} from './core.js';
+import {FORMATS,sideNames,checks,csvString,resolveText,resolveField} from './core.js';
 import {renderCanvas,layoutText,imageFrom} from './render.js';
 export async function auditCampaign(campaign,progress=()=>{},signal){
  await document.fonts.ready;
@@ -10,7 +10,7 @@ export async function auditCampaign(campaign,progress=()=>{},signal){
   if(signal?.aborted)throw new Error('Prüfung abgebrochen.');
   const recipient=campaign.recipients[i];
   for(const [side,label] of sideNames(campaign).map(side=>[side,sideLabel(campaign,side)]))for(const field of campaign.sides[side].fields){
-   if(field.type==='text'&&field.display!=='stars'&&layoutText(ctx,field,resolveText(field.text,recipient)).overflow)issues.push({level:'error',text:`${label} · ${recipient.company||'Empfänger '+(i+1)}: Text „${field.text.slice(0,50)}“ passt nicht in das Feld.`,recipientId:recipient.id,side});
+   if(field.type==='text'&&field.display!=='stars'&&layoutText(ctx,field,resolveField(field,recipient)).overflow)issues.push({level:'error',text:`${label} · ${recipient.company||'Empfänger '+(i+1)}: Text „${field.text.slice(0,50)}“ passt nicht in das Feld.`,recipientId:recipient.id,side});
   }
   if(!recipient.company?.trim())issues.push({level:'error',text:`Empfänger ${i+1}: Firmenname fehlt.`});
   progress(i+1,campaign.recipients.length);

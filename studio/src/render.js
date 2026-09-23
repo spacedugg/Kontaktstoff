@@ -1,5 +1,5 @@
 import QRCode from 'qrcode';
-import {FORMATS,resolveText,validURL,ratingValue} from './core.js';
+import {FORMATS,resolveText,resolveField,validURL,ratingValue} from './core.js';
 import {isSelfmailer,POSTAL_ZONES} from './formats.js';
 const images=new Map(), codes=new Map();
 export function imageFrom(src){if(images.size>=32&&!images.has(src))images.delete(images.keys().next().value);if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>{images.delete(src);reject(new Error('Das Bild konnte nicht gelesen werden.'));};image.src=src;}));return images.get(src);}
@@ -53,8 +53,7 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
   if(background.kind==='image'){const img=await imageFrom(background.data);const ratio=Math.min(w/img.width,h/img.height);ctx.drawImage(img,(w-img.width*ratio)/2,(h-img.height*ratio)/2,img.width*ratio,img.height*ratio);}
   const overflow=[];
   if(fields)for(const field of campaign.sides[side].fields){
-    const fullName=[recipient.first_name,recipient.last_name].filter(Boolean).join(' ');
-    const value=field.postalAddress?[recipient.company,fullName===recipient.company?'':fullName,recipient.street,[recipient.postal_code,recipient.city].filter(Boolean).join(' ')].filter(Boolean).join('\n'):resolveText(field.text,recipient);
+    const value=resolveField(field,recipient);
     if(field.background!=='transparent')rect(ctx,field.x,field.y,field.w,field.h,field.background);
     if(field.type==='shape'){continue;}
     if(field.type==='text'&&field.display==='stars'){drawRatingStars(ctx,field,value);continue;}

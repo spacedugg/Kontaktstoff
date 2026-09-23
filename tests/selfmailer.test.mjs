@@ -5,7 +5,7 @@ import {FORMATS,POSTAL_ZONES} from '../studio/src/formats.js';
 import {createClientCampaign,CLIENT_CAMPAIGNS} from '../studio/src/client-campaigns.js';
 import {createBrandTemplate,BRAND_TEMPLATES} from '../studio/src/brand-templates.js';
 import {createPromotion,PROMOTIONS} from '../studio/src/promotions.js';
-import {validateCampaign,checks} from '../studio/src/core.js';
+import {validateCampaign,checks,resolveField} from '../studio/src/core.js';
 const cases=[...CLIENT_CAMPAIGNS.map(t=>[t.id,()=>createClientCampaign(t.id)]),...BRAND_TEMPLATES.map(t=>[t.id,()=>createBrandTemplate(t.id)]),...PROMOTIONS.map(t=>[t.id,()=>createPromotion(t.id)])];
 for(const [name,make] of cases)test('selfmailer: '+name+' keeps recipients, editable fields and postal geometry',()=>{
  const original=make(),before=JSON.stringify(original),p=toSelfmailer(original);
@@ -21,3 +21,5 @@ test('exact 4-panel print geometry; postal collisions fail preflight',()=>{
  const field=p.sides.front.fields.find(f=>f.type==='text'&&!f.postalAddress);field.x=140;field.y=8;field.w=40;
  assert.ok(checks(p).some(i=>i.level==='error'&&i.text.includes('Frankierung')));
 });
+
+test('postal name is optional for a company address and address edits are rendered',()=>{const c=toSelfmailer(createClientCampaign('money-making-sprint'));assert.equal(checks(c).filter(i=>i.level==='error').length,0);const f=c.sides.front.fields.find(f=>f.postalAddress);assert.equal(resolveField(f,{company:'Anna Beispiel',first_name:'Anna',last_name:'Beispiel',street:'Weg 1',postal_code:'12345',city:'Musterstadt'}),'Anna Beispiel\nWeg 1\n12345 Musterstadt');f.text='{{company}}\nZu Händen {{first_name}}\n{{street}}';assert.equal(resolveField(f,{company:'Studio',first_name:'Anna',street:'Weg 2'}),'Studio\nZu Händen Anna\nWeg 2');});
