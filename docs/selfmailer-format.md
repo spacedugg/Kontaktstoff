@@ -88,3 +88,19 @@ Innenseite. Zahlen, Sternefüllung, Name, Ansprache und QR-Ziel bleiben native,
 personalisierbare Felder. Die Sternwerte sind als Beispiele gekennzeichnet.
 `styleBewertungspushSelfmailer` ist eine explizite Überarbeitung; gespeicherte
 Designs werden beim Öffnen nicht automatisch ersetzt.
+
+## Qualität der Kundenfreigabe
+
+Die Freigabe zeigt dauerhaft beide Druckseiten unterhalb der Falzansicht.
+Markierungen in 3D und in den flachen Ansichten nutzen dieselben relativen
+Seitenkoordinaten. Beide Detailseiten haben einen unabhängigen Zoom bis 300 %.
+Die Ausgangsbilder werden mit mindestens 12 Pixeln/mm erzeugt; bei größerer
+Darstellung werden Texte/Felder für Bildschirmdichte und Zoom neu gerendert
+(bis 24 Pixel/mm für Detailseiten, begrenzt für den Browser-Speicher).
+Bildvorlagen gewinnen dadurch keine zusätzlichen Quelldetails.
+
+Die sichtbaren Flächen sind PNG-Bildelemente statt transformierter Canvas-
+Oberflächen, damit die Browser-Bildglättung auch stark verkleinerte Schrift
+sauberer wiedergibt. Die Titelansicht nutzt den verfügbaren Platz und startet
+frontal. Aufklappen passt die Größe an die beiden sichtbaren Flächen an.
+Der PDF-Download bleibt der unveränderte, versionierte 300-dpi-Ansichtsexport.
