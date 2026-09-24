@@ -23,7 +23,8 @@
     "test:workflow": "node tests/workflow.mjs",
     "test:builder": "node tests/builder.mjs",
     "test:sales": "node tests/sales.mjs",
-    "test:proposals": "node tests/proposals.mjs"
+    "test:proposals": "node tests/proposals.mjs",
+    "test:fold": "node tests/fold-preview.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

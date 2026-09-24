@@ -59,7 +59,7 @@ function renderUI(inspector=true,table=true,guide=true){
  document.body.classList.toggle('single-sided',sideNames(campaign).length===1);
  document.documentElement.style.setProperty('--mailing-ratio',format().width+'/'+format().height);
  $$('.proof-label').forEach((el,i)=>{el.firstElementChild.textContent=(i+1)+' / '+sideLabel(campaign,i===0?'front':'back').toUpperCase();});$$('.proof-format').forEach(el=>el.textContent=format().name);$('.export-card>p').textContent=`${sideNames(campaign).length} ${sideNames(campaign).length===1?'Seite':'Seiten'} im Originalformat, mit den Daten des ausgewählten Empfängers.`;
- $('.mailing-3d-card').style.aspectRatio=isSelfmailer(campaign)?'210/99':format().width+'/'+format().height;$('.mailing-3d-card').style.width=`min(${Math.min(72,70*format().width/format().height)}%, 580px)`;
+ threeD.setSelfmailer(isSelfmailer(campaign));threeD.setVisible(view==='preview'&&previewMode==='3d');if(!isSelfmailer(campaign))$('.mailing-3d-card').style.aspectRatio=format().width+'/'+format().height;if(!isSelfmailer(campaign))$('.mailing-3d-card').style.width=`min(${Math.min(72,70*format().width/format().height)}%, 580px)`;
  $('.steps-note').textContent=cloudRecord?.id===campaign.id?'In deinem Unternehmenskonto gespeichert':'Ohne Anmeldung gestalten';
  document.body.classList.toggle('library-editor',cloudPath.includes('library'));
  document.body.classList.toggle('content-editing',editorMode==='content'&&view==='design');
@@ -102,7 +102,7 @@ function renderUI(inspector=true,table=true,guide=true){
  $('#setup-tab').hidden=!campaign.onboarding?.active||!!campaign.tutorial||campaign.sample;
  $('#guide-return').hidden=!campaign.onboarding?.active||!!campaign.tutorial||view==='setup';
  if(view==='setup'&&guide)$('#setup-view').innerHTML=guideHTML(campaign);
- $('#three-d-view').hidden=previewMode!=='3d';$('#proof-spread').hidden=previewMode!=='2d';
+ $('#three-d-front-button').textContent=isSelfmailer(campaign)?'Titelseite':'Vorderseite';$('#three-d-back-button').textContent=isSelfmailer(campaign)?'Postanschrift':'Rückseite';$('#preview-mode-2d').textContent=isSelfmailer(campaign)?'▤ Druckbogen · 2D':'▤ Beide Seiten';$('#three-d-view').hidden=previewMode!=='3d';$('#proof-spread').hidden=previewMode!=='2d';
  for(const mode of ['2d','3d']){const b=$('#preview-mode-'+mode);b.classList.toggle('active',previewMode===mode);b.setAttribute('aria-pressed',String(previewMode===mode));}
  $('#format-short').textContent=format().name;$('#format-select').innerHTML=FORMATS.map(f=>`<option value="${f.id}">${escape(f.name)}</option>`).join('');
  $('#side-title').textContent=sideLabel(campaign,side);$('#format-select').value=campaign.format;
@@ -172,12 +172,12 @@ async function requestRender(){
  const version=++renderVersion;const snapshot=clone(campaign),person=clone(view==='design'?designRecipient():recipient());
  const targets=view==='tutorial'?['front','back'].filter(s=>$('#tutorial-'+s)).map(s=>[s,'#tutorial-'+s]):view==='setup'?(campaign.onboarding?.step===2?[['front','#guide-front'],['back','#guide-back']]:campaign.onboarding?.step===5?[['front','#guide-finish-front']]:[]):view==='preview'?[['front','#proof-front'],['back','#proof-back'],['front','#three-d-front'],['back','#three-d-back']]:[[side,'#design-canvas'],['front','#thumb-front'],['back','#thumb-back']];
  try{
-   const results=await Promise.all(targets.map(async([s,target])=>{const cvs=document.createElement('canvas');const closed=isSelfmailer(snapshot)&&target.includes('three-d');const overflow=await renderCanvas(cvs,snapshot,closed?'front':s,person,{scale:target.includes('thumb')?1.2:5,panel:closed?(s==='front'?'cover':'address'):null});return{cvs,target,overflow,side:s};}));
+   const results=await Promise.all(targets.map(async([s,target])=>{const cvs=document.createElement('canvas');const overflow=await renderCanvas(cvs,snapshot,s,person,{scale:target.includes('thumb')?1.2:5});return{cvs,target,overflow,side:s};}));
    if(version!==renderVersion)return;
    drawingIssues=[];
    for(const{cvs,target,overflow,side:s}of results){const dest=$(target);dest.width=cvs.width;dest.height=cvs.height;dest.getContext('2d').drawImage(cvs,0,0);if(!target.includes('thumb')&&!target.includes('three-d')&&overflow.length)drawingIssues.push({level:'error',text:`${s==='front'?'Vorderseite':'Rückseite'}: ${overflow.length} Textfeld(er) zu klein für diesen Empfänger. Bitte größer ziehen.`});}
    if(view==='tutorial'&&$('#tutorial-qr')){const qr=snapshot.sides.back.fields.find(f=>f.type==='qr'),back=results.find(r=>r.side==='back');if(qr&&back){const q=$('#tutorial-qr');q.width=q.height=440;q.getContext('2d').drawImage(back.cvs,qr.x*5,qr.y*5,Math.min(qr.w,qr.h)*5,Math.min(qr.w,qr.h)*5,0,0,440,440);}}
-   if(view==='preview')renderChecks();
+   if(view==='preview'){if(isSelfmailer(snapshot))threeD.setSpreads($('#three-d-front'),$('#three-d-back'));renderChecks();}
  }catch(e){if(version===renderVersion)toast(e.message,true);}
 }
 function renderChecks(){const issues=[...checks(campaign),...drawingIssues];const errors=issues.filter(i=>i.level==='error');$('#check-count').textContent=errors.length?`${errors.length} offene Punkte`:'Keine blockierenden Fehler';$('#check-list').innerHTML=[{level:'success',text:`${formatCaption(campaign)} · ${sideLabel(campaign,'front')} und ${sideLabel(campaign,'back')}`},{level:'success',text:`${campaign.recipients.length} Empfänger · ${campaign.sides.front.fields.length+campaign.sides.back.fields.length} Designelemente`},...issues].map(i=>`<div class="check-item ${i.level}">${icon(i.level==='success'?'check':i.level==='info'?'info':'warning')}<span>${escape(i.text)}</span></div>`).join('');$('#pdf-export').disabled=!!errors.length;$('#png-export').disabled=!!errors.length;}
@@ -495,7 +495,7 @@ const params=new URLSearchParams(location.search);
 if(reviewReturn()){$('#workspace-link').textContent='Zurück zur Abstimmung';$('#request-campaign').textContent='Speichern & zur Abstimmung →';}
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
- if(params.has('design')){cloudPath='/library/designs/';await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI(cloudPath+encodeURIComponent(params.get('design')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view='design';saveState('In der Designbibliothek gespeichert');}
+ if(params.has('design')){cloudPath='/library/designs/';await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI(cloudPath+encodeURIComponent(params.get('design')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('In der Designbibliothek gespeichert');}
  else if(params.has('cloud')){await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI('/campaigns/'+encodeURIComponent(params.get('cloud')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('Im Konto gespeichert');}
  else if(params.has('local')){const local=campaigns.find(c=>c.id===params.get('local'));if(!local)throw Error('Dieser lokale Entwurf wurde nicht gefunden.');campaign=validateCampaign(local);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';}
  else if(params.has('tutorial')||params.get('start')==='1'){view='start';}

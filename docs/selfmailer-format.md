@@ -24,9 +24,11 @@ native Layouts. Unbekannte Gestaltung wird ohne Beschnitt eingepasst und muss
 nach dem Formatwechsel geprüft werden. Die ursprüngliche Datei bleibt im
 Backend erhalten; eine bestehende Freigabe wird nicht übertragen.
 
-2D und Freigabe zeigen vollständige Druckseiten. Die geschlossene 3D-Vorschau
-zeigt Titel und Adressseite als ausgeschnittene Flächen. Sie ist keine
-verbindliche Falzsimulation.
+2D und Freigabe zeigen vollständige Druckseiten. Die interaktive 3D-Vorschau verbindet zwei beidseitig bedruckte Papierhälften
+an der horizontalen Falzkante. Öffnungsregler, freies Drehen, Touch-Zoom und
+eine pausierbare 12-Sekunden-Schleife veranschaulichen den Aufbau. Die Ansicht
+ist eine geometrische Veranschaulichung; Druck-/Falzfreigabe erfolgt weiterhin
+mit der Druckerei.
 
 Die PDF-Exporte bleiben ausdrücklich RGB-Ansichten im offenen Endformat ohne
 Beschnitt. Für die Druckproduktion sind CMYK/PDF-X, echter Motivbeschnitt,
