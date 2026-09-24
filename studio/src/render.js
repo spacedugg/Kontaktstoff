@@ -50,7 +50,7 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
   const background=campaign.sides[side].background;
   if(background.kind==='blank'&&background.color)rect(ctx,0,0,w,h,background.color);
   if(background.kind==='template')template(ctx,side,w,h);
-  if(background.kind==='image'){const img=await imageFrom(background.data);const ratio=Math.min(w/img.width,h/img.height);ctx.drawImage(img,(w-img.width*ratio)/2,(h-img.height*ratio)/2,img.width*ratio,img.height*ratio);}
+  if(background.kind==='image'){const img=await imageFrom(background.data);const b=background.bleed||0;const ratio=Math.min((w+2*b)/img.width,(h+2*b)/img.height);ctx.drawImage(img,(w-img.width*ratio)/2,(h-img.height*ratio)/2,img.width*ratio,img.height*ratio);}
   const overflow=[];
   if(fields)for(const field of campaign.sides[side].fields){
     const value=resolveField(field,recipient);

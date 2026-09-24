@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "fflate": "0.8.3",
+    "lcms-wasm": "1.0.5",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "6.3.289",
     "pg": "^8.23.0",

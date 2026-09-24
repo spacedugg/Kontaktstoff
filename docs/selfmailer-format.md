@@ -30,11 +30,46 @@ eine pausierbare 12-Sekunden-Schleife veranschaulichen den Aufbau. Die Ansicht
 ist eine geometrische Veranschaulichung; Druck-/Falzfreigabe erfolgt weiterhin
 mit der Druckerei.
 
-Die PDF-Exporte bleiben ausdrücklich RGB-Ansichten im offenen Endformat ohne
-Beschnitt. Für die Druckproduktion sind CMYK/PDF-X, echter Motivbeschnitt,
-Papier, Verschluss, Falzorientierung, Adressierung und Frankiervermerk mit der
-Druckerei abzustimmen. Die Dateivorlage fordert 300 dpi. Eine Designfreigabe
-ist keine Druck- oder Versandbeauftragung.
+## Vorlagen, eigene Dateien und Druck-PDF
+
+`/assets/print/kontaktstoff-din-lang-vorlagen.zip` enthält die unveränderten
+Originaldateien INDD/EPS, das Original-Datenblatt, eine zweiseitige Maß-PDF,
+zwei bearbeitbare SVG-Flächen und eine Anleitung. Hilfslinien vor Produktion
+entfernen. Die EPS ist eine Postzonen-Zeichnung, kein maßhaltiger Druckbogen.
+Download im Studio am Upload und im Backend unter „Formate & Druckvorlagen“.
+
+PDF-Uploads unterscheiden 210 × 198 mm und 216 × 204 mm anhand der physischen
+Seitengröße. Vorhandener Beschnitt wird im Editor abgeschnitten angezeigt,
+im Druck-PDF erhalten. Wenn die CropBox nur das Endformat zeigt, wird die
+216 × 204 mm große MediaBox verwendet. Bild-Uploads fragen ausdrücklich nach
+Endformat oder Beschnitt. Andere Seitenverhältnisse werden zurückgewiesen.
+`background.bleed` wird validiert und in Projekt/Backend gespeichert.
+
+„Vorschau als PDF“ und das bisherige Kampagnenpaket bleiben RGB ohne Beschnitt.
+„Druck-PDF · CMYK & Beschnitt“ exportiert 1–10 Empfänger, jeweils außen/innen,
+216 × 204 mm MediaBox/BleedBox und 210 × 198 mm TrimBox mit 3 mm Versatz.
+Die Seiten werden mit 300 dpi gerastert. LittleCMS konvertiert sRGB in das vom
+Nutzer gewählte CMYK-Ausgabeprofil, das als ICCBased-Farbraum und OutputIntent
+eingebettet ist. Der Export ist **kein zertifiziertes PDF/X**. ICC-Dateien werden
+nur lokal für diesen Export verwendet, nicht hochgeladen oder gespeichert.
+Es wird bewusst kein fremdes Druckprofil weiterverteilt oder ein bestimmtes
+Papier/Druckverfahren vorausgesetzt. Testprofil: PSO Coated v3 von ECI,
+nur lokal geladen und zulässigerweise in die Test-PDF eingebettet.
+
+Bei Motiven ohne eigenen Beschnitt werden die äußersten Pixel nach außen
+fortgesetzt; die Gestaltung wird nicht auf das Datenformat gestreckt. Der Dialog
+zeigt Schnittkante und Seiten, benennt diese Randfortsetzung und weist auf
+Quellbilder unter 300 dpi hin. Druckauflösung erhöht keine Quellbildqualität.
+PDF-Uploads werden ebenfalls gerastert; vektorbasierte Original-Druckdaten bei
+Bedarf direkt in der Grafiksoftware fertigstellen. Druckprofil, Randfortsetzung,
+Papier, Verschluss, Falzorientierung und Postzonen vor Produktion mit der
+Druckerei prüfen. Die Designfreigabe ist kein Druck- oder Versandauftrag.
+
+Validierung: Node-Tests für Maße, ICC-Struktur, CropBox und Projekt-Beschnitt.
+Browser-Test: `PRINT_TEST_PROFILE=/pfad/druckerei.icc node tests/print-browser.mjs`
+(gegen lokalen Testserver auf 4183; TEST_ORIGIN überschreibbar).
+Geprüft wurden CMYK-Kanäle, ICC-Identität, PDF-Boxen und 300-dpi-Bildgröße,
+Poppler-Rendering beider Seiten, lesbarer QR-Code und mobile Dialogbedienung.
 
 ## Freigabe und BewertungsPush
 

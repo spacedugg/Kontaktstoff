@@ -53,6 +53,7 @@ export function validateCampaign(value) {
     if(!s||!['blank','template','image'].includes(s.background?.kind)||!Array.isArray(s.fields)||s.fields.length>(value.format==='selfmailer-dl-4'?80:40))throw new Error('Ungültige Designseite.');
     if(s.background.color!==undefined&&!/^#[0-9a-f]{6}$/i.test(s.background.color))throw new Error('Ungültige Flächenfarbe.');
     if(s.background.kind==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s.background.data)||s.background.data.length>16000000||![s.background.width,s.background.height].every(n=>Number.isFinite(n)&&n>0)))throw new Error('Ungültige Bilddatei im Projekt.');
+    if(s.background.bleed!==undefined&&(![0,3].includes(s.background.bleed)||s.background.kind!=='image'||(s.background.bleed===3&&(value.format!=='selfmailer-dl-4'||Math.abs(s.background.width/s.background.height-216/204)>.005))))throw new Error('Ungültiger Design-Beschnitt.');
     for(const f of s.fields){
       if(f.variantKey!==undefined||f.variants!==undefined){if(f.type!=='image'||typeof f.variantKey!=='string'||!/^\w{1,50}$/.test(f.variantKey)||!f.variants||typeof f.variants!=='object'||Array.isArray(f.variants)||Object.keys(f.variants).length>20||Object.entries(f.variants).some(([k,v])=>!/^[-\w]{1,60}$/.test(k)||['__proto__','prototype','constructor'].includes(k)||typeof v!=='string'||v.length>16000000||!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(v)))throw new Error('Ungültige Produktbild-Zuordnung.');}
       if(f.display!==undefined&&(f.display!=='stars'||f.type!=='text'))throw new Error('Ungültige Felddarstellung.');
@@ -75,7 +76,7 @@ export function validateCampaign(value) {
 export function checks(campaign) {
   const issues=[];const format=FORMATS.find(f=>f.id===campaign.format);
   if(isSelfmailer(campaign)){
-    issues.push({level:'info',text:'Selfmailer: 4 Flächen auf 2 Druckseiten. Falz bei 99 mm. Druckdaten benötigen rundum 3 mm Beschnitt; die Ansichts-PDF ist noch keine Druckfreigabe.'});
+    issues.push({level:'info',text:'Selfmailer: 4 Flächen auf 2 Druckseiten. Falz bei 99 mm. Für die Produktion: „Druck-PDF“ mit 3 mm Beschnitt und CMYK-Profil der Druckerei verwenden. Die Designfreigabe ersetzt keine Druckprüfung.'});
     for(const f of campaign.sides.front.fields){if(f.type==='shape'&&f.background==='#ffffff')continue;for(const z of POSTAL_ZONES){if(f.x<z.x+z.w&&f.x+f.w>z.x&&f.y<z.y+z.h&&f.y+f.h>z.y&&!(z.id==='address'&&f.postalAddress))issues.push({level:'error',text:'Außenseite: Ein Element überlagert die Zone „'+z.name+'“. Bitte im Layout verschieben.'});}}
   }
   if(campaign.sample)issues.push({level:'info',text:'Beispielkampagne: Empfänger sind fiktiv. Die QR-Codes enthalten Demo-Links; vor dem Einsatz durch eigene Ziele ersetzen.'});
@@ -84,7 +85,7 @@ export function checks(campaign) {
     const s=campaign.sides[side];
     if(s.background.kind==='blank'&&!s.fields.length)issues.push({level:'error',text:`${label}: Das Design ist noch leer.`});
     if(s.background.kind==='image'){
-      const dpi=Math.min(s.background.width/(format.width/25.4),s.background.height/(format.height/25.4));
+      const dpi=Math.min(s.background.width/((format.width+2*(s.background.bleed||0))/25.4),s.background.height/((format.height+2*(s.background.bleed||0))/25.4));
       if(dpi<200)issues.push({level:'warning',text:`${label}: Bildauflösung etwa ${Math.round(dpi)} dpi. Für den Druck empfehlen wir 300 dpi.`});
       if(Math.abs(s.background.width/s.background.height-format.width/format.height)>.035)issues.push({level:'warning',text:`${label}: Das Bildformat weicht ab. Das Design wird vollständig mit weißen Rändern eingepasst.`});
     }

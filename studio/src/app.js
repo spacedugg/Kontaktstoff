@@ -1,3 +1,4 @@
+import {preparePrintImport,detectBleed,validateICC,printWarnings,renderPrintCanvas,createPrintPDF} from './print.js';
 import {toSelfmailer} from './selfmailer.js';
 import {isSelfmailer,sideLabel,formatCaption,POSTAL_ZONES} from './formats.js';
 import {api as workspaceAPI} from '../../konto/src/api.js';
@@ -180,7 +181,7 @@ async function requestRender(){
    if(view==='preview'){if(isSelfmailer(snapshot))threeD.setSpreads($('#three-d-front'),$('#three-d-back'));renderChecks();}
  }catch(e){if(version===renderVersion)toast(e.message,true);}
 }
-function renderChecks(){const issues=[...checks(campaign),...drawingIssues];const errors=issues.filter(i=>i.level==='error');$('#check-count').textContent=errors.length?`${errors.length} offene Punkte`:'Keine blockierenden Fehler';$('#check-list').innerHTML=[{level:'success',text:`${formatCaption(campaign)} · ${sideLabel(campaign,'front')} und ${sideLabel(campaign,'back')}`},{level:'success',text:`${campaign.recipients.length} Empfänger · ${campaign.sides.front.fields.length+campaign.sides.back.fields.length} Designelemente`},...issues].map(i=>`<div class="check-item ${i.level}">${icon(i.level==='success'?'check':i.level==='info'?'info':'warning')}<span>${escape(i.text)}</span></div>`).join('');$('#pdf-export').disabled=!!errors.length;$('#png-export').disabled=!!errors.length;}
+function renderChecks(){const issues=[...checks(campaign),...drawingIssues];const errors=issues.filter(i=>i.level==='error');$('#check-count').textContent=errors.length?`${errors.length} offene Punkte`:'Keine blockierenden Fehler';$('#check-list').innerHTML=[{level:'success',text:`${formatCaption(campaign)} · ${sideLabel(campaign,'front')} und ${sideLabel(campaign,'back')}`},{level:'success',text:`${campaign.recipients.length} Empfänger · ${campaign.sides.front.fields.length+campaign.sides.back.fields.length} Designelemente`},...issues].map(i=>`<div class="check-item ${i.level}">${icon(i.level==='success'?'check':i.level==='info'?'info':'warning')}<span>${escape(i.text)}</span></div>`).join('');$('#pdf-export').disabled=!!errors.length;$('#png-export').disabled=!!errors.length;$('#print-export').hidden=!isSelfmailer(campaign);$('#print-export').disabled=!!errors.length;$('#print-template-download').hidden=!isSelfmailer(campaign);}
 function defaultTextColor(){const bg=campaign.sides[side].background;if(bg.kind==='template'&&side==='front')return '#ffffff';if(bg.kind==='blank'&&bg.color){const rgb=bg.color.slice(1).match(/../g).map(v=>parseInt(v,16));return rgb[0]*.299+rgb[1]*.587+rgb[2]*.114<145?'#ffffff':'#202321';}return '#202321';}
 function addField(type){if(campaign.sides[side].fields.length>=(isSelfmailer(campaign)?80:40))return toast(`Maximal ${isSelfmailer(campaign)?80:40} Felder pro Druckseite.`,true);commit(()=>{const f={id:uid(),type:type==='qr'?'qr':'text',text:type==='qr'?'{{chatbot_url}}':type==='company'?'{{company}}':type==='salutation'?'{{salutation}}':'Ihr persönlicher Text',x:type==='qr'?160:15,y:type==='qr'?100:20+Math.min(campaign.sides[side].fields.filter(f=>f.type==='text').length,5)*20,w:type==='qr'?28:75,h:type==='qr'?28:15,fontSize:16,weight:'700',align:'left',color:defaultTextColor(),background:type==='qr'?'#ffffff':'transparent',autoFit:true};campaign.sides[side].fields.push(f);selected=f.id;});toast(type==='qr'?'QR-Code hinzugefügt. Ziehe ihn an die passende Stelle.':'Feld hinzugefügt. Du kannst es direkt im Design verschieben.');}
 function renderRecipients(){
@@ -216,25 +217,34 @@ async function loadDesign(file){
    const pdfjs=await import('pdfjs-dist/build/pdf.mjs');
    // Keep the worker local, including when the studio is hosted below a path prefix.
    pdfjs.GlobalWorkerOptions.workerSrc=new URL('vendor/pdf.worker.min.mjs',document.baseURI).href;
-   const task=pdfjs.getDocument({data:await file.arrayBuffer(),isEvalSupported:false,useSystemFonts:true,cMapUrl:new URL('vendor/cmaps/',document.baseURI).href,cMapPacked:true,standardFontDataUrl:new URL('vendor/standard_fonts/',document.baseURI).href,wasmUrl:new URL('vendor/wasm/',document.baseURI).href});
+   const task=pdfjs.getDocument({data:await preparePrintImport(await file.arrayBuffer(),format()),isEvalSupported:false,useSystemFonts:true,cMapUrl:new URL('vendor/cmaps/',document.baseURI).href,cMapPacked:true,standardFontDataUrl:new URL('vendor/standard_fonts/',document.baseURI).href,wasmUrl:new URL('vendor/wasm/',document.baseURI).href});
    let pdf;try{pdf=await task.promise;}catch{await task.destroy();throw new Error('Die PDF konnte nicht geöffnet werden. Bitte eine gültige, unverschlüsselte PDF verwenden.');}
    try{
     let mode='single',pageNumber=1;
-    if(pdf.numPages>1){$('#busy').hidden=true;const answer=await modal('Seiten aus der PDF übernehmen',`<p>${escape(file.name)} enthält ${pdf.numPages} Seiten. Welche möchtest du verwenden?</p><label class="modal-choice"><input type="radio" name="pdf-mode" value="both" checked> Seite 1 als Vorderseite, Seite 2 als Rückseite</label><label class="modal-choice"><input type="radio" name="pdf-mode" value="single"> Eine Seite auf die aktuelle Mailing-Seite</label><label for="pdf-page">PDF-Seite</label><input id="pdf-page" type="number" min="1" max="${pdf.numPages}" value="1"><p style="margin-top:15px">Vorhandene Personalisierungsfelder bleiben erhalten und lassen sich danach anpassen.</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:'Design übernehmen',primary:true}]);if(answer!=='ok')return;
+    if(pdf.numPages>1){$('#busy').hidden=true;const answer=await modal('Seiten aus der PDF übernehmen',`<p>${escape(file.name)} enthält ${pdf.numPages} Seiten. Welche möchtest du verwenden?</p><label class="modal-choice"><input type="radio" name="pdf-mode" value="both" checked> Seite 1 als ${sideLabel(campaign,'front')}, Seite 2 als ${sideLabel(campaign,'back')}</label><label class="modal-choice"><input type="radio" name="pdf-mode" value="single"> Eine Seite auf die aktuelle Mailing-Seite</label><label for="pdf-page">PDF-Seite</label><input id="pdf-page" type="number" min="1" max="${pdf.numPages}" value="1"><p style="margin-top:15px">Vorhandene Personalisierungsfelder bleiben erhalten und lassen sich danach anpassen.</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:'Design übernehmen',primary:true}]);if(answer!=='ok')return;
       mode=$('input[name="pdf-mode"]:checked').value;pageNumber=clamp(Number($('#pdf-page').value)||1,1,pdf.numPages);$('#busy').hidden=false;
     }
     for(const[s,n]of mode==='both'?[['front',1],['back',2]]:[[target,pageNumber]]){
       const page=await pdf.getPage(n),base=page.getViewport({scale:1}),scale=Math.min(300/72,3500/Math.max(base.width,base.height));
+      const bleed=isSelfmailer(campaign)?detectBleed(base.width*25.4/72,base.height*25.4/72,format()):0;
+      if(bleed===null)throw new Error('Für diesen Selfmailer bitte PDF-Seiten mit 210 × 198 mm oder 216 × 204 mm inklusive Beschnitt hochladen. Einzelne gefaltete Flächen zuerst zu zwei Druckseiten zusammensetzen.');
       const viewport=page.getViewport({scale}),cvs=document.createElement('canvas');cvs.width=Math.round(viewport.width);cvs.height=Math.round(viewport.height);
       await page.render({canvasContext:cvs.getContext('2d'),viewport,background:'rgb(255,255,255)'}).promise;
-      backgrounds.push([s,{kind:'image',data:cvs.toDataURL('image/png'),width:cvs.width,height:cvs.height,name:`${file.name} · Seite ${n}`}]);
+      backgrounds.push([s,{kind:'image',data:cvs.toDataURL('image/png'),width:cvs.width,height:cvs.height,name:`${file.name} · Seite ${n}`,bleed}]);
     }
    }finally{await task.destroy();}
   }else if(['image/png','image/jpeg','image/webp'].includes(file.type)){
    const src=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('Die Datei konnte nicht gelesen werden.'));r.readAsDataURL(file);});
    const img=await imageFrom(src);if(img.width*img.height>80000000)throw new Error('Dieses Bild ist sehr groß. Bitte auf maximal 80 Megapixel verkleinern.');
    const scale=Math.min(1,3500/Math.max(img.width,img.height)),cvs=document.createElement('canvas');cvs.width=Math.round(img.width*scale);cvs.height=Math.round(img.height*scale);const ctx=cvs.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,cvs.width,cvs.height);ctx.drawImage(img,0,0,cvs.width,cvs.height);
-   backgrounds.push([target,{kind:'image',data:cvs.toDataURL('image/png'),width:cvs.width,height:cvs.height,name:file.name}]);
+   let bleed=0;
+   if(isSelfmailer(campaign)){
+    $('#busy').hidden=true;
+    const answer=await modal('Ist Beschnitt in deiner Datei enthalten?',`<p>So bleibt dein Design in der richtigen Größe. Wähle das Format, in dem du die Bilddatei erstellt hast.</p><label class="modal-choice"><input type="radio" name="image-bleed" value="0" checked> Endformat · 210 × 198 mm</label><label class="modal-choice"><input type="radio" name="image-bleed" value="3"> Mit 3 mm Beschnitt · 216 × 204 mm</label><p>Du hast einzelne gefaltete Flächen? Setze sie zuerst mit unserer <a href="/assets/print/kontaktstoff-din-lang-vorlagen.zip" download>Vorlage</a> zu zwei Druckseiten zusammen.</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:'Design übernehmen',primary:true}]);
+    if(answer!=='ok')return;bleed=Number($('input[name="image-bleed"]:checked').value);$('#busy').hidden=false;
+    if(Math.abs(cvs.width/cvs.height-(210+2*bleed)/(198+2*bleed))>.005)throw new Error(`Das Seitenverhältnis passt nicht zu ${210+2*bleed} × ${198+2*bleed} mm. Bitte die Datei im gewählten Format exportieren.`);
+   }
+   backgrounds.push([target,{kind:'image',data:cvs.toDataURL('image/png'),width:cvs.width,height:cvs.height,name:file.name,bleed}]);
   }else throw new Error('Bitte eine PDF-, PNG-, JPG- oder WebP-Datei auswählen.');
   if(backgrounds.some(([,bg])=>bg.data.length>16000000))throw new Error('Das gerasterte Design ist zu groß zum Speichern. Bitte eine kleinere Bilddatei oder eine vereinfachte PDF verwenden.');
   if(backgrounds.length){commit(()=>{backgrounds.forEach(([s,bg])=>campaign.sides[s].background=bg);});toast(`${backgrounds.length===2?'Beide Seiten':'Design'} übernommen. Personalisierungsfelder jetzt passend platzieren.`);}
@@ -249,7 +259,10 @@ $('#background-remove').onclick=async()=>{if(await confirm('Hintergrund entferne
 $('#format-select').onchange=async e=>{
  const next=FORMATS.find(f=>f.id===e.target.value),old=format();if(!next||next.id===old.id)return;
  if(next.id==='selfmailer-dl-4'){if(await confirm('Als Selfmailer gestalten?','Aus dem bisherigen Design werden vier Flächen: Titel und Anschrift außen, Nachricht und Angebot innen. Prüfe anschließend Texte und Postanschriften. Rückgängig ist möglich.','Selfmailer übernehmen'))commit(()=>{campaign=toSelfmailer(campaign);side='front';selected=null;});else e.target.value=campaign.format;return;}
- if(await confirm('Format ändern?',`Das Mailing wird auf ${next.width} × ${next.height} mm umgestellt. Positionen werden proportional angepasst. Prüfe danach beide Seiten und lade bei Bedarf passende Designs hoch.`,'Format übernehmen'))commit(()=>{for(const s of Object.values(campaign.sides))for(const f of s.fields){f.x=f.x/old.width*next.width;f.y=f.y/old.height*next.height;f.w=f.w/old.width*next.width;f.h=f.h/old.height*next.height;if(f.type==='qr')f.w=f.h=Math.min(f.w,f.h);}campaign.format=next.id;});else e.target.value=campaign.format;
+ if(await confirm('Format ändern?',`Das Mailing wird auf ${next.width} × ${next.height} mm umgestellt. Positionen werden proportional angepasst. Prüfe danach beide Seiten und lade bei Bedarf passende Designs hoch.`,'Format übernehmen')){
+  const backgrounds={};for(const [side,s] of Object.entries(campaign.sides))if(s.background.bleed===3){const image=await imageFrom(s.background.data),canvas=document.createElement('canvas');canvas.width=Math.round(image.width*old.width/(old.width+6));canvas.height=Math.round(image.height*old.height/(old.height+6));canvas.getContext('2d').drawImage(image,image.width*3/(old.width+6),image.height*3/(old.height+6),image.width*old.width/(old.width+6),image.height*old.height/(old.height+6),0,0,canvas.width,canvas.height);backgrounds[side]={...s.background,data:canvas.toDataURL(),width:canvas.width,height:canvas.height,bleed:0};}
+  commit(()=>{for(const [side,s] of Object.entries(campaign.sides)){if(backgrounds[side])s.background=backgrounds[side];for(const f of s.fields){f.x=f.x/old.width*next.width;f.y=f.y/old.height*next.height;f.w=f.w/old.width*next.width;f.h=f.h/old.height*next.height;if(f.type==='qr')f.w=f.h=Math.min(f.w,f.h);}}campaign.format=next.id;});
+ }else e.target.value=campaign.format;
 };
 $$('[data-side]').forEach(b=>b.onclick=()=>setSide(b.dataset.side));$$('[data-tab]').forEach(b=>b.onclick=()=>setView(b.dataset.tab));$$('[data-add]').forEach(b=>b.onclick=()=>addField(b.dataset.add));
 $('#open-preview').onclick=()=>setView('preview');$('#undo').onclick=undo;$('#redo').onclick=redo;$('#guides-toggle').onclick=()=>{guides=!guides;renderUI(false,false);};
@@ -337,6 +350,30 @@ async function exportProof(type){
    toast(type==='pdf'?'Ansichts-PDF exportiert.':'Mailing-Seite als PNG exportiert.');
  });
 }
+async function openPrintExport(){
+ const snapshot=clone(campaign),person=clone(recipient());
+ if(!isSelfmailer(snapshot))return;
+ if(checks(snapshot).some(i=>i.level==='error'))return toast('Bitte zuerst die offenen Punkte im Kampagnen-Check korrigieren.',true);
+ let warnings,previews;
+ await busy('Druckdaten werden geprüft …',async()=>{warnings=await printWarnings(snapshot);previews=await Promise.all(sideNames(snapshot).map(s=>renderPrintCanvas(snapshot,s,person,{dpi:90})));});
+ if(!previews)return;
+ const extended=sideNames(snapshot).filter(s=>snapshot.sides[s].background.bleed!==3).map(s=>sideLabel(snapshot,s));
+ const pending=modal('Druck-PDF herunterladen',`<p>216 × 204 mm · 3 mm Beschnitt · CMYK · 300 dpi</p><div class="print-previews">${previews.map((c,i)=>`<figure><div><img src="${c.toDataURL()}" alt="${sideLabel(snapshot,sideNames(snapshot)[i])} mit Beschnitt"><span></span></div><figcaption>${sideLabel(snapshot,sideNames(snapshot)[i])} · gestrichelt = Schnittkante</figcaption></figure>`).join('')}</div><label for="print-people">Welche Empfänger?</label><select id="print-people"><option value="current">Ausgewählter Empfänger: ${escape(person.company||person.first_name||'Kontakt')}</option><option value="range">Empfängerbereich exportieren (max. 10)</option></select><div id="print-range" hidden><label>Von <input id="print-from" type="number" min="1" max="${snapshot.recipients.length}" value="1"></label><label>Bis <input id="print-to" type="number" min="1" max="${snapshot.recipients.length}" value="${Math.min(10,snapshot.recipients.length)}"></label></div><label for="print-profile">Farbprofil deiner Druckerei (.icc / .icm)</label><input id="print-profile" type="file" accept=".icc,.icm"><p class="field-help">Das Profil bestimmt die CMYK-Farben passend zu Papier und Druckverfahren. Du bekommst es von deiner Druckerei. Es wird nur für diesen Export verwendet.</p><p id="print-profile-error" role="status"></p><details><summary>Beschnitt & Druckprüfung</summary><p>${extended.length?'Bei '+escape(extended.join(' und '))+' wird der äußerste Bildrand 3 mm nach außen fortgesetzt. Die Gestaltung im Endformat bleibt gleich. Bitte den Rand kontrollieren.':'Der Beschnitt stammt aus deinen hochgeladenen Dateien.'}</p><p>PDF-Uploads und der Druckexport werden gerastert. Vorhandene Bilder werden dadurch nicht schärfer. Kein zertifiziertes PDF/X.</p>${warnings.length?'<ul>'+warnings.map(w=>'<li>'+escape(w)+'</li>').join('')+'</ul>':'<p>Keine Bilder unter 300 dpi erkannt.</p>'}</details>${warnings.length?'<p class="print-warning">'+warnings.length+' Hinweis(e) zur Bildauflösung – siehe Druckprüfung.</p>':''}<label class="modal-choice"><input id="print-confirm" type="checkbox"> Ich habe Beschnitt, Bildqualität, Anschrift und freie Postzonen geprüft. Das Profil passt zur Druckerei.</label>`,[{id:'cancel',label:'Abbrechen'},{id:'export',label:'Druck-PDF herunterladen',primary:true}]);
+ let profile=null,profileLoad=0;
+ const button=$('#modal [data-result="export"]');button.disabled=true;
+ const enable=()=>button.disabled=!(profile&&$('#print-confirm').checked);
+ $('#print-people').onchange=e=>$('#print-range').hidden=e.target.value!=='range';
+ $('#print-confirm').onchange=enable;
+ $('#print-profile').onchange=async e=>{const load=++profileLoad;profile=null;enable();const file=e.target.files[0];try{if(!file)return;if(file.size>10*1024*1024)throw new Error('Das Profil darf maximal 10 MB groß sein.');const bytes=validateICC(new Uint8Array(await file.arrayBuffer()));if(load!==profileLoad)return;profile=bytes;$('#print-profile-error').textContent='CMYK-Ausgabeprofil gewählt: '+file.name;}catch(error){if(load===profileLoad)$('#print-profile-error').textContent=error.message;}if(load===profileLoad)enable();};
+ if(await pending!=='export')return;
+ let people=[person];
+ if($('#print-people').value==='range'){const from=Number($('#print-from').value),to=Number($('#print-to').value);if(!Number.isInteger(from)||!Number.isInteger(to)||from<1||to<from||to>snapshot.recipients.length||to-from>=10)return toast('Bitte einen gültigen Bereich mit höchstens 10 Empfängern wählen.',true);people=snapshot.recipients.slice(from-1,to);}
+ await busy('Druck-PDF wird erstellt …',async()=>{
+  const controller=new AbortController(),cancel=document.createElement('button');cancel.className='button';cancel.textContent='Export abbrechen';cancel.onclick=()=>controller.abort();$('#busy-label').after(cancel);
+  try{const bytes=await createPrintPDF(snapshot,{profile,people,signal:controller.signal,onProgress:text=>$('#busy-label').textContent=text});download(new Blob([bytes],{type:'application/pdf'}),`${filename()}-druck-cmyk.pdf`);toast('CMYK-PDF mit 3 mm Beschnitt heruntergeladen.');}finally{cancel.remove();}
+ });
+}
+$('#print-export').onclick=openPrintExport;
 $('#pdf-export').onclick=()=>exportProof('pdf');$('#png-export').onclick=()=>exportProof('png');
 window.addEventListener('keydown',e=>{if($('#modal').open)return;const editing=e.target.matches('input,textarea,select,[contenteditable=true]');if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!editing){e.preventDefault();e.shiftKey?redo():undo();}if((e.key==='Delete'||e.key==='Backspace')&&!editing&&e.target.closest('[data-field]')){e.preventDefault();deleteField();}});
 // 3D controls only change the viewing angle, never the actual mailing geometry.

@@ -1,6 +1,6 @@
 const postpal=(file)=>'https://app.getpostpal.com/storage/'+encodeURIComponent(file+'.zip');
 export const FORMATS=[
- {id:'selfmailer-dl-4',name:'DIN lang · Selfmailer · 4 Seiten',width:210,height:198,pages:2,panels:4,closedWidth:210,closedHeight:99,foldY:99,bleed:3,template:'https://mailingstore.de/wp-content/uploads/2021/02/Selfmailer_Datenblatt_DIN_lang_4_Seiter-1.pdf'},
+ {id:'selfmailer-dl-4',name:'DIN lang · Selfmailer · 4 Seiten',width:210,height:198,pages:2,panels:4,closedWidth:210,closedHeight:99,foldY:99,bleed:3,download:'/assets/print/kontaktstoff-din-lang-vorlagen.zip',template:'https://mailingstore.de/wp-content/uploads/2021/02/Selfmailer_Datenblatt_DIN_lang_4_Seiter-1.pdf'},
  {id:'a5-landscape',name:'DIN A5 · Querformat',width:210,height:148,pages:2},
  {id:'a6-landscape',name:'DIN A6',width:148,height:105,pages:2,bleed:3,template:postpal('DIN A6')},
  {id:'din-lang',name:'DIN lang',width:210,height:98,pages:2,bleed:3,template:postpal('DIN Lang')},

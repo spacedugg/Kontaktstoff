@@ -8,6 +8,9 @@ await build({entryPoints:['freigabe/main.js'],bundle:true,format:'esm',minify:tr
 await build({entryPoints:['konto/src/app.js'],bundle:true,format:'esm',minify:true,outfile:'konto/app.js',target:['es2022']});
 await build({entryPoints:['clients/main.js'],bundle:true,format:'esm',minify:true,outfile:'clients/app.js',legalComments:'inline',target:['es2022']});
 await mkdir('studio/vendor', { recursive: true });
+await copyFile('node_modules/lcms-wasm/dist/lcms.js','studio/vendor/lcms.mjs');
+await copyFile('node_modules/lcms-wasm/dist/lcms.wasm','studio/vendor/lcms.wasm');
+await copyFile('node_modules/lcms-wasm/LICENSE.md','studio/vendor/lcms-LICENSE.txt');
 await build({ entryPoints: ['studio/src/app.js'], bundle: true, format: 'esm', minify: true, outfile: 'studio/app.js', legalComments: 'linked', target: ['es2022'] });
 await build({entryPoints:['homepage/public.js'],bundle:true,format:'esm',minify:true,outfile:'app.js',legalComments:'inline',target:['es2022']});
 await copyFile('node_modules/pdfjs-dist/build/pdf.worker.min.mjs', 'studio/vendor/pdf.worker.min.mjs');
