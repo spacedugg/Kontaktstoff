@@ -15,7 +15,7 @@ export function mountReviewFold(root,project,{initialState=null,flatSelectors=[]
  function pin(p,label,cls=''){const surface=faces.get(p.face),el=document.createElement('button');el.type='button';el.className='fold-comment-pin '+cls;el.style.left=p.x*100+'%';el.style.top=p.y*100+'%';el.textContent=label;surface.append(el);return el;}
  function clearPoint(){shell.querySelectorAll('.fold-pending-pin').forEach(n=>n.remove());}
  comments.forEach((c,i)=>{if(!c.side)return;const el=pin(spreadToFace(c),String(i+1),resolved.has(c.id)?'resolved':'');el.dataset.foldComment=c.id;el.setAttribute('aria-label','Kommentar '+(i+1)+' ansehen');el.addEventListener('pointerdown',e=>e.stopPropagation());el.onclick=e=>{e.stopPropagation();onComment(c);};});
- function showFace(face){viewer.fold.stop();viewer.state.panX=viewer.state.panY=0;if(face==='cover')viewer.front();else if(face==='postal')viewer.back();else{viewer.state.x=-12;viewer.state.y=-12;viewer.fold.animate(100);viewer.paint();}}
+ function showFace(face){viewer.fold.stop();viewer.state.panX=viewer.state.panY=0;if(face==='cover'){viewer.fold.set(0);viewer.state.x=viewer.state.y=0;viewer.paint();}else if(face==='postal'){viewer.fold.set(0);viewer.state.x=180;viewer.state.y=0;viewer.paint();}else{viewer.state.x=viewer.state.y=0;viewer.fold.animate(100);viewer.paint();}}
  function markAt(face,x,y){if(!ready||!editable)return;const surface=faces.get(face);if(!surface)return;const points=[...surface.querySelectorAll('.fold-corner')].map(el=>{const r=el.getBoundingClientRect();return {x:r.x,y:r.y};}),p=pointOnQuad(points,x,y);if(!p)return;clearPoint();const el=pin({face,...p},'+','fold-pending-pin');el.tabIndex=-1;el.setAttribute('aria-hidden','true');onMark(faceToSpread(face,p));}
  stage.addEventListener('pointerdown',e=>{if(e.target.closest('.fold-comment-pin'))return;pendingTap=null;if(gesture){gesture.cancelled=true;return;}const surface=e.target.closest('[data-review-surface]');gesture={id:e.pointerId,x:e.clientX,y:e.clientY,face:surface?.dataset.reviewSurface,cancelled:false};},{signal:events.signal});
  stage.addEventListener('pointermove',e=>{if(gesture&&Math.hypot(e.clientX-gesture.x,e.clientY-gesture.y)>7)gesture.cancelled=true;},{signal:events.signal});
@@ -26,6 +26,28 @@ export function mountReviewFold(root,project,{initialState=null,flatSelectors=[]
  stage.addEventListener('keydown',e=>{if(e.target!==stage||e.key!=='Enter')return;e.preventDefault();const r=stage.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height*.48,surface=document.elementFromPoint(x,y)?.closest('[data-review-surface]');if(surface)markAt(surface.dataset.reviewSurface,x,y);},{signal:events.signal});
  document.addEventListener('close',clearPoint,{capture:true,signal:events.signal});
  shell.querySelectorAll('[data-review-face]').forEach(b=>b.onclick=()=>showFace(b.dataset.reviewFace));shell.querySelectorAll('[data-review-zoom]').forEach(b=>b.onclick=()=>viewer.zoom(b.dataset.reviewZoom==='in'?1.15:1/1.15));
- const pending=(async()=>{const front=shell.querySelector('[data-fold-source=front]'),back=shell.querySelector('[data-fold-source=back]');await Promise.all([renderCanvas(front,project,'front',project.recipients[0],{scale:5}),renderCanvas(back,project,'back',project.recipients[0],{scale:5})]);if(!disposed){viewer.setSpreads(front,back);ready=true;help.textContent=editable?'Deine Markierungen bleiben direkt an der richtigen Stelle des Mailings.':'Dieser Designstand ist bestätigt.';}})().catch(()=>{if(!disposed){viewer.setVisible(false);stage.hidden=true;for(const [n,hidden] of hiddenState)n.hidden=hidden;help.textContent='Die Falzansicht ist gerade nicht verfügbar. Du kannst unten auf dem Druckbogen kommentieren.';}});
- return {ready:pending,snapshot:()=>({state:{...viewer.state},open:viewer.fold.open}),promptMark(){viewer.fold.stop();help.textContent='Tippe oder klicke jetzt direkt auf die Stelle im Mailing.';stage.scrollIntoView({behavior:'smooth',block:'center'});stage.focus({preventScroll:true});},showPoint(p){const point=spreadToFace(p);showFace(point.face);stage.scrollIntoView({behavior:'smooth',block:'center'});},destroy(){disposed=true;events.abort();viewer.destroy();shell.remove();for(const [n,hidden] of hiddenState)n.hidden=hidden;}};
+ // Render for high-density screens and zoom, with a bounded texture budget.
+ let textureScale=0,qualityTimer=0,painting=false;
+ const quality=()=>Math.max(12,Math.min(16,Math.ceil(viewer.card.clientWidth*(window.devicePixelRatio||1)*viewer.state.scale*1.5/210/2)*2));
+ async function paintTextures(){
+  if(disposed||painting||textureScale>=quality())return;
+  painting=true;
+  try{
+   do{
+    const scale=quality(),front=document.createElement('canvas'),back=document.createElement('canvas');
+    await renderCanvas(front,project,'front',project.recipients[0],{scale});
+    await renderCanvas(back,project,'back',project.recipients[0],{scale});
+    if(disposed){front.width=back.width=1;return;}
+    textureScale=scale;viewer.setSpreads(front,back);front.width=front.height=back.width=back.height=1;
+    ready=true;stage.dataset.textureScale=String(scale);
+    help.textContent=editable?'Deine Markierungen bleiben direkt an der richtigen Stelle des Mailings.':'Dieser Designstand ist bestätigt.';
+   }while(!disposed&&textureScale<quality());
+  }finally{painting=false;}
+ }
+ function scheduleQuality(){if(disposed||textureScale>=quality())return;clearTimeout(qualityTimer);qualityTimer=setTimeout(()=>paintTextures().catch(()=>{}),200);}
+ viewer.onViewChange=scheduleQuality;
+ const resize=new ResizeObserver(scheduleQuality);resize.observe(stage);
+ const pending=paintTextures().catch(()=>{if(!disposed){viewer.setVisible(false);stage.hidden=true;for(const [n,hidden] of hiddenState)n.hidden=hidden;help.textContent='Die Falzansicht ist gerade nicht verfügbar. Du kannst unten auf dem Druckbogen kommentieren.';}});
+
+ return {ready:pending,snapshot:()=>({state:{...viewer.state},open:viewer.fold.open}),promptMark(){viewer.fold.stop();help.textContent='Tippe oder klicke jetzt direkt auf die Stelle im Mailing.';stage.scrollIntoView({behavior:'smooth',block:'center'});stage.focus({preventScroll:true});},showPoint(p){const point=spreadToFace(p);showFace(point.face);stage.scrollIntoView({behavior:'smooth',block:'center'});},destroy(){disposed=true;clearTimeout(qualityTimer);resize.disconnect();viewer.onViewChange=null;events.abort();viewer.destroy();shell.remove();for(const [n,hidden] of hiddenState)n.hidden=hidden;}};
 }

@@ -90,6 +90,7 @@ export class Mailing3D {
     this.card.style.transform = `translate3d(${s.panX}px, ${s.panY}px, 0) scale(${s.scale}) rotateX(${s.x}deg) rotateY(${s.y}deg)`;
     this.root.dataset.face = Math.cos(s.y * Math.PI / 180) >= 0 ? 'front' : 'back';
     if(this.fold)this.root.dataset.face=Math.cos(s.x*Math.PI/180)>=0?'front':'back';
+    this.onViewChange?.();
     const label = this.root.parentElement.querySelector('#three-d-position');
     if (label) label.textContent = `${this.fold?(this.fold.open>50?'Aufgeklappt':this.root.dataset.face==='front'?'Titelseite':'Postanschrift'):(this.root.dataset.face === 'front' ? 'Vorderseite' : 'Rückseite')} · ${Math.round(s.scale * 100)} %`;
   }
