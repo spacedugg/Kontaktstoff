@@ -24,7 +24,8 @@
     "test:builder": "node tests/builder.mjs",
     "test:sales": "node tests/sales.mjs",
     "test:proposals": "node tests/proposals.mjs",
-    "test:fold": "node tests/fold-preview.mjs"
+    "test:fold": "node tests/fold-preview.mjs",
+    "test:review-fold": "node tests/review-fold.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

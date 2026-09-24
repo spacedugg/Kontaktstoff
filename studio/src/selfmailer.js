@@ -1,3 +1,4 @@
+import {styleBewertungspushSelfmailer} from './bewertungspush-selfmailer.js';
 import {uid} from './core.js';
 import {FORMATS,isSelfmailer} from './formats.js';
 
@@ -27,6 +28,7 @@ export function toSelfmailer(source){
  const offer=mms?textAt('back',4):review?textAt('back',5):cart?(id==='reha-sleep'?'Ihre Auswahl, ganz in Ruhe. Entscheiden Sie, was zu Ihnen passt.':'Deine Auswahl ist nur einen Scan entfernt. Schau sie dir noch einmal an.'):(c.brief?.offer||body);
  const signature=value('signature')||(mms?textAt('back',6):review?'Ihr Team von BewertungsPush':id==='reha-sleep'?'Ihr RehaSleep-Team':'Dein Team von '+brand);
  c.format='selfmailer-dl-4';c.selfmailer={version:1,sourceFormat:source.format};
+ if(review)return styleBewertungspushSelfmailer(c);
  if(!all.length&&Object.values(original).every(s=>s.background.kind==='blank'))return c;
  // Upper outside panel is the postal back; lower panel is the cover.
  let front=[s(0,0,210,99,'#ffffff'),brandAt(10,10,100),t('PERSÖNLICH FÜR',10,36,104,5,8,accent,'','700'),t('{{company}}',10,46,108,17,18,ink,'','700'),t(review||id==='reha-sleep'?'Persönlich für Sie.':'Persönlich für dich.',10,70,105,10,10,ink),
@@ -34,9 +36,7 @@ export function toSelfmailer(source){
  const native=!!headline;
  if(native){
   front.push(brandAt(11,108,100));
-  if(review){
-   front.push(t('PERSÖNLICH FÜR {{company}}',11,128,106,7,8,accent,'','700'),t(headline,11,141,111,31,27,ink,'headline','700'),t('Unberechtigte Bewertungen prüfen und löschen lassen.',11,175,112,14,10,ink,'body'),s(133,112,67,70,'#e7efff'),t('{{rating_current}}',141,120,42,15,28,ink,'','700'),{...t('{{rating_current}}',141,138,41,6),display:'stars',color:'#efad27'},t('→',179,137,18,15,28,accent,'','700'),t('{{rating_example}}',151,153,44,20,36,accent,'','700'),{...t('{{rating_example}}',151,175,41,6),display:'stars',color:'#efad27'},t('Beispielwerte · keine Ergebniszusage',132,187,69,5,6.5,ink));
-  }else if(mms){
+  if(mms){
    front.push(s(135,99,75,99,accent),s(147,127,51,48,'#dfff52'),t('↗',153,125,42,43,80,ink,'','700'),t('FÜR\n{{company}}',145,180,55,14,10,'#ffffff','','700'),t(headline,11,133,119,43,29,ink,'headline','700'),t('Eine persönliche Frage von Jakob. →',11,185,119,7,10,accent,'','700'));
   }else if(photo){
    front.push(image(photo,121,99,89,99),s(129,177,73,13,'#ffffff'),t(cart?'{{product_name}}':'Für {{first_name}}',132,181,67,8,10,ink,'','700'),t(headline,11,132,102,42,28,ink,'headline','700'),t(cta+' →',11,183,104,10,11,accent,'cta','700'));

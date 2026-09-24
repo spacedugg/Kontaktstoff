@@ -35,3 +35,18 @@ Beschnitt. Für die Druckproduktion sind CMYK/PDF-X, echter Motivbeschnitt,
 Papier, Verschluss, Falzorientierung, Adressierung und Frankiervermerk mit der
 Druckerei abzustimmen. Die Dateivorlage fordert 300 dpi. Eine Designfreigabe
 ist keine Druck- oder Versandbeauftragung.
+
+## Freigabe und BewertungsPush
+
+Gespeicherte Designs zeigen im Vorschau-Header „Freigabe & Feedback“.
+Die Freigabeansicht bietet „Kommentieren · 2D“ und „Aufklappen · 3D“;
+beide verwenden denselben versionierten Snapshot mit genau einem Vorschaukontakt.
+Markierungen bleiben relativ zum vollständigen Außen- bzw. Innenbogen gespeichert.
+Neue Designstände werden ausdrücklich bereitgestellt, behalten den Kundenlink
+und benötigen eine neue Freigabe. Alte Kommentare und Bestätigungen bleiben erhalten.
+
+BewertungsPush hat ein eigenes DIN-lang-Layout mit Stern-Motiven auf Titel und
+Innenseite. Zahlen, Sternefüllung, Name, Ansprache und QR-Ziel bleiben native,
+personalisierbare Felder. Die Sternwerte sind als Beispiele gekennzeichnet.
+`styleBewertungspushSelfmailer` ist eine explizite Überarbeitung; gespeicherte
+Designs werden beim Öffnen nicht automatisch ersetzt.

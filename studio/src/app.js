@@ -54,7 +54,7 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
 }
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
 function renderUI(inspector=true,table=true,guide=true){
- $('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=reviewReturn()?'Speichern & zur Abstimmung →':builderReturn()?'Speichern & zurück zur Kampagne →':cloudPath.includes('library')?'Zur Designbibliothek →':'Kampagne anfragen →';
+ $('#share-review').hidden=!(view==='preview'&&cloudRecord&&!cloudPath.includes('library')&&!reviewReturn());$('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=reviewReturn()?'Speichern & zur Abstimmung →':builderReturn()?'Speichern & zurück zur Kampagne →':cloudPath.includes('library')?'Freigabe & Feedback →':'Kampagne anfragen →';
  if(!sideNames(campaign).includes(side))side='front';
  document.body.classList.toggle('single-sided',sideNames(campaign).length===1);
  document.documentElement.style.setProperty('--mailing-ratio',format().width+'/'+format().height);
@@ -75,12 +75,12 @@ function renderUI(inspector=true,table=true,guide=true){
  if(!$('#workflow-hint').hidden){const hints={design:['1. Gestalte deine Karte','Wähle einen Text in der Karte und bearbeite ihn im Textfeld. Passe danach die Rückseite an. Dein Design wird automatisch gespeichert.','recipients','Weiter zu den Empfängern →'],recipients:['2. Für wen ist dein Mailing?','Füge deine Kontakte hinzu oder importiere eine CSV. Die Spalten verbinden Namen, Firmen und Links mit deinen Karten.','preview','Mailing ansehen →'],preview:['3. Dein Mailing ist bereit zur Ansicht','Prüfe beide Seiten. Danach kannst du deine Kampagne anfragen oder den Entwurf exportieren.','design','Design weiter bearbeiten']},hint=hints[view];$('#workflow-hint').innerHTML=`<div><strong>${hint[0]}</strong><p>${hint[1]}</p></div><button class="button" data-workflow-next="${hint[2]}">${hint[3]}</button>`;}
  document.body.classList.toggle('tutorial-excursion',!!campaign.tutorial?.active&&view!=='tutorial'&&view!=='dashboard');
  document.body.classList.toggle('dashboard-active',view==='dashboard');
- document.body.classList.toggle('example-focus',view==='preview'&&campaign.sample&&!!campaign.templateId&&!campaign.tutorial?.active);
+ document.body.classList.toggle('example-focus',view==='preview'&&!cloudRecord&&campaign.sample&&!!campaign.templateId&&!campaign.tutorial?.active);
  const extrasContext=campaign.id+':'+campaign.sample;if(previewExtrasContext!==extrasContext){$('#preview-extras').open=!(campaign.sample&&campaign.templateId);previewExtrasContext=extrasContext;}
  $('.breadcrumb strong').textContent=view==='start'?'Neue Kampagne':view==='dashboard'?'Dein Arbeitsplatz':view==='tutorial'?'Beispiel ausprobieren':view==='setup'?'Deine Kampagne':'Designstudio';
  $('#dashboard-view').hidden=view!=='dashboard';
  if(view==='dashboard'||view==='start'){for(const name of ['tutorial','setup','design','recipients','preview'])$('#'+name+'-view').hidden=true;return;}
- $('#example-preview-note').hidden=!campaign.sample||!!campaign.tutorial?.active;
+ $('#example-preview-note').hidden=!!cloudRecord||!campaign.sample||!!campaign.tutorial?.active;
  const client=CLIENT_CAMPAIGNS.find(p=>p.id===campaign.templateId);
  const promotion=PROMOTIONS.find(p=>p.id===campaign.templateId)||PROMOTIONS[0];
  const credit=$('.example-photo-credit');credit.href=promotion.source;credit.textContent='Stockfoto: '+promotion.credit+' / Unsplash ↗';
@@ -482,7 +482,8 @@ $('#tutorial-view').addEventListener('click',async e=>{
 
 });
 
-$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=reviewReturn()||builderReturn()||(cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id));};
+$('#share-review').onclick=async()=>{await flushSave();if(!saveFailed&&cloudRecord)location.href='/konto/?tab=reviews&source=campaigns:'+encodeURIComponent(cloudRecord.id);};
+$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=reviewReturn()||builderReturn()||(cloudPath.includes('library')?'/konto/?tab=reviews&source=designs:'+encodeURIComponent(cloudRecord.id):cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id));};
 $('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(saveFailed)return;location.href=reviewReturn()||builderReturn()||(cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?id='+encodeURIComponent(campaign.id):'/konto/');};
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});

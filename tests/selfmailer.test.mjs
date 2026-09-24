@@ -23,3 +23,11 @@ test('exact 4-panel print geometry; postal collisions fail preflight',()=>{
 });
 
 test('postal name is optional for a company address and address edits are rendered',()=>{const c=toSelfmailer(createClientCampaign('money-making-sprint'));assert.equal(checks(c).filter(i=>i.level==='error').length,0);const f=c.sides.front.fields.find(f=>f.postalAddress);assert.equal(resolveField(f,{company:'Anna Beispiel',first_name:'Anna',last_name:'Beispiel',street:'Weg 1',postal_code:'12345',city:'Musterstadt'}),'Anna Beispiel\nWeg 1\n12345 Musterstadt');f.text='{{company}}\nZu Händen {{first_name}}\n{{street}}';assert.equal(resolveField(f,{company:'Studio',first_name:'Anna',street:'Weg 2'}),'Studio\nZu Händen Anna\nWeg 2');});
+
+test('BewertungsPush DIN-lang keeps rating placeholders and the personal QR editable',()=>{
+ const source=createClientCampaign('bewertungspush');for(const r of source.recipients)Object.assign(r,{street:'Musterstraße 1',postal_code:'10115',city:'Berlin'});source.recipients[0].rating_current='3,8';source.recipients[0].rating_example='4,5';source.recipients[0].personal_note='Eine individuelle Nachricht.';
+ const p=toSelfmailer(source);assert.deepEqual(p.recipients,source.recipients);assert.equal(p.selfmailer.design,'bewertungspush-editorial');
+ for(const key of ['rating_current','rating_example']){assert.ok(p.sides.front.fields.some(f=>f.type==='text'&&f.display==='stars'&&f.text==='{{'+key+'}}'));assert.ok(p.sides.front.fields.some(f=>!f.display&&f.text==='{{'+key+'}}'));}
+ assert.ok(p.sides.back.fields.some(f=>f.text==='{{personal_note}}'));assert.equal(p.sides.back.fields.find(f=>f.type==='qr').text,'{{chatbot_url}}');
+ assert.equal(checks(p).filter(i=>i.level==='error').length,0);
+});
