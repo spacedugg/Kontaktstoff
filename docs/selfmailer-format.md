@@ -39,9 +39,12 @@ ist keine Druck- oder Versandbeauftragung.
 ## Freigabe und BewertungsPush
 
 Gespeicherte Designs zeigen im Vorschau-Header „Freigabe & Feedback“.
-Die Freigabeansicht bietet „Kommentieren · 2D“ und „Aufklappen · 3D“;
-beide verwenden denselben versionierten Snapshot mit genau einem Vorschaukontakt.
-Markierungen bleiben relativ zum vollständigen Außen- bzw. Innenbogen gespeichert.
+Die Freigabe zeigt sofort den aufklappbaren Selfmailer. Ein kurzer Klick auf
+Titel, Anschrift oder eine Innenfläche öffnet den Kommentar-Dialog; Ziehen
+und Zwei-Finger-Zoom dienen der Navigation. Markierungen werden perspektivisch
+auf die Papierfläche zurückgerechnet und in den bestehenden Außen-/Innenbogen-
+Koordinaten gespeichert. Dadurch bleiben frühere Kommentare kompatibel.
+Nach dem Speichern bleibt die aktuelle Falt- und Drehposition erhalten.
 Neue Designstände werden ausdrücklich bereitgestellt, behalten den Kundenlink
 und benötigen eine neue Freigabe. Alte Kommentare und Bestätigungen bleiben erhalten.
 
