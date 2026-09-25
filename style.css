@@ -87,3 +87,5 @@ dialog{border:1px solid var(--line);border-radius:24px;padding:36px;color:var(--
 @media(prefers-reduced-motion:reduce){.upload-motion span{transform:scaleX(1)}.fulfillment li>span,.fulfillment li:last-child>span{background:var(--lime);color:var(--ink);box-shadow:none;transform:none}}
 .hero-line{display:block}
 @media(max-width:580px){.hero h1{font-size:min(clamp(2.65rem,10.4vw,3.55rem),calc((100vw - 40px)/10.6))}}
+@media(max-width:1080px){.definition-grid{grid-template-columns:1fr;gap:50px}}
+@media(max-width:660px){.pricing-grid{grid-template-columns:1fr;gap:18px}.price-card{padding:28px}.price-card.featured{padding:27px}.price-card>p{font-size:1rem;min-height:auto}.price-card-top>span{display:block}.price-card ul{font-size:1rem;margin-top:24px;padding-top:22px}.price-card>.button{font-size:1rem;padding:13px 20px}}
