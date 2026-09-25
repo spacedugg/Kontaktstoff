@@ -29,3 +29,12 @@ Das Dashboard und die Case-Ergebnisse sind Beispiele. Der QR-Code führt zur lok
 ## Prüfung
 
 Geprüft wurden JS-Syntax und Initialisierung, Personalisierung, beide Chatpfade, QR-Direkteinstieg, Statuswechsel und Rücknahme, fünf Case-Details, Credit-Aufrundung, ungültige Werte, Briefing, Dialogsteuerung und Auswahl des realen Selfmailers. Alle lokalen Seiten- und Asset-Referenzen werden vor dem Deployment validiert.
+
+## SEO und Auslieferung
+
+- Live-Domain: `https://kontaktstoff.com/` (Canonical, Open Graph, Sitemap und strukturierte Daten verweisen darauf).
+- `sitemap.xml` und `robots.txt` liegen im Wurzelverzeichnis. In der Google Search Console wird `https://kontaktstoff.com/sitemap.xml` eingetragen. Neue Seiten müssen dort ergänzt werden.
+- Strukturierte Daten (JSON-LD) im `<head>`: Organization, WebSite, WebPage, Service mit den drei Paketen und FAQPage. Die FAQ-Texte müssen mit den sichtbaren FAQ übereinstimmen.
+- Favicons (`favicon.ico`, `favicon.svg`, `apple-touch-icon.png`), `site.webmanifest` und ein Social-Vorschaubild `assets/og-image.jpg` (1200 × 630).
+- Für die Anzeige werden verkleinerte Dateien genutzt: `assets/logo-k-96.webp`, `assets/dashboard-konzept.webp` und WOFF2-Schriften. Die Originale bleiben erhalten.
+- `vercel.json` setzt Sicherheits- und Cache-Header und markiert `logo-ideen/` zusätzlich als `noindex`.
