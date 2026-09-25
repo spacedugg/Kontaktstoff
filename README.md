@@ -6,7 +6,7 @@ Statische, interaktive Landingpage für personalisierte B2B-Postkampagnen: vom W
 
 - Weiß, Graphit und Neongelb; Manrope in 400 und 700, lokal unter SIL Open Font License.
 - Direkter Hero ohne Eyebrow, klare Größenhierarchie, großzügige Software-UI und reduzierte Scroll-Reveals mit Reduced-Motion-Unterstützung.
-- Die H1 lautet „B2B-Mailing für persönliche Neukundengewinnung“. Der Hero belegt den ersten Viewport und zeigt als Studienwerte nur 935 % ROAS und 2,8 % Conversion Rate. Danach erklärt ein Briefsymbol Kontaktstoff als physischen B2B-Erstkontakt.
+- Die H1 steht in drei Zeilen: „B2B-Mailing für / Neukundengewinnung. / Echte Post. Persönlich.“ Auf kleinen Bildschirmen wird die Schrift so skaliert, dass „Neukundengewinnung.“ ungetrennt in eine Zeile passt. Der Hero belegt den ersten Viewport und zeigt als Studienwerte nur 935 % ROAS und 2,8 % Conversion Rate. Danach erklärt ein Briefsymbol Kontaktstoff als physischen B2B-Erstkontakt.
 - Der Nutzen und der offen sichtbare Vergleich mit Kaltakquise per E-Mail, Anruf und LinkedIn stehen vor dem detaillierten Dashboard. Große vertikale Abstände trennen die Abschnitte.
 - Die ausgewählte Logoidee 02, das Material-K, steht links neben der Wortmarke. Alle zehn Richtungen bleiben unter `dist/logo-ideen/` vergleichbar.
 
