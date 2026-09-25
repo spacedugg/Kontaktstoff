@@ -2,8 +2,79 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.kontaktstoff.com/</loc>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-09-26</lastmod>
+    <priority>1.0</priority>
     <image:image><image:loc>https://www.kontaktstoff.com/assets/og-image.jpg</image:loc></image:image>
     <image:image><image:loc>https://www.kontaktstoff.com/assets/dashboard-konzept.webp</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/ratgeber</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/branchen</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/ratgeber/b2b-mailing</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/ratgeber/kaltakquise-methoden</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/ratgeber/wirkung-von-post</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/ratgeber/telefonakquise-b2b</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/ratgeber/cold-email-b2b</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/ratgeber/werbung-per-post-recht</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/ratgeber/roi-postkampagne</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/branchen/agenturen</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/branchen/it-dienstleister</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/branchen/recruiting</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/branchen/industrie</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/branchen/gewerbeenergie</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
   </url>
 </urlset>
