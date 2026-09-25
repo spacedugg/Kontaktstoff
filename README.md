@@ -38,3 +38,11 @@ Geprüft wurden JS-Syntax und Initialisierung, Personalisierung, beide Chatpfade
 - Favicons (`favicon.ico`, `favicon.svg`, `apple-touch-icon.png`), `site.webmanifest` und ein Social-Vorschaubild `assets/og-image.jpg` (1200 × 630).
 - Für die Anzeige werden verkleinerte Dateien genutzt: `assets/logo-k-96.webp`, `assets/dashboard-konzept.webp` und WOFF2-Schriften. Die Originale bleiben erhalten.
 - `vercel.json` setzt Sicherheits- und Cache-Header und markiert `logo-ideen/` zusätzlich als `noindex`.
+
+## Ratgeber, Branchen und Rechtliches
+
+- Texte liegen in `inhalte/ratgeber/*.html` und `inhalte/branchen/*.html`. Jede Datei beginnt mit einer Zeile `<!--META {...}-->` (Titel, Description, H1, Lead, FAQ, verwandte Artikel), danach folgt der HTML-Text.
+- `inhalte/FAKTEN.md` ist das verbindliche Faktenblatt: Studienzahlen, Preise, Case-Study-Werte und Stilregeln. Neue Texte müssen dazu passen.
+- `python3 tools/seiten_bauen.py` erzeugt daraus `ratgeber/`, `branchen/`, die Rechtsseiten (`impressum.html` usw.), `404.html`, den Footer der Startseite und die `sitemap.xml`. Neue Artikel werden in den Listen `RATGEBER` bzw. `BRANCHEN` im Skript eingetragen.
+- Die Rechtsseiten sind Platzhalter mit `noindex` und stehen nicht in der Sitemap, bis die echten Angaben ergänzt sind.
+- Das Hauptmenü bleibt unverändert. Ratgeber, Branchen und Rechtliches sind über den Footer verlinkt.

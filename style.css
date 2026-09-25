@@ -114,3 +114,5 @@ dialog{border:1px solid var(--line);border-radius:24px;padding:36px;color:var(--
 @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;gap:40px 32px}.footer-brand{grid-column:1/-1}}
 @media(max-width:580px){.subpage-home{display:none}.article-page{padding-block:32px 64px}.article-lead{font-size:1.1rem}.article-body{font-size:1.0625rem}.article-cta{flex-direction:column;align-items:flex-start;padding:28px}.footer-grid{grid-template-columns:1fr}.footer{padding-block:48px 28px}}
 .subpage .subpage-nav .nav-cta{display:inline-flex;margin-left:0}
+@media(max-width:580px){.subpage .subpage-nav .nav-cta{white-space:nowrap;min-height:40px;padding:8px 14px;gap:0;font-size:.8125rem}.subpage .subpage-nav .nav-cta span{display:none}}
+@media(max-width:400px){.subpage .wordmark .brand-type{font-size:1.2rem}.subpage .wordmark .brand-mark{width:26px;height:26px}.subpage .navigation{gap:10px}}
