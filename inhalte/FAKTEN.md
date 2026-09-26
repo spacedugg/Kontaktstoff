@@ -26,17 +26,17 @@
 Kampagnen-ROI = (Deckungsbeitrag der gewonnenen Kunden − Kampagnenkosten) ÷ Kampagnenkosten × 100. Interner Vertriebsaufwand und Steuern nicht berücksichtigt.
 Break-even: benötigte Neukunden = Kampagnenbudget ÷ Deckungsbeitrag je Neukunde (aufrunden). Beispiel Startseite: 300 Unternehmen, Standard-Postkarte (300 Credits), Paket Fokus 1.350 €, 1.800 € Deckungsbeitrag je Neukunde → Budget gedeckt ab 1 Neukunde (nötiger Anteil 0,33 % von 300).
 
-## Regel für Ratgeber- und Branchentexte: keine Firmennamen
-In Ratgeber- und Branchenbeiträgen niemals konkrete (auch erfundene) Unternehmensnamen nennen, insbesondere nicht in Verbindung mit Geschäftsführern oder anderen Personen. Erlaubt sind Personennamen mit Rolle und Branche, z. B. „Sarah Hansen, Geschäftsführerin einer Webagentur“. Beispiele immer als Beispiel oder Rechenbeispiel kennzeichnen, nie als echte Kampagnendaten. Die Firmennamen in der Tabelle unten gelten nur für die Startseite.
+## Regel für alle Texte: keine Firmennamen
+Auf der ganzen Website (Startseite, Ratgeber, Branchen) niemals konkrete (auch erfundene) Unternehmensnamen nennen, insbesondere nicht in Verbindung mit Geschäftsführern oder anderen Personen. Erlaubt sind Personennamen mit Rolle und Branche, z. B. „Sarah Hansen, Geschäftsführerin einer Webagentur“. Beispiele immer als Beispiel oder Rechenbeispiel kennzeichnen, nie als echte Kampagnendaten.
 
-## Case Studies auf der Startseite (/#cases) – Zahlen exakt so
-| Branche | Unternehmen | Laufzeit | Mailings | QR-Aufrufe | Gespräche | Termine | Neukunden | Budget | DB je Kunde | ROI |
+## Beispielrechnungen auf der Startseite (/#cases) – Zahlen exakt so
+| Branche | Person | Laufzeit | Mailings | QR-Aufrufe | Gespräche | Termine | Neukunden | Budget | DB je Kunde | ROI |
 |---|---|---|---|---|---|---|---|---|---|---|
-| Agentur | Nordwerk Studio (Sarah Hansen, GF) | 8 Wochen | 300 | 42 | 27 | 11 | 4 | 1.350 € | 1.800 € | +433 % |
-| IT-Dienstleister | Hafenbyte IT (Jonas Mertens, GF) | 10 Wochen | 500 | 72 | 46 | 19 | 6 | 3.200 € | 3.000 € | +463 % |
-| Recruiting | Teamhafen Recruiting (Miriam Yilmaz, Gründerin) | 12 Wochen | 250 | 34 | 22 | 9 | 3 | 2.200 € | 4.500 € | +514 % |
-| Industrie | Werkblick Automation (Felix Mensah, Vertriebsleiter) | 16 Wochen | 180 | 21 | 14 | 7 | 2 | 2.700 € | 9.000 € | +567 % |
-| Gewerbeenergie | Sonnenfeld Energie (Lena Berg, GF) | 14 Wochen | 400 | 56 | 36 | 13 | 5 | 3.600 € | 4.500 € | +525 % |
+| Agentur | Sarah Hansen, Geschäftsführerin einer Webagentur | 8 Wochen | 300 | 42 | 27 | 11 | 4 | 1.350 € | 1.800 € | +433 % |
+| IT-Dienstleister | Jonas Mertens, Geschäftsführer eines IT-Systemhauses | 10 Wochen | 500 | 72 | 46 | 19 | 6 | 3.200 € | 3.000 € | +463 % |
+| Recruiting | Miriam Yilmaz, Gründerin einer Personalberatung | 12 Wochen | 250 | 34 | 22 | 9 | 3 | 2.200 € | 4.500 € | +514 % |
+| Industrie | Felix Mensah, Vertriebsleiter bei einem Anbieter für Automatisierungstechnik | 16 Wochen | 180 | 21 | 14 | 7 | 2 | 2.700 € | 9.000 € | +567 % |
+| Gewerbeenergie | Lena Berg, Geschäftsführerin eines Photovoltaik-Anbieters | 14 Wochen | 400 | 56 | 36 | 13 | 5 | 3.600 € | 4.500 € | +525 % |
 Gesprächsanlässe: Agentur = 20-minütiger Website-Check mit drei Ansatzpunkten, personalisierte Postkarte; IT = kurzer IT-Sicherheitscheck, Selfmailer mit persönlicher Checkliste, Zielgruppe 20–150 Beschäftigte; Recruiting = 15-minütiger Austausch über eine aktuell ausgeschriebene Vakanz, personalisierte Klappkarte; Industrie = Erstgespräch über einen manuellen Prozess, Pop-up-Mailing mit Prozessmotiv; Gewerbeenergie = unverbindlicher Standort-Check für Photovoltaik, Selfmailer mit Standort-Ansprache.
 
 ## Rechtliches (Stand allgemein bekannt, immer mit Hinweis „keine Rechtsberatung“)
