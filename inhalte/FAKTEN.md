@@ -29,6 +29,9 @@ Break-even: benötigte Neukunden = Kampagnenbudget ÷ Deckungsbeitrag je Neukund
 ## Regel für alle Texte: keine Firmennamen
 Auf der ganzen Website (Startseite, Ratgeber, Branchen) niemals konkrete (auch erfundene) Unternehmensnamen nennen, insbesondere nicht in Verbindung mit Geschäftsführern oder anderen Personen. Erlaubt sind Personennamen mit Rolle und Branche, z. B. „Sarah Hansen, Geschäftsführerin einer Webagentur“. Beispiele immer als Beispiel oder Rechenbeispiel kennzeichnen, nie als echte Kampagnendaten.
 
+## Regel für Vergleiche mit anderen Anbietern (/vergleich)
+Vergleichende Werbung (§ 6 UWG): nur objektiv nachprüfbare, wesentliche Merkmale, nichts herabsetzen, klar als Vergleich von Kontaktstoff kennzeichnen (Kontaktstoff-Kopf, nicht im neutralen Magazin). Einzelne Anbieter nur mit Angaben nennen, die auf deren offizieller Website geprüft wurden (URL und Prüfdatum festhalten). Ungeprüfte Angaben nie veröffentlichen. Ehrlich sagen, wann ein anderer Anbietertyp besser passt.
+
 ## Beispielrechnungen auf der Startseite (/#cases) – Zahlen exakt so
 | Branche | Person | Laufzeit | Mailings | QR-Aufrufe | Gespräche | Termine | Neukunden | Budget | DB je Kunde | ROI |
 |---|---|---|---|---|---|---|---|---|---|---|

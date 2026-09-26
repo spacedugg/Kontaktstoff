@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Erzeugt Ratgeber-, Branchen- und Rechtsseiten, den Footer der Startseite und die sitemap.xml.
 
-Inhalte liegen in inhalte/ratgeber/*.html und inhalte/branchen/*.html.
+Inhalte liegen in inhalte/ratgeber/*.html, inhalte/wissen/*.html, inhalte/branchen/*.html
+und inhalte/seiten/*.html (Seiten mit Kontaktstoff-Kopf, z. B. der Anbieter-Vergleich).
 Jede Datei beginnt mit <!--META {...}--> (JSON) und enthält danach den HTML-Body.
 
 Aufruf aus dem Repo-Stamm:  python3 tools/seiten_bauen.py
@@ -25,6 +26,17 @@ RATGEBER = [  # Reihenfolge = Reihenfolge in Übersicht und Footer
     ('werbung-per-post-recht', 'Werbung per Post: Rechtslage'),
     ('roi-postkampagne', 'ROI einer Postkampagne'),
 ]
+WISSEN = [  # Wissenswertes: kurze Antworten auf konkrete Fragen
+    ('adressen-kaufen', 'Adressen kaufen: erlaubt?'),
+    ('qr-code-tracking', 'QR-Tracking und Datenschutz'),
+    ('postkarte-oder-brief', 'Postkarte, Brief oder Selfmailer?'),
+    ('nachfassen', 'Richtig nachfassen'),
+    ('werbewiderspruch', 'Werbewiderspruch richtig behandeln'),
+    ('personalisierung-grenzen', 'Wie persönlich darf es sein?'),
+    ('glossar', 'Glossar: Begriffe erklärt'),
+]
+KONTAKTSTOFF_MENUE = [('/#plattform', 'Plattform'), ('/#vorteil', 'Warum Post?'), ('/#cases', 'Beispiele'),
+                      ('/#preise', 'Preise'), ('/#planen', 'Kampagne planen'), ('/vergleich', 'Anbieter im Vergleich')]
 BRANCHEN = ['agenturen', 'it-dienstleister', 'recruiting', 'industrie', 'gewerbeenergie']
 RECHTLICHES = [('impressum', 'Impressum'), ('datenschutz', 'Datenschutz'), ('agb', 'AGB'),
                ('widerruf', 'Widerruf'), ('kontakt', 'Kontakt')]
@@ -66,7 +78,7 @@ def jsonld(daten):
 
 MAGAZIN = 'Akquise-Wissen'
 MARKENKOPF = '<header class="site-header"><nav aria-label="Hauptnavigation" class="navigation container"><a aria-label="Kontaktstoff Startseite" class="wordmark" href="/"><img alt="" class="brand-mark" height="38" src="/assets/logo-k-96.webp" width="38"/><span class="brand-type">kontaktstoff<span class="brand-dot">.</span></span></a><div class="subpage-nav"><a class="subpage-home" href="/">Zur Startseite</a><a class="button button-dark nav-cta" href="/#planen">Kampagne planen <span aria-hidden="true">↗</span></a></div></nav></header>'
-NEUTRALER_KOPF = f'<header class="site-header magazine-header"><nav aria-label="Hauptnavigation" class="navigation container"><a class="magazine-mark" href="/ratgeber">{MAGAZIN}<span>Ratgeber für B2B-Neukundengewinnung</span></a><div class="subpage-nav"><a href="/ratgeber">Ratgeber</a><a href="/branchen">Branchen</a></div></nav></header>'
+NEUTRALER_KOPF = f'<header class="site-header magazine-header"><nav aria-label="Hauptnavigation" class="navigation container"><a class="magazine-mark" href="/ratgeber">{MAGAZIN}<span>Ratgeber für B2B-Neukundengewinnung</span></a><div class="subpage-nav"><a href="/ratgeber">Ratgeber</a><a href="/wissen">Wissenswertes</a><a href="/branchen">Branchen</a></div></nav></header>'
 
 
 def kopf(titel, beschreibung, pfad, noindex=False, ld=None, og_typ='article', og_bild='/assets/og-image.jpg', neutral=False):
@@ -93,10 +105,12 @@ def kopf(titel, beschreibung, pfad, noindex=False, ld=None, og_typ='article', og
 
 
 def footer():
-    ratgeber = ''.join(f'<li><a href="/ratgeber/{s}">{e(l)}</a></li>' for s, l in RATGEBER)
-    branchen = ''.join(f'<li><a href="/branchen/{s}">{e(lade("branchen", s)[0]["navLabel"])}</a></li>' for s in BRANCHEN)
+    ratgeber = '<li><a href="/ratgeber">Alle Ratgeber-Artikel</a></li>' + ''.join(f'<li><a href="/ratgeber/{s}">{e(l)}</a></li>' for s, l in RATGEBER)
+    wissen = ''.join(f'<li><a href="/wissen/{s}">{e(l)}</a></li>' for s, l in WISSEN)
+    menue = ''.join(f'<li><a href="{p}">{e(l)}</a></li>' for p, l in KONTAKTSTOFF_MENUE)
+    branchen = ''.join(f'<li><a href="/branchen/{s}">{e(lade("branchen", s)[0]["navLabel"])}</a></li>' for s in BRANCHEN) + '<li><a href="/branchen">Alle Branchen</a></li>'
     recht = ''.join(f'<li><a href="/{s}">{e(l)}</a></li>' for s, l in RECHTLICHES)
-    return f'''<footer class="footer"><div class="container footer-grid"><div class="footer-brand"><a aria-label="Kontaktstoff Startseite" class="wordmark" href="/"><img alt="" class="brand-mark" height="38" src="/assets/logo-k-96.webp" width="38"/><span class="brand-type">kontaktstoff<span class="brand-dot">.</span></span></a><p>B2B-Mailing für Neukundengewinnung. Echte Post. Persönlich.</p><a class="text-button" href="/#planen">Kampagne planen ↗</a></div><nav aria-label="Ratgeber" class="footer-col"><h2><a href="/ratgeber">Ratgeber</a></h2><ul>{ratgeber}</ul></nav><nav aria-label="Branchen" class="footer-col"><h2><a href="/branchen">Branchen</a></h2><ul>{branchen}</ul></nav><nav aria-label="Rechtliches" class="footer-col"><h2>Rechtliches</h2><ul>{recht}</ul></nav></div><div class="container footer-bottom"><span>© 2026 Kontaktstoff</span><span>Personalisierte B2B-Postkampagnen aus Deutschland</span></div></footer>'''
+    return f'''<footer class="footer"><div class="container footer-grid"><div class="footer-brand"><a aria-label="Kontaktstoff Startseite" class="wordmark" href="/"><img alt="" class="brand-mark" height="38" src="/assets/logo-k-96.webp" width="38"/><span class="brand-type">kontaktstoff<span class="brand-dot">.</span></span></a><p>B2B-Mailing für Neukundengewinnung. Echte Post. Persönlich.</p><a class="text-button" href="/#planen">Kampagne planen ↗</a></div><nav aria-label="Ratgeber" class="footer-col"><h2><a href="/ratgeber">Ratgeber</a></h2><ul>{ratgeber}</ul></nav><nav aria-label="Wissenswertes" class="footer-col"><h2><a href="/wissen">Wissenswertes</a></h2><ul>{wissen}</ul></nav><nav aria-label="Branchen" class="footer-col"><h2><a href="/branchen">Branchen</a></h2><ul>{branchen}</ul></nav><div class="footer-col"><nav aria-label="Kontaktstoff"><h2><a href="/">Kontaktstoff</a></h2><ul>{menue}</ul></nav><nav aria-label="Rechtliches" class="footer-sub"><h2>Rechtliches</h2><ul>{recht}</ul></nav></div></div><div class="container footer-bottom"><span>© 2026 Kontaktstoff</span><span>Personalisierte B2B-Postkampagnen aus Deutschland</span></div></footer>'''
 
 
 def seitenende():
@@ -155,7 +169,7 @@ def inhaltsseite(ordner, slug, meta, body, krumen, kicker, verwandte):
         titelbild = f'<figure class="article-hero"><img alt="{e(BILD_ALT[slug])}" decoding="async" fetchpriority="high" height="900" sizes="(max-width: 860px) 100vw, 780px" src="/assets/artikel/{slug}.webp" srcset="/assets/artikel/{slug}-640.webp 640w, /assets/artikel/{slug}.webp 1600w" width="1600"/></figure>'
     nav, ld_krumen = brotkrumen(krumen)
     faq_html, ld_faq = faq_block(meta.get('faq'))
-    haupt = {'@type': 'Article' if ordner == 'ratgeber' else 'WebPage', 'headline': meta['h1'], 'name': meta['h1'],
+    haupt = {'@type': 'Article' if ordner in ('ratgeber', 'wissen') else 'WebPage', 'headline': meta['h1'], 'name': meta['h1'],
              'description': meta['description'], 'inLanguage': 'de-DE', 'url': BASE + pfad,
              'mainEntityOfPage': BASE + pfad, 'image': BASE + og_bild,
              'datePublished': STAND, 'dateModified': STAND, 'author': ORG, 'publisher': ORG}
@@ -172,6 +186,15 @@ def inhaltsseite(ordner, slug, meta, body, krumen, kicker, verwandte):
 def ratgeber_karte(slug):
     m, _ = lade('ratgeber', slug)
     return (f'/ratgeber/{slug}', 'Ratgeber', m['h1'], m['lead'])
+
+
+def wissen_karte(slug):
+    m, _ = lade('wissen', slug)
+    return (f'/wissen/{slug}', 'Wissenswertes', m['h1'], m['lead'])
+
+
+def verwandte_karte(slug, titel_von):
+    return ratgeber_karte(slug) if slug in titel_von else wissen_karte(slug)
 
 
 def branchen_karte(slug):
@@ -207,6 +230,20 @@ def rechtsseite(slug):
     schreibe(f'{slug}.html', seite)
 
 
+def markenseite(slug):
+    """Seite von Kontaktstoff selbst (Kontaktstoff-Kopf statt Magazin), z. B. der Anbieter-Vergleich."""
+    meta, body = lade('seiten', slug)
+    pfad = f'/{slug}'
+    nav, ld_krumen = brotkrumen([('Startseite', '/'), (meta['navLabel'], pfad)])
+    faq_html, ld_faq = faq_block(meta.get('faq'))
+    haupt = {'@type': 'WebPage', 'name': meta['h1'], 'description': meta['description'], 'inLanguage': 'de-DE',
+             'url': BASE + pfad, 'dateModified': STAND, 'publisher': ORG, 'about': ORG}
+    graph = [haupt, ld_krumen] + ([ld_faq] if ld_faq else [])
+    seite = kopf(f'{meta["title"]} | Kontaktstoff', meta['description'], pfad, ld={'@context': 'https://schema.org', '@graph': graph}, og_typ='website')
+    seite += f'''<main class="article-page" id="main"><article class="container article">{nav}<header class="article-header"><p class="article-kicker">{e(meta["kicker"])}</p><h1>{e(meta["h1"])}</h1><p class="article-lead">{e(meta["lead"])}</p><p class="article-meta">Stand: {STAND_TEXT} · Ein Vergleich von Kontaktstoff</p></header><div class="article-body">{body}</div>{CTA}{faq_html}</article></main>''' + seitenende()
+    schreibe(f'{slug}.html', seite)
+
+
 def fehlerseite():
     seite = kopf('Seite nicht gefunden | Kontaktstoff', 'Diese Seite gibt es nicht.', '/404', noindex=True, og_typ='website')
     seite += f'<main class="article-page" id="main"><div class="container hub"><header class="article-header"><p class="article-kicker">Fehler 404</p><h1>Diese Seite gibt es nicht.</h1><p class="article-lead">Vielleicht findest du im Ratgeber oder bei den Branchen, was du suchst.</p></header>{karten([("/", "Start", "Zur Startseite", "B2B-Mailing für Neukundengewinnung."), ("/ratgeber", "Wissen", "Ratgeber", "Akquise-Methoden, Wirkung von Post, Recht und ROI."), ("/branchen", "Branchen", "Branchen", "Neukundengewinnung für Agenturen, IT, Recruiting, Industrie und Energie.")])}</div></main>' + seitenende()
@@ -224,7 +261,8 @@ def startseite_footer():
 
 def sitemap():
     urls = [('/', '1.0'), ('/ratgeber', '0.8'), ('/branchen', '0.8')]
-    urls += [(f'/ratgeber/{s}', '0.7') for s, _ in RATGEBER] + [(f'/branchen/{s}', '0.7') for s in BRANCHEN]
+    urls += [('/wissen', '0.7'), ('/vergleich', '0.7')]
+    urls += [(f'/ratgeber/{s}', '0.7') for s, _ in RATGEBER] + [(f'/wissen/{s}', '0.6') for s, _ in WISSEN] + [(f'/branchen/{s}', '0.7') for s in BRANCHEN]
     zeilen = []
     for pfad, prio in urls:
         bild = ''
@@ -237,22 +275,32 @@ def sitemap():
 
 def main():
     titel_von = {s: l for s, l in RATGEBER}
+    wissen_von = {s: l for s, l in WISSEN}
+    for slug, label in WISSEN:
+        meta, body = lade('wissen', slug)
+        verwandt = [verwandte_karte(r, titel_von) for r in meta.get('related', []) if (r in titel_von or r in wissen_von) and r != slug][:3]
+        inhaltsseite('wissen', slug, meta, body, [(MAGAZIN, '/ratgeber'), ('Wissenswertes', '/wissen'), (label, f'/wissen/{slug}')], 'Wissenswertes', verwandt)
     for slug, label in RATGEBER:
         meta, body = lade('ratgeber', slug)
-        verwandt = [ratgeber_karte(r) for r in meta.get('related', []) if r in titel_von and r != slug][:3]
+        verwandt = [verwandte_karte(r, titel_von) for r in meta.get('related', []) if r in titel_von or r in wissen_von][:3]
         inhaltsseite('ratgeber', slug, meta, body, [(MAGAZIN, '/ratgeber'), (label, f'/ratgeber/{slug}')], 'Ratgeber', verwandt)
     for slug in BRANCHEN:
         meta, body = lade('branchen', slug)
-        verwandt = [ratgeber_karte(r) for r in meta.get('related', []) if r in titel_von][:3]
+        verwandt = [verwandte_karte(r, titel_von) for r in meta.get('related', []) if r in titel_von or r in wissen_von][:3]
         inhaltsseite('branchen', slug, meta, body, [(MAGAZIN, '/ratgeber'), ('Branchen', '/branchen'), (meta['navLabel'], f'/branchen/{slug}')], 'Branche · ' + meta['navLabel'], verwandt)
     uebersicht('ratgeber', 'Ratgeber', 'Wissen für die B2B-Neukundengewinnung',
                'Akquise-Methoden im Vergleich, die Wirkung von Post im Unternehmen, Rechtslage und ROI: kompakt erklärt für Vertrieb und Geschäftsführung.',
                'Ratgeber zur B2B-Neukundengewinnung: Kaltakquise per E-Mail, Telefon und Post im Vergleich, Wirkung von Print-Mailings, Recht und ROI.',
                [ratgeber_karte(s) for s, _ in RATGEBER])
+    uebersicht('wissen', 'Wissenswertes', 'Wissenswertes rund ums B2B-Mailing',
+               'Kurze, ehrliche Antworten auf die Fragen, die im Vertrieb immer wieder auftauchen: Adresskauf, Tracking, Formate, Nachfassen und Datenschutz.',
+               'Wissenswertes zum B2B-Mailing: Adressen kaufen, QR-Code-Tracking und Datenschutz, Formatwahl, Nachfassen, Werbewiderspruch und Glossar.',
+               [wissen_karte(s) for s, _ in WISSEN])
     uebersicht('branchen', 'Branchen', 'Neukundengewinnung per Post nach Branche',
                'Welche Gesprächsanlässe, Formate und Reaktionswege in deiner Branche funktionieren und was ein persönliches B2B-Mailing dort leisten kann.',
                'Neukundengewinnung per B2B-Mailing für Agenturen, IT-Dienstleister, Recruiting, Industrie und Gewerbeenergie: Gesprächsanlässe, Formate, Beispiele.',
                [branchen_karte(s) for s in BRANCHEN])
+    markenseite('vergleich')
     for slug, _ in RECHTLICHES:
         rechtsseite(slug)
     fehlerseite()
