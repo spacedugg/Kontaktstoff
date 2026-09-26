@@ -64,7 +64,12 @@ def jsonld(daten):
     return '<script type="application/ld+json">' + json.dumps(daten, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/') + '</script>'
 
 
-def kopf(titel, beschreibung, pfad, noindex=False, ld=None, og_typ='article', og_bild='/assets/og-image.jpg'):
+MAGAZIN = 'Akquise-Wissen'
+MARKENKOPF = '<header class="site-header"><nav aria-label="Hauptnavigation" class="navigation container"><a aria-label="Kontaktstoff Startseite" class="wordmark" href="/"><img alt="" class="brand-mark" height="38" src="/assets/logo-k-96.webp" width="38"/><span class="brand-type">kontaktstoff<span class="brand-dot">.</span></span></a><div class="subpage-nav"><a class="subpage-home" href="/">Zur Startseite</a><a class="button button-dark nav-cta" href="/#planen">Kampagne planen <span aria-hidden="true">↗</span></a></div></nav></header>'
+NEUTRALER_KOPF = f'<header class="site-header magazine-header"><nav aria-label="Hauptnavigation" class="navigation container"><a class="magazine-mark" href="/ratgeber">{MAGAZIN}<span>Ratgeber für B2B-Neukundengewinnung</span></a><div class="subpage-nav"><a href="/ratgeber">Ratgeber</a><a href="/branchen">Branchen</a></div></nav></header>'
+
+
+def kopf(titel, beschreibung, pfad, noindex=False, ld=None, og_typ='article', og_bild='/assets/og-image.jpg', neutral=False):
     url = BASE + pfad
     robots = 'noindex, follow' if noindex else 'index, follow, max-image-preview:large, max-snippet:-1'
     return f'''<!DOCTYPE html>
@@ -74,7 +79,7 @@ def kopf(titel, beschreibung, pfad, noindex=False, ld=None, og_typ='article', og
 <meta content="{robots}" name="robots"/>
 <link href="{url}" rel="canonical"/>
 <meta content="#e2ff54" name="theme-color"/>
-<meta content="{og_typ}" property="og:type"/><meta content="Kontaktstoff" property="og:site_name"/><meta content="de_DE" property="og:locale"/>
+<meta content="{og_typ}" property="og:type"/><meta content="{MAGAZIN if neutral else 'Kontaktstoff'}" property="og:site_name"/><meta content="de_DE" property="og:locale"/>
 <meta content="{url}" property="og:url"/><meta content="{e(titel)}" property="og:title"/><meta content="{e(beschreibung)}" property="og:description"/>
 <meta content="{BASE}{og_bild}" property="og:image"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/>
 <meta content="summary_large_image" name="twitter:card"/>
@@ -83,7 +88,7 @@ def kopf(titel, beschreibung, pfad, noindex=False, ld=None, og_typ='article', og
 {jsonld(ld) if ld else ''}
 </head>
 <body class="subpage"><a class="skip-link" href="#main">Zum Inhalt</a>
-<header class="site-header"><nav aria-label="Hauptnavigation" class="navigation container"><a aria-label="Kontaktstoff Startseite" class="wordmark" href="/"><img alt="" class="brand-mark" height="38" src="/assets/logo-k-96.webp" width="38"/><span class="brand-type">kontaktstoff<span class="brand-dot">.</span></span></a><div class="subpage-nav"><a class="subpage-home" href="/">Zur Startseite</a><a class="button button-dark nav-cta" href="/#planen">Kampagne planen <span aria-hidden="true">↗</span></a></div></nav></header>
+{NEUTRALER_KOPF if neutral else MARKENKOPF}
 '''
 
 
@@ -156,8 +161,8 @@ def inhaltsseite(ordner, slug, meta, body, krumen, kicker, verwandte):
              'datePublished': STAND, 'dateModified': STAND, 'author': ORG, 'publisher': ORG}
     graph = [haupt, ld_krumen] + ([ld_faq] if ld_faq else [])
     related = karten(verwandte) if verwandte else ''
-    seite = kopf(f'{meta["title"]} | Kontaktstoff', meta['description'], pfad, ld={'@context': 'https://schema.org', '@graph': graph}, og_bild=og_bild)
-    seite += f'''<main class="article-page" id="main"><article class="container article">{nav}<header class="article-header"><p class="article-kicker">{e(kicker)}</p><h1>{e(meta["h1"])}</h1><p class="article-lead">{e(meta["lead"])}</p><p class="article-meta">{meta.get("readingMinutes", 6)} Min. Lesezeit · Stand: {STAND_TEXT} · Kontaktstoff Redaktion</p></header>{titelbild}<div class="article-body">{body}</div>{CTA}{faq_html}</article>'''
+    seite = kopf(f'{meta["title"]} | {MAGAZIN}', meta['description'], pfad, ld={'@context': 'https://schema.org', '@graph': graph}, og_bild=og_bild, neutral=True)
+    seite += f'''<main class="article-page" id="main"><article class="container article">{nav}<header class="article-header"><p class="article-kicker">{e(kicker)}</p><h1>{e(meta["h1"])}</h1><p class="article-lead">{e(meta["lead"])}</p><p class="article-meta">{meta.get("readingMinutes", 6)} Min. Lesezeit · Stand: {STAND_TEXT} · Redaktion {MAGAZIN}</p></header>{titelbild}<div class="article-body">{body}</div>{CTA}{faq_html}</article>'''
     if related:
         seite += f'<section class="container related"><h2>Weiterlesen</h2>{related}</section>'
     seite += '</main>' + seitenende()
@@ -176,11 +181,11 @@ def branchen_karte(slug):
 
 def uebersicht(ordner, titel, h1, lead, beschreibung, eintraege, intro_html=''):
     pfad = f'/{ordner}'
-    nav, ld_krumen = brotkrumen([('Startseite', '/'), (titel, pfad)])
+    nav, ld_krumen = brotkrumen([(MAGAZIN, '/ratgeber')] + ([(titel, pfad)] if pfad != '/ratgeber' else []))
     ld = {'@context': 'https://schema.org', '@graph': [
         {'@type': 'CollectionPage', 'name': h1, 'description': beschreibung, 'url': BASE + pfad, 'inLanguage': 'de-DE', 'publisher': ORG,
          'hasPart': [{'@type': 'WebPage', 'url': BASE + p, 'name': t} for p, _, t, _ in eintraege]}, ld_krumen]}
-    seite = kopf(f'{titel}: {h1} | Kontaktstoff' if len(titel + h1) < 48 else f'{h1} | Kontaktstoff', beschreibung, pfad, ld=ld, og_typ='website')
+    seite = kopf(f'{h1} | {MAGAZIN}', beschreibung, pfad, ld=ld, og_typ='website', neutral=True)
     seite += f'<main class="article-page" id="main"><div class="container hub">{nav}<header class="article-header"><p class="article-kicker">{e(titel)}</p><h1>{e(h1)}</h1><p class="article-lead">{e(lead)}</p></header>{intro_html}{karten(eintraege)}{CTA}</div></main>' + seitenende()
     schreibe(f'{ordner}/index.html', seite)
 
@@ -235,11 +240,11 @@ def main():
     for slug, label in RATGEBER:
         meta, body = lade('ratgeber', slug)
         verwandt = [ratgeber_karte(r) for r in meta.get('related', []) if r in titel_von and r != slug][:3]
-        inhaltsseite('ratgeber', slug, meta, body, [('Startseite', '/'), ('Ratgeber', '/ratgeber'), (label, f'/ratgeber/{slug}')], 'Ratgeber', verwandt)
+        inhaltsseite('ratgeber', slug, meta, body, [(MAGAZIN, '/ratgeber'), (label, f'/ratgeber/{slug}')], 'Ratgeber', verwandt)
     for slug in BRANCHEN:
         meta, body = lade('branchen', slug)
         verwandt = [ratgeber_karte(r) for r in meta.get('related', []) if r in titel_von][:3]
-        inhaltsseite('branchen', slug, meta, body, [('Startseite', '/'), ('Branchen', '/branchen'), (meta['navLabel'], f'/branchen/{slug}')], 'Branche · ' + meta['navLabel'], verwandt)
+        inhaltsseite('branchen', slug, meta, body, [(MAGAZIN, '/ratgeber'), ('Branchen', '/branchen'), (meta['navLabel'], f'/branchen/{slug}')], 'Branche · ' + meta['navLabel'], verwandt)
     uebersicht('ratgeber', 'Ratgeber', 'Wissen für die B2B-Neukundengewinnung',
                'Akquise-Methoden im Vergleich, die Wirkung von Post im Unternehmen, Rechtslage und ROI: kompakt erklärt für Vertrieb und Geschäftsführung.',
                'Ratgeber zur B2B-Neukundengewinnung: Kaltakquise per E-Mail, Telefon und Post im Vergleich, Wirkung von Print-Mailings, Recht und ROI.',
