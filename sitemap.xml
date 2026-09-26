@@ -18,6 +18,16 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.kontaktstoff.com/wissen</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/vergleich</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://www.kontaktstoff.com/ratgeber/b2b-mailing</loc>
     <lastmod>2026-09-26</lastmod>
     <priority>0.7</priority>
@@ -51,6 +61,41 @@
     <loc>https://www.kontaktstoff.com/ratgeber/roi-postkampagne</loc>
     <lastmod>2026-09-26</lastmod>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/wissen/adressen-kaufen</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/wissen/qr-code-tracking</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/wissen/postkarte-oder-brief</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/wissen/nachfassen</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/wissen/werbewiderspruch</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/wissen/personalisierung-grenzen</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.kontaktstoff.com/wissen/glossar</loc>
+    <lastmod>2026-09-26</lastmod>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.kontaktstoff.com/branchen/agenturen</loc>
