@@ -1,0 +1,5 @@
+# Interne Dateien nicht veröffentlichen
+inhalte/
+tools/
+README.md
+case-studies.json

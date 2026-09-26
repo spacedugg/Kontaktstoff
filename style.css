@@ -116,3 +116,5 @@ dialog{border:1px solid var(--line);border-radius:24px;padding:36px;color:var(--
 .subpage .subpage-nav .nav-cta{display:inline-flex;margin-left:0}
 @media(max-width:580px){.subpage .subpage-nav .nav-cta{white-space:nowrap;min-height:40px;padding:8px 14px;gap:0;font-size:.8125rem}.subpage .subpage-nav .nav-cta span{display:none}}
 @media(max-width:400px){.subpage .wordmark .brand-type{font-size:1.2rem}.subpage .wordmark .brand-mark{width:26px;height:26px}.subpage .navigation{gap:10px}}
+.article-hero{margin:0 0 48px;border-radius:20px;overflow:hidden;background:var(--tint);aspect-ratio:16/9}.article-hero img{width:100%;height:100%;object-fit:cover}
+.content-card{padding:0;overflow:hidden}.content-card-text{display:flex;flex-direction:column;gap:12px;padding:24px 28px 28px;flex:1}.content-card-img{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--tint)}

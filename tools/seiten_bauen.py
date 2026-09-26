@@ -31,6 +31,26 @@ RECHTLICHES = [('impressum', 'Impressum'), ('datenschutz', 'Datenschutz'), ('agb
 
 e = html.escape
 
+# Titelbilder: assets/artikel/<slug>.webp (1600 px), <slug>-640.webp (Karten), <slug>-og.jpg (1200 × 630)
+BILD_ALT = {
+    'b2b-mailing': 'Hände öffnen einen persönlich adressierten Umschlag mit einer Karte auf einem Schreibtisch',
+    'kaltakquise-methoden': 'Schreibtisch mit Laptop, Smartphone, Headset und einer auffälligen gedruckten Postkarte',
+    'wirkung-von-post': 'Gedruckte Postkarte lehnt am Bildschirm auf dem Schreibtisch einer Geschäftsführerin',
+    'telefonakquise-b2b': 'Vertriebsmitarbeiter mit Headset macht sich während eines Telefonats Notizen',
+    'cold-email-b2b': 'Laptop mit vollem E-Mail-Posteingang neben einem einzelnen gedruckten Brief',
+    'werbung-per-post-recht': 'Stapel adressierter Geschäftsbriefe mit Brille, Füller und einer Checkliste',
+    'roi-postkampagne': 'Taschenrechner, gedrucktes Balkendiagramm und Postkarten bei der Kampagnenplanung',
+    'agenturen': 'Designerin in einer Agentur hält eine personalisierte Postkarte in der Hand',
+    'it-dienstleister': 'Manager eines IT-Dienstleisters liest einen Selfmailer, im Hintergrund ein Serverraum',
+    'recruiting': 'Personalverantwortliche hält in einem Besprechungsraum eine gedruckte Klappkarte',
+    'industrie': 'Ingenieur in einer Produktionshalle hält ein Pop-up-Mailing, dahinter ein Roboterarm',
+    'gewerbeenergie': 'Gewerbegebäude mit Photovoltaikanlage auf dem Dach, im Vordergrund ein Umschlag',
+}
+
+
+def bild(slug):
+    return (ROOT / 'assets' / 'artikel' / f'{slug}.webp').exists()
+
 
 def lade(ordner, slug):
     text = (ROOT / 'inhalte' / ordner / f'{slug}.html').read_text(encoding='utf-8')
@@ -44,7 +64,7 @@ def jsonld(daten):
     return '<script type="application/ld+json">' + json.dumps(daten, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/') + '</script>'
 
 
-def kopf(titel, beschreibung, pfad, noindex=False, ld=None, og_typ='article'):
+def kopf(titel, beschreibung, pfad, noindex=False, ld=None, og_typ='article', og_bild='/assets/og-image.jpg'):
     url = BASE + pfad
     robots = 'noindex, follow' if noindex else 'index, follow, max-image-preview:large, max-snippet:-1'
     return f'''<!DOCTYPE html>
@@ -56,7 +76,7 @@ def kopf(titel, beschreibung, pfad, noindex=False, ld=None, og_typ='article'):
 <meta content="#e2ff54" name="theme-color"/>
 <meta content="{og_typ}" property="og:type"/><meta content="Kontaktstoff" property="og:site_name"/><meta content="de_DE" property="og:locale"/>
 <meta content="{url}" property="og:url"/><meta content="{e(titel)}" property="og:title"/><meta content="{e(beschreibung)}" property="og:description"/>
-<meta content="{BASE}/assets/og-image.jpg" property="og:image"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/>
+<meta content="{BASE}{og_bild}" property="og:image"/><meta content="1200" property="og:image:width"/><meta content="630" property="og:image:height"/>
 <meta content="summary_large_image" name="twitter:card"/>
 <link href="/favicon.ico" rel="icon" sizes="48x48"/><link href="/favicon.svg" rel="icon" type="image/svg+xml"/><link href="/apple-touch-icon.png" rel="apple-touch-icon"/><link href="/site.webmanifest" rel="manifest"/>
 <link as="font" crossorigin="" href="/assets/fonts/Manrope-Bold.woff2" rel="preload" type="font/woff2"/><link href="/style.css" rel="stylesheet"/>
@@ -102,9 +122,14 @@ CTA = '''<aside class="article-cta"><div><h2>Deine erste Postkampagne durchrechn
 
 
 def karten(eintraege):
-    return '<div class="card-grid">' + ''.join(
-        f'<a class="content-card" href="{pfad}"><span class="content-card-kicker">{e(kicker)}</span><h3>{e(titel)}</h3><p>{e(text)}</p><span class="content-card-more">Weiterlesen ↗</span></a>'
-        for pfad, kicker, titel, text in eintraege) + '</div>'
+    html_karten = []
+    for pfad, kicker, titel, text in eintraege:
+        slug = pfad.rstrip('/').rsplit('/', 1)[-1]
+        img = ''
+        if bild(slug):
+            img = f'<img alt="" class="content-card-img" decoding="async" height="360" loading="lazy" src="/assets/artikel/{slug}-640.webp" width="640"/>'
+        html_karten.append(f'<a class="content-card" href="{pfad}">{img}<div class="content-card-text"><span class="content-card-kicker">{e(kicker)}</span><h3>{e(titel)}</h3><p>{e(text)}</p><span class="content-card-more">Weiterlesen ↗</span></div></a>')
+    return '<div class="card-grid">' + ''.join(html_karten) + '</div>'
 
 
 def schreibe(pfad, inhalt):
@@ -119,16 +144,20 @@ ORG = {'@type': 'Organization', '@id': BASE + '/#organization', 'name': 'Kontakt
 
 def inhaltsseite(ordner, slug, meta, body, krumen, kicker, verwandte):
     pfad = f'/{ordner}/{slug}'
+    og_bild = f'/assets/artikel/{slug}-og.jpg' if bild(slug) else '/assets/og-image.jpg'
+    titelbild = ''
+    if bild(slug):
+        titelbild = f'<figure class="article-hero"><img alt="{e(BILD_ALT[slug])}" decoding="async" fetchpriority="high" height="900" sizes="(max-width: 860px) 100vw, 780px" src="/assets/artikel/{slug}.webp" srcset="/assets/artikel/{slug}-640.webp 640w, /assets/artikel/{slug}.webp 1600w" width="1600"/></figure>'
     nav, ld_krumen = brotkrumen(krumen)
     faq_html, ld_faq = faq_block(meta.get('faq'))
     haupt = {'@type': 'Article' if ordner == 'ratgeber' else 'WebPage', 'headline': meta['h1'], 'name': meta['h1'],
              'description': meta['description'], 'inLanguage': 'de-DE', 'url': BASE + pfad,
-             'mainEntityOfPage': BASE + pfad, 'image': BASE + '/assets/og-image.jpg',
+             'mainEntityOfPage': BASE + pfad, 'image': BASE + og_bild,
              'datePublished': STAND, 'dateModified': STAND, 'author': ORG, 'publisher': ORG}
     graph = [haupt, ld_krumen] + ([ld_faq] if ld_faq else [])
     related = karten(verwandte) if verwandte else ''
-    seite = kopf(f'{meta["title"]} | Kontaktstoff', meta['description'], pfad, ld={'@context': 'https://schema.org', '@graph': graph})
-    seite += f'''<main class="article-page" id="main"><article class="container article">{nav}<header class="article-header"><p class="article-kicker">{e(kicker)}</p><h1>{e(meta["h1"])}</h1><p class="article-lead">{e(meta["lead"])}</p><p class="article-meta">{meta.get("readingMinutes", 6)} Min. Lesezeit · Stand: {STAND_TEXT} · Kontaktstoff Redaktion</p></header><div class="article-body">{body}</div>{CTA}{faq_html}</article>'''
+    seite = kopf(f'{meta["title"]} | Kontaktstoff', meta['description'], pfad, ld={'@context': 'https://schema.org', '@graph': graph}, og_bild=og_bild)
+    seite += f'''<main class="article-page" id="main"><article class="container article">{nav}<header class="article-header"><p class="article-kicker">{e(kicker)}</p><h1>{e(meta["h1"])}</h1><p class="article-lead">{e(meta["lead"])}</p><p class="article-meta">{meta.get("readingMinutes", 6)} Min. Lesezeit · Stand: {STAND_TEXT} · Kontaktstoff Redaktion</p></header>{titelbild}<div class="article-body">{body}</div>{CTA}{faq_html}</article>'''
     if related:
         seite += f'<section class="container related"><h2>Weiterlesen</h2>{related}</section>'
     seite += '</main>' + seitenende()
