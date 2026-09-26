@@ -130,3 +130,16 @@ dialog{border:1px solid var(--line);border-radius:24px;padding:36px;color:var(--
 @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:580px){.footer-grid{grid-template-columns:1fr}}
 @media(max-width:480px){.magazine-header .navigation{flex-wrap:wrap;height:auto;padding-block:14px;row-gap:6px}.magazine-header .subpage-nav{gap:16px}}
+.article-body th.hl{background:var(--lime);color:var(--ink)}
+.article-body td.hl,.article-body tr.hl td{background:#f7ffd6;color:var(--ink)}
+.article-body tr.hl td:first-child{box-shadow:inset 4px 0 0 var(--lime)}
+.badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--ink);color:#fff;font-size:.72rem;font-weight:700;letter-spacing:.02em;vertical-align:middle;white-space:nowrap}
+.verdict{background:var(--lime);border-radius:20px;padding:32px 34px;margin:36px 0 44px}
+.verdict h2{margin:4px 0 16px;font-size:1.6rem}
+.verdict-kicker{font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:0}
+.verdict ul{margin:0 0 16px;padding-left:1.2em}
+.verdict li{margin-bottom:8px;color:var(--ink)}
+.verdict p{color:var(--ink)}
+.verdict .button{margin-top:6px}
+@media(max-width:580px){.verdict{padding:24px 22px}.verdict h2{font-size:1.35rem}}
+.article-body .verdict a.button{text-decoration:none}
