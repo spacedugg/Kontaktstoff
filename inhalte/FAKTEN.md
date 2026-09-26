@@ -26,6 +26,9 @@
 Kampagnen-ROI = (Deckungsbeitrag der gewonnenen Kunden − Kampagnenkosten) ÷ Kampagnenkosten × 100. Interner Vertriebsaufwand und Steuern nicht berücksichtigt.
 Break-even: benötigte Neukunden = Kampagnenbudget ÷ Deckungsbeitrag je Neukunde (aufrunden). Beispiel Startseite: 300 Unternehmen, Standard-Postkarte (300 Credits), Paket Fokus 1.350 €, 1.800 € Deckungsbeitrag je Neukunde → Budget gedeckt ab 1 Neukunde (nötiger Anteil 0,33 % von 300).
 
+## Regel für Ratgeber- und Branchentexte: keine Firmennamen
+In Ratgeber- und Branchenbeiträgen niemals konkrete (auch erfundene) Unternehmensnamen nennen, insbesondere nicht in Verbindung mit Geschäftsführern oder anderen Personen. Erlaubt sind Personennamen mit Rolle und Branche, z. B. „Sarah Hansen, Geschäftsführerin einer Webagentur“. Beispiele immer als Beispiel oder Rechenbeispiel kennzeichnen, nie als echte Kampagnendaten. Die Firmennamen in der Tabelle unten gelten nur für die Startseite.
+
 ## Case Studies auf der Startseite (/#cases) – Zahlen exakt so
 | Branche | Unternehmen | Laufzeit | Mailings | QR-Aufrufe | Gespräche | Termine | Neukunden | Budget | DB je Kunde | ROI |
 |---|---|---|---|---|---|---|---|---|---|---|
