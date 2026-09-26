@@ -17,7 +17,7 @@ Statische, interaktive Landingpage für personalisierte B2B-Postkampagnen: vom W
 - Ein tatsächlich geliefertes Selfmailer-Format wird gezeigt. Seine Außen- und Perforationskonturen sind aus `2402-00575 DH Selfmailer Ostern_Stanze.pdf` übernommen; die sichtbare Kontaktstoff-Gestaltung wurde neu erstellt. Eine interaktive Perspektive stellt das flache Format räumlich dar, ohne seine Kontur zu verändern.
 - Eine eigene Zielsektion zeigt WhatsApp, Kalender, Potenzialanalyse, Video und Kontaktformular als mögliche Rückwege.
 - Das Angebot geht von 20 Gestaltungsvorlagen aus. Im Formatdialog wird nur der vorliegende Selfmailer konkret gezeigt.
-- Fünf Case Studies aus unterschiedlichen Branchen mit Porträts, eigenen Botschaften, vollständigen Abläufen und nachvollziehbarer ROI-Rechnung.
+- Fünf Beispielrechnungen aus unterschiedlichen Branchen (ohne Firmennamen) mit Porträts, eigenen Botschaften, vollständigen Abläufen und nachvollziehbarer ROI-Rechnung.
 - Drei Creditpakete, Kosten- und Kostendeckungsrechner sowie ein lokales Kampagnenbriefing mit TXT-Download und Druckansicht.
 
 ## Zahlen und Grenzen
