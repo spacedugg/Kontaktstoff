@@ -1,0 +1,46 @@
+{
+  "name": "kontaktstoff-studio",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/server.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "test:guide": "node tests/guide-3d.mjs",
+    "test:product": "node tests/product.mjs",
+    "test:handoff": "node tests/handoff.mjs",
+    "test:example": "node tests/example.mjs",
+    "test:tutorial": "node tests/tutorial.mjs",
+    "test:promotions": "node tests/promotions.mjs",
+    "test:homepage": "node tests/public-homepage.mjs",
+    "test:onboarding": "node tests/onboarding.mjs",
+    "test:content": "node tests/studio-content.mjs",
+    "test:csv-client": "node tests/csv-client.mjs",
+    "test:workspace": "node tests/workspace.mjs",
+    "requests": "node scripts/requests.mjs",
+    "test:workflow": "node tests/workflow.mjs",
+    "test:builder": "node tests/builder.mjs",
+    "test:sales": "node tests/sales.mjs",
+    "test:proposals": "node tests/proposals.mjs",
+    "test:fold": "node tests/fold-preview.mjs",
+    "test:review-fold": "node tests/review-fold.mjs"
+  },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "lcms-wasm": "1.0.5",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "6.3.289",
+    "pg": "^8.23.0",
+    "qrcode": "1.5.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "esbuild": "0.28.2",
+    "jsqr": "1.4.0"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  }
+}

@@ -46,3 +46,10 @@ Geprüft wurden JS-Syntax und Initialisierung, Personalisierung, beide Chatpfade
 - `python3 tools/seiten_bauen.py` erzeugt daraus `ratgeber/`, `branchen/`, die Rechtsseiten (`impressum.html` usw.), `404.html`, den Footer der Startseite und die `sitemap.xml`. Neue Artikel werden in den Listen `RATGEBER` bzw. `BRANCHEN` im Skript eingetragen.
 - Die Rechtsseiten sind Platzhalter mit `noindex` und stehen nicht in der Sitemap, bis die echten Angaben ergänzt sind.
 - Das Hauptmenü bleibt unverändert. Ratgeber, Branchen und Rechtliches sind über den Footer verlinkt.
+
+
+## Kundenbereich und Veröffentlichung
+
+Dieses Projekt enthält die öffentliche Website **und** das bestehende Backend: `/admin/`, `/konto/`, `/studio/`, `/freigabe/` und `/api/`. `npm run build` kopiert die aktuelle Homepage unverändert und baut die Anwendungen gemeinsam nach `dist/`. Nicht ausschließlich die statische Homepage deployen; sonst verschwinden Kundenbereich und Freigabelinks. Die PostgreSQL-Datenbank und Produktionsvariablen bleiben am bestehenden Vercel-Projekt `kontaktstoff`.
+
+Vor Veröffentlichung: `npm test`, `npm run build`, `node scripts/check-deployment.mjs`. Anschließend `/api/health`, Admin-Login und bestehende Freigabe prüfen.

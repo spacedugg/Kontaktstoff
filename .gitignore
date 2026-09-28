@@ -1,0 +1,14 @@
+node_modules/
+.DS_Store
+test-results/
+dist/
+.data/
+.env
+.env.*
+!.env.example
+.vercel
+.env*.local
+
+output/
+
+tmp/
