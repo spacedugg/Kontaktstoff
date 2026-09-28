@@ -1,114 +1,55 @@
-# Kontaktstoff
+# KONTAKTSTOFF | B2B-Outreach per Post
 
-Editor und Kundenbereich für persönliche B2B-Mailings. Der Branch **`codex/kundenbereich`** ergänzt das bestehende öffentliche Homepage-Design um Studio-/Kontolinks und eine Übergabe aus dem Planungsrechner. Der Stand ist seit 21.09.2026 unter https://www.kontaktstoff.com veröffentlicht. Anmeldung und Server-Speicherung nutzen Neon PostgreSQL in Frankfurt. E-Mail-Versand bleibt vorerst deaktiviert.
+Statische, interaktive Landingpage für personalisierte B2B-Postkampagnen: vom Wunschkunden über Gestaltung, Produktion und Versand bis zum Gespräch und gepflegten Kampagnenergebnis.
 
-## Lokal starten
+## Gestaltung
 
-Node.js 22.19+:
+- Weiß, Graphit und Neongelb; Manrope in 400 und 700, lokal unter SIL Open Font License.
+- Direkter Hero ohne Eyebrow, klare Größenhierarchie, großzügige Software-UI und reduzierte Scroll-Reveals mit Reduced-Motion-Unterstützung.
+- Die H1 steht in drei Zeilen: „B2B-Mailing für / Neukundengewinnung. / Echte Post. Persönlich.“ Auf kleinen Bildschirmen wird die Schrift so skaliert, dass „Neukundengewinnung.“ ungetrennt in eine Zeile passt. Der Hero belegt den ersten Viewport und zeigt als Studienwerte nur 935 % ROAS und 2,8 % Conversion Rate. Danach erklärt ein Briefsymbol Kontaktstoff als physischen B2B-Erstkontakt.
+- Der Nutzen und der offen sichtbare Vergleich mit Kaltakquise per E-Mail, Anruf und LinkedIn stehen vor dem detaillierten Dashboard. Große vertikale Abstände trennen die Abschnitte.
+- Die ausgewählte Logoidee 02, das Material-K, steht links neben der Wortmarke. Alle zehn Richtungen bleiben unter `dist/logo-ideen/` vergleichbar.
 
-```sh
-npm ci
-npm run build
-npm run dev
-```
+## Leistung und Inhalte
 
-- Homepage: http://127.0.0.1:4177/
-- Kundenbereich: http://127.0.0.1:4177/konto/
-- Fiktive Dashboard-Demo: http://127.0.0.1:4177/konto/?demo=1
-- Editor: http://127.0.0.1:4177/studio/?start=1&workspace=1
-- Kundenkonzept: http://127.0.0.1:4177/fuer/money-making-sprint/
+- Fünf manuell auswählbare Prozessschritte: Wunschkunden, Gestaltung, Druck und Versand, Reaktion, Ergebnis und ROI. Auf großen Viewports läuft der Prozess als Sticky-Scroll und wechselt seine animierten Ansichten beim Scrollen.
+- Vergrößerbares Beispiel-Dashboard mit lokaler Status- und ROI-Interaktion.
+- Ein tatsächlich geliefertes Selfmailer-Format wird gezeigt. Seine Außen- und Perforationskonturen sind aus `2402-00575 DH Selfmailer Ostern_Stanze.pdf` übernommen; die sichtbare Kontaktstoff-Gestaltung wurde neu erstellt. Eine interaktive Perspektive stellt das flache Format räumlich dar, ohne seine Kontur zu verändern.
+- Eine eigene Zielsektion zeigt WhatsApp, Kalender, Potenzialanalyse, Video und Kontaktformular als mögliche Rückwege.
+- Das Angebot geht von 20 Gestaltungsvorlagen aus. Im Formatdialog wird nur der vorliegende Selfmailer konkret gezeigt.
+- Fünf Beispielrechnungen aus unterschiedlichen Branchen (ohne Firmennamen) mit Porträts, eigenen Botschaften, vollständigen Abläufen und nachvollziehbarer ROI-Rechnung.
+- Drei Creditpakete, Kosten- und Kostendeckungsrechner sowie ein lokales Kampagnenbriefing mit TXT-Download und Druckansicht.
 
-## Ablauf
+## Zahlen und Grenzen
 
-Ohne Konto beginnen: Beispiel in 2D/3D ansehen, selbst gestalten oder Gestaltung anfragen. CSV importieren und Spalten zuordnen oder Lead-Recherche wählen. Kampagnenwunsch prüfen. Beim Anfragen ein Unternehmenskonto anlegen oder anmelden; der Entwurf wird ins Konto übernommen und als Anfrage-Snapshot gespeichert.
+Die CMC Print-Mailing-Studie 2025 betrifft B2B-Bestandskundenaktivierung. Gezeigt werden 2,8 % Conversion Rate und 935 % ROAS. ROAS ist Umsatz im Verhältnis zu Mailingkosten, kein Gewinn. Es werden keine Öffnungs-, Antwort- oder Neukundenquoten für Kontaktstoff erfunden.
 
-Der Kundenbereich zeigt Kampagnen, Designs, Kontakte, Unternehmensdaten und Auswertung. Versand-/Vertriebsstatus, tatsächliche Kosten und Deckungsbeiträge werden manuell gepflegt. Aktivierte Kampagnen-Links erfassen tatsächliche QR-Aufrufe. Eine separate Demo zeigt ausdrücklich fiktive Daten; echte Konten starten ohne erfundene Ergebnisse.
+Das Dashboard ist ein Beispiel. Der QR-Code führt zur lokalen Gesprächsdemo; ein echter WhatsApp-Unternehmenslink ist noch nicht hinterlegt. Es werden keine Nachrichten versendet, Termine gebucht oder Aufträge ausgelöst. Betreiber- und Live-Kontaktangaben müssen vor dem öffentlichen Marktstart ergänzt werden.
 
-Im Editor bleiben PDF/Bild-Uploads, Gestaltung in Millimetern, Personalisierung, reale QR-Codes, CSV-Import, 3D, Undo/Redo, Prüfungen und PDF-/ZIP-Export erhalten. Lokale Entwürfe bleiben im jeweiligen Browser. Kontoentwürfe werden serverseitig gespeichert und sind nach Anmeldung auf anderen Geräten verfügbar.
+## Prüfung
 
-## Backend und Grenzen
+Geprüft wurden JS-Syntax und Initialisierung, Personalisierung, beide Chatpfade, QR-Direkteinstieg, Statuswechsel und Rücknahme, fünf Case-Details, Credit-Aufrundung, ungültige Werte, Briefing, Dialogsteuerung und Auswahl des realen Selfmailers. Alle lokalen Seiten- und Asset-Referenzen werden vor dem Deployment validiert.
 
-Lokal läuft SQLite in `.data/`; die Datei und Testkonten werden nicht eingecheckt oder statisch ausgeliefert. Vercel benötigt PostgreSQL (`DATABASE_URL`) und die eigene URL (`PUBLIC_ORIGIN`). Ohne Konfiguration bleibt der lokale Editor nutzbar; Serverfunktionen melden, dass die Anbindung fehlt. Neon PostgreSQL ist seit 21.09.2026 im kostenlosen Tarif in Frankfurt ausschließlich mit der Produktion verbunden. E-Mail-Versand bleibt auf Nutzerwunsch offen.
+## SEO und Auslieferung
 
-Keine Zahlung, Versandbuchung, automatische Lead-Recherche oder E-Mail-Versendung. Leistungen werden angefragt. Kontowiederherstellung/E-Mail-Verifikation, Mehrbenutzerrollen und privater separater Dateispeicher sind noch nicht angebunden. Die öffentliche Homepage ist das bestehende Marketingkonzept, kein Nachweis bereits automatisierter Produktionsleistungen.
+- Live-Domain: `https://www.kontaktstoff.com/` (Canonical, Open Graph, Sitemap und strukturierte Daten verweisen darauf).
+- `sitemap.xml` und `robots.txt` liegen im Wurzelverzeichnis. In der Google Search Console wird `https://www.kontaktstoff.com/sitemap.xml` eingetragen. Neue Seiten müssen dort ergänzt werden.
+- Strukturierte Daten (JSON-LD) im `<head>`: Organization, WebSite, WebPage, Service mit den drei Paketen und FAQPage. Die FAQ-Texte müssen mit den sichtbaren FAQ übereinstimmen.
+- Favicons (`favicon.ico`, `favicon.svg`, `apple-touch-icon.png`), `site.webmanifest` und ein Social-Vorschaubild `assets/og-image.jpg` (1200 × 630).
+- Für die Anzeige werden verkleinerte Dateien genutzt: `assets/logo-k-96.webp`, `assets/dashboard-konzept.webp` und WOFF2-Schriften. Die Originale bleiben erhalten.
+- `vercel.json` setzt Sicherheits- und Cache-Header und markiert `logo-ideen/` zusätzlich als `noindex`.
 
-DIN A5 ist editierbar. Selfmailer/Sonderformate werden als Angebotswunsch erfasst. Exporte sind RGB-Ansichtsdateien ohne Beschnitt, keine PDF/X-Druckfreigabe. Vorlagen und Beispieldaten sind fiktiv. Fotos: [Quellen](assets/photos/CREDITS.md).
+## Ratgeber, Branchen und Rechtliches
 
-Details zu Daten, Infrastruktur und den vor öffentlichem Kontobetrieb offenen Punkten: **[Kundenbereich](docs/KUNDENBEREICH.md)**.
+- Texte liegen in `inhalte/ratgeber/*.html` und `inhalte/branchen/*.html`. Jede Datei beginnt mit einer Zeile `<!--META {...}-->` (Titel, Description, H1, Lead, FAQ, verwandte Artikel), danach folgt der HTML-Text.
+- `inhalte/FAKTEN.md` ist das verbindliche Faktenblatt: Studienzahlen, Preise, Case-Study-Werte und Stilregeln. Neue Texte müssen dazu passen.
+- `python3 tools/seiten_bauen.py` erzeugt daraus `ratgeber/`, `branchen/`, die Rechtsseiten (`impressum.html` usw.), `404.html`, den Footer der Startseite und die `sitemap.xml`. Neue Artikel werden in den Listen `RATGEBER` bzw. `BRANCHEN` im Skript eingetragen.
+- Die Rechtsseiten sind Platzhalter mit `noindex` und stehen nicht in der Sitemap, bis die echten Angaben ergänzt sind.
+- Das Hauptmenü bleibt unverändert. Ratgeber, Branchen und Rechtliches sind über den Footer verlinkt.
 
-## Prüfen
 
-```sh
-npm test
-npm run test:content
-npm run test:csv-client
-```
+## Kundenbereich und Veröffentlichung
 
-Für vollständige Kontentests eine getrennte Testdatenbank starten:
+Dieses Projekt enthält die öffentliche Website **und** das bestehende Backend: `/admin/`, `/konto/`, `/studio/`, `/freigabe/` und `/api/`. `npm run build` kopiert die aktuelle Homepage unverändert und baut die Anwendungen gemeinsam nach `dist/`. Nicht ausschließlich die statische Homepage deployen; sonst verschwinden Kundenbereich und Freigabelinks. Die PostgreSQL-Datenbank und Produktionsvariablen bleiben am bestehenden Vercel-Projekt `kontaktstoff`.
 
-```sh
-PORT=4181 SQLITE_PATH=test-results/workspace-test.sqlite npm run dev
-npm run test:workspace
-npm run test:homepage
-```
-
-Die Tests prüfen unter anderem Kontentrennung, CSRF, revisionssicheres Speichern, Anfrage-Snapshots, QR-Redirects, CSV, Editor, Anmeldung auf einem zweiten Gerät, responsive Ansichten und Übergaben von Homepage/Kundenkonzept. Die Produktion nutzt Neon PostgreSQL; lokale Tests verwenden eine getrennte SQLite-Datenbank.
-
-`npm run requests` ist ein lokaler Betreiberbefehl zum Lesen eingegangener Anfragen. Die Betreiber-API ist durch Anmeldung und serverseitige Rollenprüfung geschützt.
-
-### Geführter Kampagnenablauf
-
-`/konto/?tab=new-campaign` startet einen benannten Entwurf. Der Arbeitsplatz unter
-`?tab=build&id=…` führt durch Layout, Design, Personalisierung und Übergabe. Zehn
-native A5-Vorlagen liegen in `studio/src/brand-templates.js`; ihre Branding-Felder
-bleiben auch im vollständigen Editor bearbeitbar. Andere Formate und PDF-Uploads
-sind weiterhin im Detail-Editor verfügbar. Gastentwürfe werden lokal gespeichert,
-Kontentwürfe revisionsgesichert im Backend. Beim Absenden wird der bestätigte
-Entwurfsstand als unveränderlicher Anfrage-Snapshot gespeichert. Das Team sieht
-Bestätigung und Bearbeitungsstatus im Anfragen-Eingang. Dies ist keine automatische
-Druckbestellung und ersetzt nicht die Abstimmung druckfertiger Produktionsdaten.
-
-Das Tracking zeigt tatsächliche QR-Aufrufe samt täglichem Verlauf (UTC).
-Versandstatus, Vertriebsergebnisse und Kosten werden manuell gepflegt; es gibt
-keine automatische Shop-Conversion- oder Versanddienst-Anbindung.
-
-Prüfung: `npm test`, `npm run test:builder`, `npm run test:workflow` und
-`node tests/template-render.mjs`. Browser-Tests nutzen den lokalen Server auf Port 4183.
-
-### Verkaufsseite und persönliche Links
-
-`/mailings/` zeigt Angebot, drei fiktive Kampagnenbeispiele, Ablauf und ein
-Anfrageformular ohne Registrierung. Unter `/konto/?tab=sales-links` erstellen
-Betreiber gespeicherte Kundenseiten aus einer Website oder einem manuellen Entwurf.
-Der Import übernimmt öffentliche Metadaten und geeignete Rasterbilder und erzeugt
-einen regelbasierten, bearbeitbaren Text-/Layoutvorschlag. Es ist kein angebundener
-LLM-Dienst. Money Making Sprint besitzt einen eigens ausgearbeiteten Ausgangsentwurf.
-Logo, Foto, Farbe, Texte, Zielgruppe, QR-Ziel und Loom lassen sich anpassen.
-
-`/mailings/?vorschau=<id>` zeigt den gespeicherten Entwurf nur angemeldeten Betreibern.
-`/mailings/?konzept=<slug>` zeigt den explizit veröffentlichten Stand. Der Link
-bleibt bei Updates gleich und kann deaktiviert werden. Entwürfe und veröffentlichte
-Snapshots sind getrennt und revisionsgesichert. Öffentliche Vorschläge enthalten
-keine internen Herkunftsnotizen; Suchmaschinen sollen sie nicht indexieren.
-Der optionale Loom-Freigabelink öffnet das Video extern. Die bisherigen einfachen
-Links mit `fuer`, `ziel` und `video` funktionieren weiterhin.
-
-Website-Abrufe sind auf öffentliche IPv4-Adressen und HTTP(S) begrenzt. DNS wird pro
-Weiterleitung geprüft und an die Verbindung gebunden; Zeit-, Größen- und
-Dekomprimierungslimits gelten auch für Bilder. HTML wird als Daten gelesen, nicht
-ausgeführt. Bei gesperrten Websites kann man manuell beginnen. SVG-Logos werden
-nicht importiert; PNG/JPG/WebP können hochgeladen werden.
-
-Anfragen werden serverseitig gespeichert und unter
-`/konto/?tab=sales-inquiries` mit Status und interner Notiz bearbeitet. Persönliche
-Kundenseiten werden der Anfrage zugeordnet. Wiederholte Übermittlungen derselben
-Anfrage sind idempotent. Herkunftsprüfung, Rate-Limits, Honeypot und
-Betreiberberechtigungen schützen die Endpunkte. Es erfolgt keine automatische
-E-Mail, Zahlung oder Bestellung.
-
-Offen bleiben vollständige Betreiber-/Datenschutzhinweise, E-Mail-Anbindung,
-Shop-Ereignisse und Druck-/Versanddienst-Anbindung. `npm test` prüft Validierung,
-Berechtigungen und Veröffentlichung; `npm run test:sales` und
-`npm run test:proposals` prüfen die Browserabläufe mit einem getrennten Testserver
-auf Port 4183. `node tests/proposal-import.mjs` prüft zusätzlich den Import gegen
-öffentliche Websites und benötigt Netzwerkzugriff.
+Vor Veröffentlichung: `npm test`, `npm run build`, `node scripts/check-deployment.mjs`. Anschließend `/api/health`, Admin-Login und bestehende Freigabe prüfen.

@@ -13,3 +13,8 @@ skills-lock.json
 output/
 
 tmp/
+
+# Editorial sources are not runtime assets.
+inhalte/
+tools/
+README.md
