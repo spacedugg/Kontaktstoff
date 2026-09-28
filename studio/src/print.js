@@ -60,7 +60,7 @@ export async function renderPrintCanvas(campaign,side,person,{dpi=PRINT_DPI}={})
  return out;
 }
 export async function createPrintPDF(campaign,{profile,people=campaign.recipients,onProgress=()=>{},signal}={}){
- if(campaign.format!=='selfmailer-dl-4')throw new Error('Der Druckexport ist für den vierseitigen DIN-lang-Selfmailer eingerichtet.');
+ if(!FORMATS.some(f=>f.id===campaign.format))throw new Error('Unbekanntes Druckformat.');
  validateICC(profile);
  if(!people.length||people.length>10)throw new Error('Bitte 1 bis 10 Empfänger pro Druck-PDF auswählen.');
  if(checks({...campaign,recipients:people}).some(i=>i.level==='error'))throw new Error('Bitte zuerst die offenen Punkte im Kampagnen-Check korrigieren.');
@@ -80,7 +80,7 @@ export async function createPrintPDF(campaign,{profile,people=campaign.recipient
   let index=0;
   for(const person of people)for(const side of sideNames(campaign)){
    if(signal?.aborted)throw new Error('Druckexport abgebrochen.');
-   onProgress(`Druckseite ${++index} von ${people.length*2} wird erstellt …`);
+   onProgress(`Druckseite ${++index} von ${people.length*sideNames(campaign).length} wird erstellt …`);
    const canvas=await renderPrintCanvas(campaign,side,person),rgba=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data,cmyk=new Uint8Array(rgba.length);
    for(let offset=0;offset<rgba.length;offset+=262144){
     if(signal?.aborted)throw new Error('Druckexport abgebrochen.');

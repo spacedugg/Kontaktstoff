@@ -104,3 +104,18 @@ Oberflächen, damit die Browser-Bildglättung auch stark verkleinerte Schrift
 sauberer wiedergibt. Die Titelansicht nutzt den verfügbaren Platz und startet
 frontal. Aufklappen passt die Größe an die beiden sichtbaren Flächen an.
 Der PDF-Download bleibt der unveränderte, versionierte 300-dpi-Ansichtsexport.
+
+### Direkter Download pro Design
+
+Die Designbibliothek bietet „PDF & Druckdatei“ an jedem gespeicherten Design.
+Sie lädt den aktuellen gespeicherten Stand, zeigt die Personaliserung und prüft
+fehlende Werte, QR-Ziele, Textüberläufe und Bildauflösung. Die Ansichts-PDF bleibt
+RGB ohne Beschnitt; die separate Druck-PDF enthält 3 mm Beschnitt, 300 dpi,
+ein eingebettetes CMYK-Ausgabeprofil und Trim-/BleedBoxen. Der gemeinsame
+Druckexport unterstützt nun sämtliche im Studio hinterlegten Formate, inklusive
+einseitigem A4. Das Profil muss zur Druckerei passen; es wird nicht gespeichert.
+
+Im Freigabedetail exportiert „Druckdatei“ exakt die angezeigte Version, nicht das
+nachträglich bearbeitete Quelldesign. Entwürfe und Beispieldaten werden im Dialog
+benannt; Beispiele erhalten zusätzlich „BEISPIEL“ im Dateinamen. Eine Freigabe
+ist weiterhin keine PDF/X-Zertifizierung oder automatische Druckbestellung.
