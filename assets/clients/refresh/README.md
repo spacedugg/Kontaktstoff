@@ -14,3 +14,6 @@ Geprüft: Feldgeometrie, Platzhalter, alle drei ZYVO-Produktvarianten, Bildaufl�
 
 ## Vor Versand offen
 Die Designvorschauen enthalten fiktive Beispiele. Echte Empfängerlisten, ggf. individuelle Checkout-Rückkehrlinks und das ICC-Profil der Druckerei sind noch nötig. Die aktuellen Warenkorbabbrecher-QRs öffnen Produkt- bzw. Suchseiten, keine garantierte gespeicherte Auswahl. Ansichts-PDFs sind RGB und ohne Beschnitt; die druckfertige CMYK-Datei wird über den separaten Druckexport mit 3 mm Beschnitt und Druckerei-Profil erzeugt. Keine Druck- oder Versandbuchung erfolgt.
+
+## Sternmotiv-Revision
+Beide BewertungsPush-Titelseiten nutzen wieder mehrere schwebende Goldsterne in unterschiedlicher Größe und Neigung. `refreshBewertungspushStars` ändert ausschließlich das Motiv; Texte, Empfänger, QR-Ziele und Innenseiten bleiben erhalten. PNG: 2520 × 1188 px (über 300 dpi).
