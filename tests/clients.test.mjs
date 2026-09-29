@@ -9,7 +9,7 @@ test('customer concepts round-trip through the studio and QR destinations match 
   const campaign=validateCampaign(JSON.parse(JSON.stringify(createClientCampaign(client.id))));
   assert.equal(campaign.templateId,client.id);assert.equal(campaign.sample,true);assert.equal(campaign.format,'a5-landscape');
   assert.deepEqual(checks(campaign).filter(c=>c.level==='error'),[]);
-  for(const recipient of campaign.recipients){const url=new URL(recipient.chatbot_url);assert.equal(url.origin+url.pathname,client.kind==='cart-recovery'?recipient.product_url:client.target);assert.equal(url.searchParams.get('utm_medium'),'direct_mail');assert.ok(resolveText(campaign.sides.front.fields.find(f=>f.text.includes('{{first_name}}')).text,recipient).includes(recipient.first_name));}
+  for(const recipient of campaign.recipients){const url=new URL(recipient.chatbot_url);assert.equal(url.origin+url.pathname,client.id==='reha-sleep'?'https://reha-sleep.de/collections/all':client.kind==='cart-recovery'?recipient.product_url:client.target);if(client.id!=='reha-sleep')assert.equal(url.searchParams.get('utm_medium'),'direct_mail');else assert.equal(recipient.coupon_code,'Schlaf30');assert.ok(resolveText(campaign.sides.front.fields.find(f=>f.text.includes('{{first_name}}')).text,recipient).includes(recipient.first_name));}
   const html=await readFile(new URL(`../fuer/${client.id}/index.html`,import.meta.url),'utf8');assert.ok(html.includes(`data-client="${client.id}"`));assert.ok(html.includes(`/studio/?client=${client.id}`));assert.ok(html.includes('noindex,nofollow'));
  }
 });

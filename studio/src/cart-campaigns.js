@@ -1,3 +1,4 @@
+import {applyRehaSleepOffer} from './reha-offer.js';
 import {createCampaign,uid} from './core.js';
 import {cartArt} from './cart-art.js';
 export const CART_BRANDS={
@@ -56,7 +57,7 @@ export function createCartCampaign(id){
   t(reha?'Scannen. Auswahl ansehen.\nIn Ruhe entscheiden.':'Scannen. Auswahl ansehen.\nWeiter geht’s.',149,108,45,14,9,muted),
   t(reha?'reha-sleep.de':'zyvo.de',150,124,44,6,9,accent,'700'),
   t(reha?'Fragen offen? Wir helfen Ihnen gern.  ·  Ihr RehaSleep-Team':'Noch Fragen? Wir sind für dich da.  ·  Dein ZYVO-Team',12,137,186,8,9,muted)
- ]};return c;
+ ]};return reha?applyRehaSleepOffer(c):c;
 }
 export function applyCartCoupon(campaign){
  const c=structuredClone(campaign),blue=c.templateId==='reha-sleep'?'#1878b9':'#2f75f4';c.name+=' · Gutscheinentwurf';

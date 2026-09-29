@@ -1,3 +1,4 @@
+import {applyRehaSleepOffer} from './reha-offer.js';
 import {styleBewertungspushSelfmailer} from './bewertungspush-selfmailer.js';
 import {uid} from './core.js';
 import {FORMATS,isSelfmailer} from './formats.js';
@@ -63,5 +64,5 @@ export function toSelfmailer(source){
  if(!native){const f=FORMATS.find(f=>f.id===source.format),scale=Math.min(186/f.width,85/f.height),dx=(210-f.width*scale)/2,dy=7;back=back.filter(f=>f.y>=99);if(original.back.background.kind==='image')back.unshift({...t('',dx,dy,f.width*scale,f.height*scale),type:'image',data:original.back.background.data,fit:'contain'});else back.unshift(s(dx,dy,f.width*scale,f.height*scale,original.back.background.color||'#ffffff'));back.splice(1,0,...original.back.fields.map(f=>({...f,id:uid(),x:dx+f.x*scale,y:dy+f.y*scale,w:f.w*scale,h:Math.max(f.h*scale,f.type==='text'?6*25.4/72*1.3*f.text.split('\n').length:2),fontSize:Math.max(6,f.fontSize*scale)})));}
  c.sides={front:{background:{kind:'blank',color:paper},fields:front},back:{background:{kind:'blank',color:'#ffffff'},fields:back}};
  for(const side of Object.values(c.sides))for(const f of side.fields){f.w=Math.max(2,f.w);f.h=Math.max(2,f.h);if(f.color==='#ffffff')f.brandOnAccent=true;}
- return c;
+ return id==='reha-sleep'?applyRehaSleepOffer(c):c;
 }
