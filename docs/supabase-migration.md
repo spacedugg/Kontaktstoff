@@ -1,6 +1,27 @@
 # Kontaktstoff: Neon → Supabase
 
-Status: prepared, not switched. Never point production to an empty database.
+Status: destination created and healthy, not switched. Never point production to an empty database.
+
+Approved destination (2026-09-29): create a separate Kontaktstoff Micro project
+inside the existing Temoa Pro organization (approximately USD 10/month additional
+compute). Do not create a second paid organization and do not import into Temoa's
+existing application database. Organization identity and Pro plan verified in the
+signed-in dashboard. No Neon paid upgrade or quotas were activated;
+the temporary Neon project key was revoked and its local copy removed.
+
+Created destination: `kontaktstoff-production`, project `tpwyirchugjoqangparb`,
+organization `temoa` (`hxsdbimmrizbixzitgle`), Micro, Frankfurt (`eu-central-1`).
+Dashboard: https://supabase.com/dashboard/project/tpwyirchugjoqangparb
+UI confirmed USD 10/month additional compute and status Healthy. Existing org
+Spend Cap is enabled (left unchanged). Data API and automatic table exposure
+disabled; automatic RLS enabled during creation. No application data imported,
+no Vercel env variables changed, no connection added yet: the integration writes
+POSTGRES_* keys that conflict with Neon's existing keys. Connect only as part of
+the verified cutover, preserving the old DATABASE_URL for rollback.
+
+Remaining blocker: Neon network-transfer suspension (live backend returns 503).
+User was asked whether to wait for 2026-10-01 reset or temporarily upgrade Neon
+for the export. Do not infer an answer. Supabase target provisioning is complete.
 
 ## Destination
 
