@@ -4,6 +4,18 @@ import {renderCanvas,imageFrom} from './render.js';
 import {sideLabel} from './formats.js';
 const mm=72/25.4;
 export const PRINT_DPI=300;
+export const DEFAULT_PRINT_PROFILE='/assets/print/profiles/ISOcoated_v2_300_eci.icc';
+export const DEFAULT_PRINT_PROFILE_NAME='ISO Coated v2 300% (ECI)';
+let defaultProfilePromise;
+export function loadDefaultPrintProfile(){
+ return defaultProfilePromise??=(async()=>{
+  try{
+   const response=await fetch(DEFAULT_PRINT_PROFILE);
+   if(!response.ok)throw new Error('Profil nicht erreichbar');
+   return validateICC(new Uint8Array(await response.arrayBuffer()));
+  }catch{defaultProfilePromise=undefined;throw new Error('Das Standard-Druckprofil konnte nicht geladen werden. Bitte den Download erneut versuchen.');}
+ })();
+}
 export function detectBleed(widthMM,heightMM,format){
  const near=(a,b)=>Math.abs(a-b)<.6;
  if(near(widthMM,format.width+6)&&near(heightMM,format.height+6))return 3;
@@ -61,6 +73,7 @@ export async function renderPrintCanvas(campaign,side,person,{dpi=PRINT_DPI}={})
 }
 export async function createPrintPDF(campaign,{profile,people=campaign.recipients,onProgress=()=>{},signal}={}){
  if(!FORMATS.some(f=>f.id===campaign.format))throw new Error('Unbekanntes Druckformat.');
+ profile??=await loadDefaultPrintProfile();
  validateICC(profile);
  if(!people.length||people.length>10)throw new Error('Bitte 1 bis 10 Empfänger pro Druck-PDF auswählen.');
  if(checks({...campaign,recipients:people}).some(i=>i.level==='error'))throw new Error('Bitte zuerst die offenen Punkte im Kampagnen-Check korrigieren.');
