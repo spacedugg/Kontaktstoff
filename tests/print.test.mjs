@@ -20,3 +20,17 @@ test('PDF import exposes supplied bleed hidden by a trim-sized CropBox',async()=
  const {PDFDocument}=await import('pdf-lib');const doc=await PDFDocument.create(),mm=72/25.4,p=doc.addPage([216*mm,204*mm]);p.setCropBox(3*mm,3*mm,210*mm,198*mm);
  const imported=await PDFDocument.load(await preparePrintImport(await doc.save(),FORMATS[0]));assert.deepEqual(imported.getPages()[0].getCropBox(),imported.getPages()[0].getMediaBox());
 });
+
+test('bundled default profile is valid; failed loads are retryable and successful loads are cached',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const {loadDefaultPrintProfile,DEFAULT_PRINT_PROFILE}=await import('../studio/src/print.js');
+ const bytes=new Uint8Array(await readFile(new URL('../assets/print/profiles/ISOcoated_v2_300_eci.icc',import.meta.url)));
+ assert.equal(validateICC(bytes),bytes);
+ const original=globalThis.fetch;let calls=0;
+ try{
+  globalThis.fetch=async url=>{assert.equal(url,DEFAULT_PRINT_PROFILE);calls++;return calls===1?{ok:false}:{ok:true,arrayBuffer:async()=>bytes.buffer};};
+  await assert.rejects(loadDefaultPrintProfile(),/erneut versuchen/);
+  assert.deepEqual(await loadDefaultPrintProfile(),bytes);
+  await loadDefaultPrintProfile();assert.equal(calls,2);
+ }finally{globalThis.fetch=original;}
+});
