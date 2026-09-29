@@ -1,3 +1,4 @@
+import {styleRehaSleepSelfmailer} from './reha-selfmailer.js';
 import {uid} from './core.js';
 
 export const REHA_COLLECTION_URL='https://reha-sleep.de/collections/all';
@@ -33,5 +34,5 @@ export function applyRehaSleepOffer(project){
  c.sides.back.fields=c.sides.back.fields.filter(f=>f.brandRole!=='reha-offer'&&!(dl?(f.x<140&&f.y>=139&&f.y<192):(f.x<140&&f.y>=92&&f.y<132)));
  const text=(value,x,y,w,h,size=11,weight='400')=>({id:uid(),type:'text',text:value,x,y,w,h,fontSize:size,color:blue,weight,align:'left',background:'transparent',autoFit:true,brandRole:'reha-offer'});
  c.sides.back.fields.push({...text('',12,y,120,dl?44:37),type:'shape',background:'#e5eff4'},text('IHR RABATTCODE FÜR 30 €',17,y+4,110,6,9,'700'),text('Schlaf30',17,y+12,110,13,25,'700'),text('Code im Checkout eingeben\nund 30 € sparen.',17,y+26,110,11,10));
- return c;
+ return dl?styleRehaSleepSelfmailer(c):c;
 }
