@@ -64,9 +64,11 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
     }else{
       const layout=layoutText(ctx,field,value);if(layout.overflow)overflow.push(field.id);
       ctx.save();ctx.beginPath();ctx.rect(field.x,field.y,field.w,field.h);ctx.clip();
-      ctx.font=`${field.weight} ${layout.size}px Kontakt, sans-serif`;ctx.fillStyle=field.color;ctx.textBaseline='top';ctx.textAlign=field.align;
+      ctx.font=`${field.weight} ${layout.size}px Kontakt, sans-serif`;ctx.fillStyle=field.color;ctx.textBaseline='alphabetic';ctx.textAlign=field.align;
+      // The font's top baseline can place accents above the field's clipping box.
+      const ascent=Math.max(layout.size,ctx.measureText('ÄÖÜÉÅHg').actualBoundingBoxAscent||0);
       const x=field.x+(field.align==='center'?field.w/2:field.align==='right'?field.w:0);
-      layout.lines.forEach((line,i)=>ctx.fillText(line,x,field.y+i*layout.size*1.3));ctx.restore();
+      layout.lines.forEach((line,i)=>ctx.fillText(line,x,field.y+ascent+i*layout.size*1.3));ctx.restore();
     }
   }
   if(guides&&isSelfmailer(campaign)){
