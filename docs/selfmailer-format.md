@@ -119,3 +119,8 @@ Im Freigabedetail exportiert „Druckdatei“ exakt die angezeigte Version, nich
 nachträglich bearbeitete Quelldesign. Entwürfe und Beispieldaten werden im Dialog
 benannt; Beispiele erhalten zusätzlich „BEISPIEL“ im Dateinamen. Eine Freigabe
 ist weiterhin keine PDF/X-Zertifizierung oder automatische Druckbestellung.
+
+Unter „Dateien herunterladen“ stehen außerdem alle Druckseiten als hochauflösende
+RGB-PNGs (300 dpi im Endformat) in einem ZIP und das leere DIN-lang-Vorlagenpaket
+bereit. „Ansehen“ öffnet direkt die Designvorschau. Bilder/Ansichts-PDF sind
+keine CMYK-Druckdaten; die separate Druckprüfung bleibt unverändert.
