@@ -43,9 +43,9 @@ export function libraryService(db,{origin,limited,reviewLinkKey}){
  }
  async function review(q,id,user){const r=(await q('SELECT * FROM reviews WHERE id=$1 AND user_id=$2',[id,user])).rows[0];if(!r)fail(404,'Freigabe nicht gefunden.');return r;}
  async function reviewResult(q,r,owner=false){
-  const version=Number(r.version),versions=(await q('SELECT version,payload,created_at FROM review_versions WHERE review_id=$1 ORDER BY version DESC',[r.id])).rows;
+  const version=Number(r.version),versions=(await q('SELECT version,created_at FROM review_versions WHERE review_id=$1 ORDER BY version DESC',[r.id])).rows;
   const events=(await q('SELECT payload FROM review_events WHERE review_id=$1 ORDER BY created_at,id',[r.id])).rows.map(e=>JSON.parse(e.payload));
-  const current=versions.find(v=>Number(v.version)===version);let stale=false;
+  const current=(await q('SELECT payload FROM review_versions WHERE review_id=$1 AND version=$2',[r.id,version])).rows[0];let stale=false;
   if(owner){try{const s=await source(q,r.source_kind,r.source_id,r.user_id);stale=hash(JSON.stringify(proof(JSON.parse(s.payload).project,Number(r.recipient_index))))!==r.fingerprint;}catch{stale=true;}}
   return {id:r.id,title:r.title,status:r.status,version,revision:Number(r.revision),project:JSON.parse(current.payload),events,versions:versions.map(v=>({version:Number(v.version),createdAt:Number(v.created_at)})),...(owner?{url:await customerURL(q,r),sourceKind:r.source_kind,sourceId:r.source_id,stale,expiresAt:Number(r.expires_at)}:{})};
  }
@@ -57,7 +57,11 @@ export function libraryService(db,{origin,limited,reviewLinkKey}){
   return db.tx(async q=>{
    const r=(await q('SELECT * FROM reviews WHERE token_hash=$1',[hashed])).rows[0];
    if(!r||r.status==='revoked'||Number(r.expires_at)<Date.now())fail(404,'Dieser Freigabelink ist abgelaufen oder wurde deaktiviert.');
-   if(req.method==='GET')return reviewResult(q,r);
+   if(req.method==='GET'){
+    const known=new URL(req.url,'https://kontaktstoff.invalid').searchParams.get('revision')??req.query?.revision;
+    if(known!==null&&known===String(r.revision))return {unchanged:true,revision:Number(r.revision)};
+    return reviewResult(q,r);
+   }
    if(req.method!=='POST')fail(405,'Methode nicht erlaubt.');
    if(Number(input.version)!==Number(r.version)||Number(input.revision)!==Number(r.revision))fail(409,'Es gibt einen neueren Stand. Bitte lade die Ansicht neu.');
    if(r.status==='approved')fail(409,'Diese Version ist bereits freigegeben. Für Änderungen bitte eine neue Version anfordern.');

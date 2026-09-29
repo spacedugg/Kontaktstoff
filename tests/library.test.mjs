@@ -78,11 +78,14 @@ test('review links expose only one chosen proof, support annotations, resolution
  let r=(await request('/api/reviews',{method:'POST',account:a,body:{sourceKind:'designs',sourceId:d.id,sourceRevision:d.revision}})).data;
  const token=new URLSearchParams(new URL(r.url).hash.slice(1)).get('token'),headers={authorization:'Bearer '+token};
  const opened=await request('/api/review',{headers});assert.equal(opened.status,200);assert.equal(opened.data.project.recipients.length,1);assert.equal(opened.data.project.recipients[0].email,undefined);assert.equal(opened.data.sourceId,undefined);
+ const unchanged=await request('/api/review?revision=1',{headers});assert.equal(unchanged.status,200);assert.deepEqual(unchanged.data,{unchanged:true,revision:1});
+ assert.equal((await request('/api/review?revision=1',{headers:{authorization:'Bearer invalid'}})).status,404);
  assert.equal((await db.query('SELECT token_hash FROM reviews')).rows[0].token_hash.includes(token),false);
  assert.equal((await request('/api/reviews/'+r.id,{account:b})).status,404);
  assert.equal((await request('/api/review',{headers:{authorization:'Bearer invalid'}})).status,404);
  assert.equal((await request('/api/review',{method:'POST',headers:{...headers,origin:'https://evil.example'},body:{type:'comment'}})).status,403);
  let comment=await request('/api/review',{method:'POST',headers,body:{type:'comment',name:'Kunde',text:'Logo größer',side:'front',x:.2,y:.3,version:1,revision:1}});assert.equal(comment.status,200);r=comment.data;
+ const changed=await request('/api/review?revision=1',{headers});assert.equal(changed.data.revision,r.revision);assert.ok(changed.data.project);assert.equal(changed.data.events[0].text,'Logo größer');
  assert.equal((await request('/api/review',{method:'POST',headers,body:{type:'approve',name:'Kunde',confirm:true,version:1,revision:r.revision}})).status,409);
  assert.equal((await request('/api/review',{method:'POST',headers,body:{type:'comment',name:'Kunde',text:'Bad',side:'front',x:9,y:0,version:1,revision:r.revision}})).status,400);
  r=(await request('/api/reviews/'+r.id+'/resolve',{method:'POST',account:a,body:{revision:r.revision,commentId:r.events[0].id}})).data;
@@ -93,6 +96,7 @@ test('review links expose only one chosen proof, support annotations, resolution
  assert.equal((await request('/api/reviews/'+r.id+'/delete',{method:'POST',account:a,body:{revision:r.revision}})).status,200);
  assert.equal((await request('/api/reviews',{account:a})).data.items.length,0);
  assert.equal((await request('/api/review',{headers})).status,404);
+ assert.equal((await request('/api/review?revision='+r.revision,{headers})).status,404);
  assert.equal((await request('/api/reviews/'+r.id,{account:a})).status,404);
  const trash=(await request('/api/reviews/trash',{account:a})).data.items;assert.equal(trash.length,1);
  assert.equal((await request('/api/reviews/trash',{account:b})).data.items.length,0);

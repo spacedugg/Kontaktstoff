@@ -8,7 +8,7 @@ const $=s=>document.querySelector(s),h=v=>String(v??'').replace(/[&<>"']/g,c=>({
 const token=new URLSearchParams(location.hash.slice(1)).get('token');let review,point=null,scale=1,author='',busy=false,activeSide='front',syncing=false,rendering=false,draftText='';
 let foldReview=null;
 const stateLabels={open:'Wartet auf dein Feedback',changes:'Änderungen in Abstimmung',approved:'Design freigegeben'};
-async function request(body){const r=await fetch('/api/review',{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const data=await r.json();if(!r.ok){const e=Error(data.error||'Die Ansicht konnte nicht geladen werden.');e.status=r.status;throw e;}return data;}
+async function request(body,revision){const r=await fetch('/api/review'+(revision===undefined?'':'?revision='+encodeURIComponent(revision)),{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const data=await r.json();if(!r.ok){const e=Error(data.error||'Die Ansicht konnte nicht geladen werden.');e.status=r.status;throw e;}return data;}
 function message(text){if($('#comment-dialog')?.open&&$('#comment-error')){$('#comment-error').textContent=text;$('#comment-error').hidden=false;return;}$('#review-notice').textContent=text;$('#review-notice').hidden=false;setTimeout(()=>$('#review-notice').hidden=true,7000);}
 function closed(){return new Set(review.events.filter(e=>e.type==='resolve').map(e=>e.commentId));}
 async function render(){
@@ -47,7 +47,7 @@ function editingFeedback(){return !!document.querySelector('dialog[open]')||($('
 async function syncReview(){
  if(!review||document.hidden||busy||rendering||syncing||$('#review-pdf')?.disabled||editingFeedback())return;
  syncing=true;const revision=review.revision;
- try{const next=await request();if(busy||rendering||$('#review-pdf')?.disabled||editingFeedback()||review.revision!==revision)return;
+ try{const next=await request(undefined,revision);if(busy||rendering||$('#review-pdf')?.disabled||editingFeedback()||review.revision!==revision)return;
   if(next.revision!==revision){review=next;point=null;await render();}
   if($('#sync-state'))$('#sync-state').textContent='Aktueller Stand';
  }catch(e){if($('#sync-state'))$('#sync-state').textContent=e.status===404?'Dieser Kundenlink ist nicht mehr verfügbar.':'Verbindung unterbrochen. Wir versuchen es automatisch erneut.';}

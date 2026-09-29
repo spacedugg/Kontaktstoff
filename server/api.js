@@ -35,7 +35,7 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
     if(req.method==='GET'&&!/bot|crawler|spider|preview|slack|facebookexternalhit/i.test(req.headers['user-agent']||''))await db.query('INSERT INTO visits(id,token,created_at) VALUES($1,$2,$3)',[randomUUID(),token,Date.now()]);
     res.writeHead(302,{Location:link.target,'Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow'});res.end();return true;
    }
-   if(pathname==='/api/health'){send(res,200,{available:true,storage:process.env.DATABASE_URL?'postgres':'local',origin,email:mailer.configured});return true;}
+   if(pathname==='/api/health'){try{await db.query('SELECT 1');}catch{send(res,503,{available:false,storage:process.env.DATABASE_URL?'postgres':'local'});return true;}send(res,200,{available:true,storage:process.env.DATABASE_URL?'postgres':'local',origin,email:mailer.configured});return true;}
    if(!['GET','HEAD'].includes(req.method)&&req.headers.origin!==origin)throw new HTTPError(403,'Die Anfrage muss aus deinem Kontaktstoff-Arbeitsplatz kommen.');
    if(pathname==='/api/sales-inquiries'&&req.method==='POST'){
     const address=process.env.VERCEL?String(req.headers['x-forwarded-for']||'').split(',')[0]:req.socket?.remoteAddress||'local';
