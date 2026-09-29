@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import path from 'node:path';
 import pg from 'pg';
-import {schema} from '../server/db.js';
+import {schema,postgresOptions} from '../server/db.js';
 
 export const tables=schema.flatMap(sql=>sql.match(/^CREATE TABLE IF NOT EXISTS (\w+)/)?.[1]||[]);
 const identifier=name=>'"'+name.replaceAll('"','""')+'"';
@@ -67,7 +67,7 @@ async function run(){
  const url=process.env[action==='export'?'SOURCE_DATABASE_URL':'TARGET_DATABASE_URL'];
  if(!url)throw Error('Required migration connection variable missing.');
  if(!['localhost','127.0.0.1','::1'].includes(new URL(url).hostname)&&new URL(url).searchParams.get('sslmode')!=='verify-full')throw Error('Remote migration connections require sslmode=verify-full.');
- const client=new pg.Client({connectionString:url,connectionTimeoutMillis:15000});
+ const client=new pg.Client({...postgresOptions(url),connectionTimeoutMillis:15000});
  try{
   await client.connect();let backup;
   if(action==='export'){

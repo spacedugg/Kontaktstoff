@@ -1,5 +1,14 @@
 import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
+import {readFileSync} from 'node:fs';
+
+export function postgresOptions(url){
+ const parsed=new URL(url);
+ if(!parsed.hostname.endsWith('.pooler.supabase.com')&&!parsed.hostname.endsWith('.supabase.co'))return {connectionString:url};
+ for(const key of ['sslmode','sslcert','sslkey','sslrootcert'])parsed.searchParams.delete(key);
+ return {connectionString:parsed.href,ssl:{rejectUnauthorized:true,ca:readFileSync(new URL('./certs/supabase-ca.crt',import.meta.url),'utf8')}};
+}
+
 export const schema=[
  "CREATE TABLE IF NOT EXISTS sales_proposals (id TEXT PRIMARY KEY, slug TEXT NOT NULL UNIQUE, draft TEXT NOT NULL, published TEXT, revision INTEGER NOT NULL, updated_at BIGINT NOT NULL)",
  "CREATE TABLE IF NOT EXISTS sales_inquiries (id TEXT PRIMARY KEY, payload TEXT NOT NULL, digest TEXT NOT NULL, created_at BIGINT NOT NULL, status TEXT NOT NULL, note TEXT NOT NULL, revision INTEGER NOT NULL)",
@@ -31,7 +40,7 @@ export const schema=[
 ];
 export async function connectDB({url=process.env.DATABASE_URL,file=process.env.SQLITE_PATH||'.data/kontaktstoff.sqlite'}={}){
  let db;
- if(url){const {Pool}=await import('pg');const pool=new Pool({connectionString:url,max:5,connectionTimeoutMillis:10000,idleTimeoutMillis:30000,allowExitOnIdle:true});pool.on('error',()=>console.error('Kontaktstoff: Datenbankverbindung unterbrochen.'));db={query:(sql,args=[])=>pool.query(sql,args),async tx(fn){const client=await pool.connect();try{await client.query('BEGIN');const value=await fn((sql,args=[])=>client.query(sql,args));await client.query('COMMIT');return value;}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}},close:()=>pool.end()};}
+ if(url){const {Pool}=await import('pg');const pool=new Pool({...postgresOptions(url),max:5,connectionTimeoutMillis:10000,idleTimeoutMillis:30000,allowExitOnIdle:true});pool.on('error',()=>console.error('Kontaktstoff: Datenbankverbindung unterbrochen.'));db={query:(sql,args=[])=>pool.query(sql,args),async tx(fn){const client=await pool.connect();try{await client.query('BEGIN');const value=await fn((sql,args=[])=>client.query(sql,args));await client.query('COMMIT');return value;}catch(e){await client.query('ROLLBACK');throw e;}finally{client.release();}},close:()=>pool.end()};}
  else{
   if(process.env.VERCEL||process.env.NODE_ENV==='production')throw Error('DATABASE_URL fehlt. Kein flüchtiger Dateispeicher in Produktion.');
   if(file!==':memory:')await mkdir(path.dirname(file),{recursive:true,mode:0o700});

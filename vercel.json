@@ -162,5 +162,10 @@
       "permanent": true
     }
   ],
-  "cleanUrls": true
+  "cleanUrls": true,
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "server/certs/*.crt"
+    }
+  }
 }

@@ -1,12 +1,12 @@
 # Kontaktstoff: Neon → Supabase
 
-Status: destination created and healthy, not switched. Never point production to an empty database.
+Status: production migrated and verified on 2026-09-29. Neon returned to Free.
 
 Approved destination (2026-09-29): create a separate Kontaktstoff Micro project
 inside the existing Temoa Pro organization (approximately USD 10/month additional
 compute). Do not create a second paid organization and do not import into Temoa's
 existing application database. Organization identity and Pro plan verified in the
-signed-in dashboard. No Neon paid upgrade or quotas were activated;
+signed-in dashboard. No Neon quotas were modified;
 the temporary Neon project key was revoked and its local copy removed.
 
 Created destination: `kontaktstoff-production`, project `tpwyirchugjoqangparb`,
@@ -14,14 +14,39 @@ organization `temoa` (`hxsdbimmrizbixzitgle`), Micro, Frankfurt (`eu-central-1`)
 Dashboard: https://supabase.com/dashboard/project/tpwyirchugjoqangparb
 UI confirmed USD 10/month additional compute and status Healthy. Existing org
 Spend Cap is enabled (left unchanged). Data API and automatic table exposure
-disabled; automatic RLS enabled during creation. No application data imported,
-no Vercel env variables changed, no connection added yet: the integration writes
-POSTGRES_* keys that conflict with Neon's existing keys. Connect only as part of
-the verified cutover, preserving the old DATABASE_URL for rollback.
+disabled; automatic RLS enabled during creation. The Vercel integration was not reconnected, avoiding POSTGRES_* collisions.
+Production DATABASE_URL was changed directly after verified import; the prior
+Neon URL is preserved privately for recovery.
 
-Remaining blocker: Neon network-transfer suspension (live backend returns 503).
-User was asked whether to wait for 2026-10-01 reset or temporarily upgrade Neon
-for the export. Do not infer an answer. Supabase target provisioning is complete.
+## Completed cutover — 2026-09-29
+
+User explicitly approved temporary Neon Launch only if free export was blocked.
+A fresh direct SELECT 1 returned PostgreSQL 53000 (quota exceeded), confirming
+that free export was unavailable. Launch was enabled only for the migration and
+Vercel subsequently confirmed Current Installation Level Plan: Free again.
+The other Neon resource and the integration were not deleted.
+
+- Maintenance deployment blocked application writes before export.
+- Private mode-600 gzip backup stored under ignored `.data/migration/` (~40 MB).
+- All 19 application tables imported and verified by per-table row checksums:
+  2 users, 15 library entries, 11 campaigns, 12 reviews, 25 review versions,
+  12 encrypted review-link secrets, 5 trash entries and all remaining tables.
+- 19/19 application tables have RLS, zero grants to PUBLIC/anon/authenticated.
+- Only production DATABASE_URL changed. Existing authentication and link keys
+  preserved. Vercel remains hosting provider; database now Supabase.
+- Supabase pooler TLS verifies hostname and official CA certificate, included in
+  the server function. No certificate-verification bypass.
+- Live deployment: kontaktstoff-r98euk6k7-spaceduggs-projects.vercel.app.
+- Production /api/health 200, admin login 200, designs and campaigns 200,
+  pre-existing BewertungsPush customer link 200 and revision polling returns
+  unchanged without re-transferring images. Maintenance disabled.
+- 85 tests pass; production build passed.
+- Email delivery remains unconfigured (pre-existing, unrelated).
+
+Supabase Micro remains approximately USD 10/month additional in Temoa Pro.
+Neon incurred temporary usage only; final charge is provider-calculated, not
+asserted to be zero. Source data retained for recovery; credentials and backup
+are ignored by git and excluded from deployments.
 
 ## Destination
 
