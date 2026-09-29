@@ -1,3 +1,4 @@
+import {styleRehaGiftCard} from './reha-gift-card.js';
 import {uid} from './core.js';
 import {styleRehaSleepSelfmailer} from './reha-selfmailer.js';
 
@@ -41,5 +42,5 @@ export function createRehaCloudVariant(source,{name,art,warm=false}){
   t('Herzliche Grüße, Ihr RehaSleep-Team',12,190,122,5,7.5,muted),
   t('reha-sleep.de',154,190,45,5,7.5,blue)
  ]};
- return c;
+ return styleRehaGiftCard(c);
 }
