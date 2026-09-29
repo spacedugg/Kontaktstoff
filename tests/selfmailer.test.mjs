@@ -13,7 +13,8 @@ for(const [name,make] of cases)test('selfmailer: '+name+' keeps recipients, edit
  assert.ok(p.sides.front.fields.some(f=>f.postalAddress));assert.ok(p.sides.back.fields.some(f=>f.type==='qr'));
  assert.equal(checks(p).filter(i=>i.text.includes('überlagert')).length,0);
  assert.deepEqual(toSelfmailer(p),p);
- if(['reha-sleep','zyvo'].includes(name)){assert.ok(p.sides.front.fields.some(f=>f.variantKey==='product_id'));assert.equal(p.sides.back.fields.find(f=>f.type==='qr').text,'{{cart_url}}');}
+ if(name==='reha-sleep'){assert.ok(!p.sides.front.fields.some(f=>f.variantKey));assert.equal(p.sides.back.fields.find(f=>f.type==='qr').text,'https://reha-sleep.de/collections/all');assert.ok(p.sides.back.fields.some(f=>f.text==='Schlaf30'));}
+ if(name==='zyvo'){assert.ok(p.sides.front.fields.some(f=>f.variantKey==='product_id'));assert.equal(p.sides.back.fields.find(f=>f.type==='qr').text,'{{cart_url}}');}
 });
 test('exact 4-panel print geometry; postal collisions fail preflight',()=>{
  const f=FORMATS.find(f=>f.id==='selfmailer-dl-4');assert.deepEqual([f.width,f.height,f.closedWidth,f.closedHeight,f.bleed,f.pages,f.panels],[210,198,210,99,3,2,4]);
