@@ -10,6 +10,15 @@ const qr=(value,x,y,w=34)=>({...text(value,x,y,w,w),type:'qr',background:'#fffff
 const postal=c=>({...text(c.sides.front.fields.find(f=>f.postalAddress)?.text||'{{company}}\n{{first_name}} {{last_name}}\n{{street}}\n{{postal_code}} {{city}}',134,45,70,33,10,'#111111'),postalAddress:true});
 const polite=r=>({...r,salutation:(r.salutation||'').replace(/^Guten Tag Frau /,'Liebe Frau ').replace(/^Guten Tag Herr /,'Lieber Herr ')});
 
+// Apply a cover-only revision without resetting edited copy, recipients or inside pages.
+export function refreshBewertungspushStars(source,{recovery=false}={}){
+ const c=structuredClone(source);
+ const fields=c.sides.front.fields.filter(f=>f.type==='image'&&f.x===0&&f.y===99&&f.w===210&&f.h===99);
+ if(c.format!=='selfmailer-dl-4'||fields.length!==1)throw Error('Unerwartetes BewertungsPush-Titellayout.');
+ fields[0].data=refreshArt[recovery?'bp-recovery':'bp-acquisition'];
+ return c;
+}
+
 // Explicitly applied redesigns; never silently overwrite a saved customer project.
 export function refreshBewertungspush(source,{recovery=false}={}){
  const c=structuredClone(source),ink='#17263f',blue='#2e72e7',muted='#566982';
