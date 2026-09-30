@@ -20,3 +20,5 @@
 .flow-tile>.flow-details summary{font-size:13px;color:var(--muted,#68766c);cursor:pointer}
 .flow-tile>.flow-details .button{margin-top:12px}
 .flow-tile a.flow-art{display:block}
+
+.campaign-share{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:16px;margin-top:18px}.campaign-share label{display:grid;gap:4px;font-size:12px;color:var(--muted)}.campaign-share input{width:100%;min-width:0;border:1px solid var(--line);border-radius:7px;padding:9px;background:#f7f8fa;font-size:12px}.campaign-share small{color:var(--muted);line-height:1.5}.campaign-share .actions{gap:8px}.campaign-share .button{padding:10px 12px;font-size:13px}

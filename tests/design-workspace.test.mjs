@@ -22,3 +22,17 @@ test('coupon code stays inside white artwork inset after PFS aspect ratio conver
  assert.ok(code.y>=top+1150*k);assert.ok(code.y+code.h<=top+1435*k);assert.ok(code.x>=left+140*k);assert.ok(code.x+code.w<=left+920*k);
  assert.deepEqual(alignRehaGiftCard(p),p);
 });
+
+test('campaign sharing resolves exact source IDs and never matches another campaign by name',async()=>{
+ const {campaignReview}=await import('../konto/src/campaign-sharing.js');
+ const reviews=[{id:'design-review',sourceKind:'designs',sourceId:'design-a'},{id:'campaign-review',sourceKind:'campaigns',sourceId:'campaign-a'}];
+ const c={id:'campaign-a',meta:{designId:'design-a'}};assert.equal(campaignReview(c,reviews).id,'design-review');
+ c.meta.builder={version:1};assert.equal(campaignReview(c,reviews).id,'campaign-review');
+ c.id='unrelated';assert.equal(campaignReview(c,reviews),null);
+});
+test('ZYVO PFS cover fills its panel without modifying logos, recipients or archived DIN-lang artwork',async()=>{
+ const {fillZyvoCover}=await import('../studio/src/zyvo-panel.js');
+ const p={format:'selfmailer-maxi-4',selfmailer:{design:'zyvo-lifestyle-comeback'},recipients:[{id:'one'}],sides:{front:{fields:[{type:'image',brandRole:'artwork',y:125,w:235,fit:'contain'},{type:'image',brandRole:'brand',y:130,w:30,fit:'contain'}]}}};
+ const fixed=fillZyvoCover(p);assert.equal(fixed.sides.front.fields[0].fit,'cover');assert.equal(fixed.sides.front.fields[1].fit,'contain');assert.deepEqual(fixed.recipients,p.recipients);assert.equal(p.sides.front.fields[0].fit,'contain');
+ p.format='selfmailer-dl-4';assert.deepEqual(fillZyvoCover(p),p);
+});

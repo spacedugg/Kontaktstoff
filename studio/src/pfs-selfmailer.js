@@ -1,3 +1,4 @@
+import {fillZyvoCover} from './zyvo-panel.js';
 import {alignRehaGiftCard} from './reha-gift-card.js';
 import {toSelfmailer} from './selfmailer.js';
 import {PFS_FORMAT_ID,isPFS,FORMATS} from './formats.js';
@@ -6,7 +7,7 @@ import {uid} from './core.js';
 // Keep previous revisions immutable. This creates a new editable layout; the
 // delivery address, clear zones and separator are controlled by the renderer.
 export function toPFSSelfmailer(source){
- if(isPFS(source))return alignRehaGiftCard(source);
+ if(isPFS(source))return fillZyvoCover(alignRehaGiftCard(source));
  const c=toSelfmailer(source),old=FORMATS.find(f=>f.id===c.format),sx=235/old.width,sy=250/old.height;
  for(const [side,page] of Object.entries(c.sides)){
   page.fields=page.fields.filter(f=>!f.postalAddress).map(f=>{
@@ -34,5 +35,5 @@ export function toPFSSelfmailer(source){
  c.sides.front.fields.push({id:uid(),type:'text',text:'{{postal_salutation}}\n{{postal_name}}\n{{street}}\n{{postal_code}} {{city}}',x:164,y:79,w:68,h:25,fontSize:10,color:'#000000',weight:'400',align:'left',background:'transparent',autoFit:false,postalAddress:'pfs'});
  c.format=PFS_FORMAT_ID;c.selfmailer={...c.selfmailer,pfsVersion:1,sourceFormat:source.format};
  c.name=c.name.replace(/DIN[- ]lang(?:[- ]Selfmailer)?/gi,'Standard-Maxi-Selfmailer').replace(/DIN[- ]A5[- ]Mailing/gi,'Standard-Maxi-Selfmailer').slice(0,120);
- return alignRehaGiftCard(c);
+ return fillZyvoCover(alignRehaGiftCard(c));
 }
