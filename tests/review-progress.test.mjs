@@ -9,3 +9,8 @@ test('the project next step reflects current unresolved comments and unpublished
  r.stale=true;assert.equal(reviewProgress(r).state,'ready');
  r.status='revoked';assert.equal(reviewProgress(r).state,'revoked');
 });
+test('missing sources and expired links have actionable states instead of promising a new version',()=>{
+ const r={status:'open',version:1,events:[],sourceMissing:true,stale:false};
+ assert.equal(reviewProgress(r).state,'archived');
+ r.expiresAt=Date.now()-1000;assert.equal(reviewProgress(r).state,'expired');
+});

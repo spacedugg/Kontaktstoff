@@ -57,6 +57,7 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
 }
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
 function renderUI(inspector=true,table=true,guide=true){
+ $('#print-template-download').hidden=!format().download;$('#print-template-download').href=format().download||'#';
  $('#share-review').hidden=!(workspaceUser?.operator&&view==='preview'&&cloudRecord&&!cloudPath.includes('library')&&!reviewReturn());$('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=reviewReturn()?'Speichern & zur Abstimmung →':builderReturn()?'Speichern & zurück zur Kampagne →':cloudPath.includes('library')?(workspaceUser?.operator?'Kundenlink & Feedback →':'Zurück zu meinen Designs →'):'Kampagne anfragen →';
  if(!sideNames(campaign).includes(side))side='front';
  document.body.classList.toggle('single-sided',sideNames(campaign).length===1);

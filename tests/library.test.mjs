@@ -180,3 +180,17 @@ test('authenticated team annotations use the same proof and cannot impersonate c
   assert.equal((await db.query('SELECT * FROM requests')).rows.length,0);
  }finally{await db.close();}
 });
+
+test('deleted sources preserve the shared proof but do not advertise an unpublished revision',async()=>{
+ const {db,request,register}=await fixture();try{
+ const account=await register('review@example.org');const d=(await request('/api/library/designs',{method:'POST',account,body:{project:createCampaign()}})).data;
+ const review=(await request('/api/reviews',{method:'POST',account,body:{sourceKind:'designs',sourceId:d.id,sourceRevision:d.revision}})).data;
+ const token=new URLSearchParams(new URL(review.url).hash.slice(1)).get('token');
+ assert.equal((await request('/api/library/designs/'+d.id,{method:'DELETE',account,body:{revision:d.revision}})).status,200);
+ const stored=(await request('/api/reviews/'+review.id,{account})).data;assert.equal(stored.sourceMissing,true);assert.equal(stored.stale,false);assert.deepEqual(stored.project,review.project);
+ assert.equal((await request('/api/review',{headers:{authorization:'Bearer '+token}})).status,200);
+ await db.query('UPDATE reviews SET expires_at=$1 WHERE id=$2',[Date.now()-1000,review.id]);
+ assert.equal((await request('/api/reviews/'+review.id,{account})).data.url,null);
+ assert.equal((await request('/api/review',{headers:{authorization:'Bearer '+token}})).status,404);
+ }finally{await db.close();}
+});

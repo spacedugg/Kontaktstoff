@@ -76,7 +76,7 @@ test('guided handoff records the checked revision and tracking daily counts are 
  let c=(await request('/api/campaigns',{method:'POST',account:a,body:{project,meta:{...defaults(),audience:'Testkunden',builder:{version:1,step:3}}}})).data;
  const key=crypto.randomUUID();assert.equal((await request('/api/campaigns/'+c.id+'/request',{method:'POST',account:a,body:{key,revision:c.revision}})).status,400);
  const submitted=await request('/api/campaigns/'+c.id+'/request',{method:'POST',account:a,body:{key,revision:c.revision,confirmed:true}});assert.equal(submitted.status,201);
- const snapshot=JSON.parse((await db.query('SELECT payload FROM requests WHERE id=$1',[key])).rows[0].payload);assert.equal(snapshot.submission.scope,'design-and-data-review');assert.equal(snapshot.revision,1);
+ const snapshot=JSON.parse((await db.query('SELECT payload FROM requests WHERE id=$1',[key])).rows[0].payload);assert.equal(snapshot.submission.scope,'design-and-data-review');assert.equal(snapshot.revision,1);assert.equal(snapshot.meta.quantity,project.recipients.length);assert.equal(snapshot.meta.formatRequest,project.format);
  c=(await request('/api/campaigns/'+c.id,{account:a})).data;c=(await request('/api/campaigns/'+c.id+'/tracking',{method:'POST',account:a,body:{revision:c.revision}})).data;
  const url=new URL(c.project.recipients[0].chatbot_url);await request(url.pathname);await request(url.pathname);
  const stats=(await request('/api/campaigns/'+c.id+'/stats',{account:a})).data;assert.equal(stats.scanDays.reduce((n,d)=>n+Number(d.count),0),2);assert.deepEqual(stats.trackedRecipientIds,['person-1']);assert.equal((await request('/api/campaigns/'+c.id+'/stats',{account:b})).status,404);
@@ -105,5 +105,35 @@ test('sales proposals require operator and CSRF, expose published fields only, a
  const publicPage=await request('/api/proposal?slug='+r.slug);assert.equal(publicPage.status,200);assert.equal(publicPage.data.proposal.sourceDescription,undefined);assert.equal((await request('/api/proposal',{query:{route:'proposal',slug:r.slug}})).status,200);
  const inquiry=await request('/api/sales-inquiries',{method:'POST',body:{id:crypto.randomUUID(),name:'Test',email:'test@example.org',company:'Test',useCase:'b2b',proposalSlug:r.slug,sourceCompany:'Spoof'}});assert.equal(inquiry.status,201);const leads=(await request('/api/operator/sales',{account:admin})).data.items;assert.equal(leads[0].sourceCompany,'Money Making Sprint');assert.equal(leads[0].proposalSlug,r.slug);
  assert.equal((await request('/api/operator/proposals/'+r.id+'/disable',{method:'POST',account:member,body:{revision:r.revision}})).status,403);
+ }finally{await db.close();}
+});
+
+test('tracking replaces the actual literal QR, remains stable and rejects conflicting QR destinations atomically',async()=>{
+ const {db,request,register}=await fixture();try{
+ const account=await register('literal-track@example.org'),project=createCampaign();
+ const fields=Object.values(project.sides).flatMap(s=>s.fields.filter(f=>f.type==='qr'));
+ for(const f of fields)f.text='https://example.org/checkout';
+ let c=(await request('/api/campaigns',{method:'POST',account,body:{project,meta:defaults()}})).data;
+ const tracked=await request('/api/campaigns/'+c.id+'/tracking',{method:'POST',account,body:{revision:c.revision}});assert.equal(tracked.status,200);c=tracked.data;
+ const {resolveText}=await import('../studio/src/core.js');const qr=Object.values(c.project.sides).flatMap(s=>s.fields).find(f=>f.type==='qr');
+ const target=resolveText(qr.text,c.project.recipients[0]);assert.match(target,/localhost:9000\/r\//);assert.equal((await request(new URL(target).pathname)).headers.Location,'https://example.org/checkout');
+ c=(await request('/api/campaigns/'+c.id+'/tracking',{method:'POST',account,body:{revision:c.revision}})).data;assert.equal(resolveText(qr.text,c.project.recipients[0]),target);
+ assert.equal((await request('/api/campaigns/'+c.id+'/stats',{account})).data.trackedRecipientIds.length,3);
+ c.project.sides.front.fields.push({...qr,id:'conflict',text:'https://example.org/different'});
+ c=(await request('/api/campaigns/'+c.id,{method:'PUT',account,body:c})).data;
+ const before=(await db.query('SELECT * FROM links ORDER BY token')).rows;
+ assert.equal((await request('/api/campaigns/'+c.id+'/tracking',{method:'POST',account,body:{revision:c.revision}})).status,400);assert.deepEqual((await db.query('SELECT * FROM links ORDER BY token')).rows,before);
+ for(const s of Object.values(c.project.sides))s.fields=s.fields.filter(f=>f.type!=='qr');
+ c=(await request('/api/campaigns/'+c.id,{method:'PUT',account,body:c})).data;
+ assert.equal((await request('/api/campaigns/'+c.id+'/stats',{account})).data.trackedRecipientIds.length,0);
+ assert.equal((await request('/api/campaigns/'+c.id+'/tracking',{method:'POST',account,body:{revision:c.revision}})).status,400);
+ }finally{await db.close();}
+});
+test('legacy requests cannot bypass postal readiness by omitting the builder metadata',async()=>{
+ const {db,request,register}=await fixture();try{
+ const account=await register('legacy-postal@example.org'),project=createCampaign();project.sample=false;
+ const c=(await request('/api/campaigns',{method:'POST',account,body:{project,meta:{...defaults(),audience:'Kunden'}}})).data;
+ const result=await request('/api/campaigns/'+c.id+'/request',{method:'POST',account,body:{revision:c.revision,key:crypto.randomUUID()}});
+ assert.equal(result.status,400);assert.match(result.data.error,/Postanschrift/);assert.equal((await db.query('SELECT * FROM requests')).rows.length,0);
  }finally{await db.close();}
 });

@@ -7,7 +7,7 @@ import {promisify} from 'node:util';
 import {HTTPError,text,profile,payload,requestIssues} from './validation.js';
 import {createMailer} from './mail.js';
 import {accountServices} from './account-services.js';
-import {validURL} from '../studio/src/core.js';
+import {validURL,sideNames,resolveText} from '../studio/src/core.js';
 const scrypt=promisify(rawScrypt),hash=v=>createHash('sha256').update(v).digest('hex');
 const send=(res,status,data)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
 const packed=row=>({...JSON.parse(row.payload),id:row.id,revision:Number(row.revision),updatedAt:Number(row.updated_at)});
@@ -123,17 +123,28 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
       if(Number(input.revision)!==Number(c.revision))throw new HTTPError(409,'Dein Entwurf wurde geändert. Prüfe bitte den aktuellen Stand.');
       if(value.meta.builder&&input.confirmed!==true)throw new HTTPError(400,'Bitte bestätige, dass du den aktuellen Stand geprüft hast.');
       const issues=requestIssues(value.project,value.meta,JSON.parse(user.profile));if(issues.length)throw new HTTPError(400,issues.join(' '));
+      if(value.meta.leadSource==='upload')value.meta.quantity=value.project.recipients.length;
+      if(!value.meta.designService)value.meta.formatRequest=value.project.format;
       const at=Date.now();await q('INSERT INTO requests(id,campaign_id,user_id,payload,created_at) VALUES($1,$2,$3,$4,$5)',[key,id,user.id,JSON.stringify({...value,profile:JSON.parse(user.profile),email:user.email,revision:Number(c.revision),...(value.meta.builder?{submission:{checkedAt:at,checkedBy:user.id,scope:'design-and-data-review'}}:{})}),at]);
       value.meta.status='requested';const updated=await q('UPDATE campaigns SET payload=$1,revision=revision+1,updated_at=$2 WHERE id=$3 AND revision=$4 RETURNING id',[JSON.stringify(value),at,id,Number(c.revision)]);if(!updated.rows.length)throw new HTTPError(409,'Der Entwurf wurde geändert. Bitte erneut prüfen.');return {id:key,created_at:at};});send(res,201,{...result,...await services.notifyRequest(result.id)});return true;
     }
-    if(action==='stats'&&req.method==='GET'){await load(db.query,id,user.id);const visits=await db.query('SELECT links.recipient_id, COUNT(visits.id) AS count, MIN(visits.created_at) AS first_visit FROM links LEFT JOIN visits ON visits.token=links.token WHERE links.campaign_id=$1 GROUP BY links.recipient_id',[id]);const requests=await db.query('SELECT requests.id,requests.created_at,request_workflow.status FROM requests LEFT JOIN request_workflow ON request_workflow.request_id=requests.id WHERE requests.campaign_id=$1 AND requests.user_id=$2 ORDER BY requests.created_at DESC',[id,user.id]);const daily=await db.query('SELECT CAST(visits.created_at / 86400000 AS BIGINT) AS day, COUNT(visits.id) AS count FROM visits JOIN links ON links.token=visits.token WHERE links.campaign_id=$1 AND visits.created_at>=$2 GROUP BY CAST(visits.created_at / 86400000 AS BIGINT) ORDER BY day',[id,Date.now()-30*86400000]);const tracked=await db.query('SELECT recipient_id FROM links WHERE campaign_id=$1',[id]);send(res,200,{visits:visits.rows,requests:requests.rows,scanDays:daily.rows,trackedRecipientIds:tracked.rows.map(r=>r.recipient_id),measuredAt:Date.now()});return true;}
+    if(action==='stats'&&req.method==='GET'){const current=JSON.parse((await load(db.query,id,user.id)).payload).project;const visits=await db.query('SELECT links.recipient_id, COUNT(visits.id) AS count, MIN(visits.created_at) AS first_visit FROM links LEFT JOIN visits ON visits.token=links.token WHERE links.campaign_id=$1 GROUP BY links.recipient_id',[id]);const requests=await db.query('SELECT requests.id,requests.created_at,request_workflow.status FROM requests LEFT JOIN request_workflow ON request_workflow.request_id=requests.id WHERE requests.campaign_id=$1 AND requests.user_id=$2 ORDER BY requests.created_at DESC',[id,user.id]);const daily=await db.query('SELECT CAST(visits.created_at / 86400000 AS BIGINT) AS day, COUNT(visits.id) AS count FROM visits JOIN links ON links.token=visits.token WHERE links.campaign_id=$1 AND visits.created_at>=$2 GROUP BY CAST(visits.created_at / 86400000 AS BIGINT) ORDER BY day',[id,Date.now()-30*86400000]);const tracked=await db.query('SELECT recipient_id,token FROM links WHERE campaign_id=$1',[id]);const qrFields=sideNames(current).flatMap(side=>current.sides[side].fields.filter(f=>f.type==='qr')),recipientById=new Map(current.recipients.map(r=>[r.id,r]));const active=tracked.rows.filter(link=>{const recipient=recipientById.get(link.recipient_id);return recipient&&qrFields.some(f=>resolveText(f.text,recipient)===origin+'/r/'+link.token);});send(res,200,{visits:visits.rows,requests:requests.rows,scanDays:daily.rows,trackedRecipientIds:active.map(r=>r.recipient_id),measuredAt:Date.now()});return true;}
     if(action==='tracking'&&req.method==='POST'){
      const input=await body(req);const result=await db.tx(async q=>{const c=await load(q,id,user.id);if(Number(input.revision)!==Number(c.revision))throw new HTTPError(409,'Bitte den aktuellen Kampagnenstand laden.');const value=JSON.parse(c.payload);if(!value.project.recipients.length)throw new HTTPError(400,'Füge zuerst deine Kontakte hinzu.');
-      for(const r of value.project.recipients){const existing=(await q('SELECT * FROM links WHERE campaign_id=$1 AND recipient_id=$2',[id,r.id])).rows[0];const tracked=existing?origin+'/r/'+existing.token:null;const linkKey=Object.values(value.project.sides).some(s=>s.fields.some(f=>f.type==='qr'&&f.text.includes('{{cart_url}}')))?'cart_url':'chatbot_url';let target=r[linkKey]||value.meta.targetURL;
-       if(target===tracked)target=existing.target;
-       if(!validURL(target)||target.length>2000||new URL(target).username||new URL(target).password||new URL(target).origin===origin&&new URL(target).pathname.startsWith('/r/'))throw new HTTPError(400,`Bitte einen direkten Ziel-Link für ${r.company} hinterlegen.`);
+      const qrFields=sideNames(value.project).flatMap(side=>value.project.sides[side].fields.filter(f=>f.type==='qr'));
+      if(!qrFields.length)throw new HTTPError(400,'Füge deinem Mailing zuerst einen QR-Code hinzu.');
+      const keys=qrFields.map(f=>f.text.match(/^\{\{\s*([\w-]+)\s*\}\}$/)?.[1]);
+      const linkKey=['cart_url','chatbot_url','tracking_url'].includes(keys[0])&&keys.every(k=>k===keys[0])?keys[0]:'tracking_url';
+      for(const r of value.project.recipients){
+       const existing=(await q('SELECT * FROM links WHERE campaign_id=$1 AND recipient_id=$2',[id,r.id])).rows[0];
+       const tracked=existing?origin+'/r/'+existing.token:null;
+       const targets=qrFields.map(f=>resolveText(f.text,r).trim()).map(target=>target===tracked?existing.target:target);
+       if(new Set(targets).size!==1)throw new HTTPError(400,'Die QR-Codes eines Kontakts haben unterschiedliche Ziele. Verwende für das Kampagnen-Tracking ein gemeinsames Ziel.');
+       const target=targets[0];
+       if(!validURL(target)||target.length>2000||new URL(target).username||new URL(target).password||new URL(target).origin===origin&&new URL(target).pathname.startsWith('/r/'))throw new HTTPError(400,`Bitte einen direkten QR-Ziel-Link für ${r.company||r.first_name||'diesen Kontakt'} hinterlegen.`);
        const token=existing?.token||randomBytes(18).toString('base64url');await q('INSERT INTO links(token,campaign_id,recipient_id,target) VALUES($1,$2,$3,$4) ON CONFLICT(campaign_id,recipient_id) DO UPDATE SET target=$4',[token,id,r.id,target]);r[linkKey]=origin+'/r/'+token;
       }
+      for(const field of qrFields)field.text='{{'+linkKey+'}}';
       const updated=await q('UPDATE campaigns SET payload=$1,revision=revision+1,updated_at=$2 WHERE id=$3 AND revision=$4 RETURNING *',[JSON.stringify(value),Date.now(),id,Number(input.revision)]);if(!updated.rows.length)throw new HTTPError(409,'Bitte neu laden.');return packed(updated.rows[0]);});send(res,200,result);return true;
     }
    }

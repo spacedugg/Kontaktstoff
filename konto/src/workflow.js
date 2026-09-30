@@ -67,8 +67,8 @@ export async function mountWorkflow(root,{view,user,demo,authenticate,notice,rec
  }
  root.onclick=async e=>{const b=e.target.closest('[data-flow]');if(!b)return;e.preventDefault();b.disabled=true;const act=b.dataset.flow,id=b.dataset.id;try{
   if($('#wizard-form'))Object.assign(wizard,Object.fromEntries(new FormData($('#wizard-form'))));
-  if(act==='download-design'){const design=await api('/library/designs/'+id);openDesignDownload(design.project,{editURL:'/studio/?design='+design.id});return;}
-  if(act==='download-review-snapshot'){const r=reviews.find(r=>r.id===id);openDesignDownload(r.project,{version:r.version,approved:r.status==='approved'});return;}
+  if(act==='download-design'){const design=await api('/library/designs/'+id),linked=reviews.find(r=>r.sourceKind==='designs'&&r.sourceId===id),review=linked?await api('/reviews/'+linked.id):null,approved=review?.status==='approved'&&!review.stale&&!review.sourceMissing;openDesignDownload(approved?review.project:design.project,{editURL:'/studio/?design='+design.id,approved,version:approved?review.version:undefined});return;}
+  if(act==='download-review-snapshot'){const r=await api('/reviews/'+id);openDesignDownload(r.project,{version:r.version,approved:r.status==='approved'});return;}
   if(act==='download-review-print'){const r=selectedReview;openDesignDownload(r.project,{version:r.version,approved:r.status==='approved',editURL:r.sourceKind==='designs'?'/studio/?design='+r.sourceId:''});return;}
   if(act==='download-review-pdf'){const label=b.textContent;b.textContent='PDF wird erstellt …';try{await downloadReviewPDF(selectedReview);}finally{b.textContent=label;}return;}
   if(act==='new-audience'||act==='wizard-audience'){if(!await login())return;view='audiences';selectedAudience={name:'',description:'',recipients:[]};draw();}

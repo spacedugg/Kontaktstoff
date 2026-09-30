@@ -46,9 +46,9 @@ export function libraryService(db,{origin,limited,reviewLinkKey}){
  async function reviewResult(q,r,owner=false){
   const version=Number(r.version),versions=(await q('SELECT version,created_at FROM review_versions WHERE review_id=$1 ORDER BY version DESC',[r.id])).rows;
   const events=(await q('SELECT payload FROM review_events WHERE review_id=$1 ORDER BY created_at,id',[r.id])).rows.map(e=>JSON.parse(e.payload));
-  const current=(await q('SELECT payload FROM review_versions WHERE review_id=$1 AND version=$2',[r.id,version])).rows[0];let stale=false;
-  if(owner){try{const s=await source(q,r.source_kind,r.source_id,r.user_id);stale=hash(JSON.stringify(proof(JSON.parse(s.payload).project,Number(r.recipient_index))))!==r.fingerprint;}catch{stale=true;}}
-  return {id:r.id,title:r.title,status:r.status,version,revision:Number(r.revision),project:JSON.parse(current.payload),events,versions:versions.map(v=>({version:Number(v.version),createdAt:Number(v.created_at)})),...(owner?{url:await customerURL(q,r),sourceKind:r.source_kind,sourceId:r.source_id,stale,expiresAt:Number(r.expires_at)}:{})};
+  const current=(await q('SELECT payload FROM review_versions WHERE review_id=$1 AND version=$2',[r.id,version])).rows[0];let stale=false,sourceMissing=false;
+  if(owner){try{const s=await source(q,r.source_kind,r.source_id,r.user_id);stale=hash(JSON.stringify(proof(JSON.parse(s.payload).project,Number(r.recipient_index))))!==r.fingerprint;}catch(e){if(e.status!==404)throw e;sourceMissing=true;}}
+  return {id:r.id,title:r.title,status:r.status,version,revision:Number(r.revision),project:JSON.parse(current.payload),events,versions:versions.map(v=>({version:Number(v.version),createdAt:Number(v.created_at)})),...(owner?{url:await customerURL(q,r),sourceKind:r.source_kind,sourceId:r.source_id,stale,sourceMissing,expiresAt:Number(r.expires_at)}:{})};
  }
  return {
  async public(req,input){

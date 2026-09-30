@@ -3,8 +3,9 @@ export const BUILD_STEPS=['Layout','Design','Personalisierung','Freigeben'];
 export function hasDesign(project){return sideNames(project).every(s=>project.sides[s].background.kind!=='blank'||project.sides[s].fields.length>0);}
 export function campaignReadiness(project,meta){
  const errors=[],warnings=[];
+ if(!meta.audience?.trim())errors.push('Beschreibe oder benenne deine Zielgruppe.');
  if(!meta.designService){for(const issue of checks(project)){if(issue.level==='error'&&!(meta.leadSource==='research'&&issue.text==='Noch keine Empfänger vorhanden.'))errors.push(issue.text);else if(issue.level==='warning')warnings.push(issue.text);}}
- if(meta.leadSource==='research'){if(!meta.audience?.trim())errors.push('Beschreibe deine gewünschte Zielgruppe.');if(!meta.region?.trim())errors.push('Ergänze die Region für die Recherche.');}
+ if(meta.leadSource==='research'){if(!meta.region?.trim())errors.push('Ergänze die Region für die Recherche.');}
  else{
   if(!project.recipients.length)errors.push('Lade deine Empfängerliste hoch.');
   if(project.sample)errors.push('Ersetze die Beispielkontakte durch deine eigene Empfängerliste.');

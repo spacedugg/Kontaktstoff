@@ -24,10 +24,9 @@ export function payload(input){
 }
 export function requestIssues(project,meta,company){
  const issues=[];if(!company.company||!company.name)issues.push('Unternehmen und Ansprechpartner ergänzen.');
- if(!meta.audience)issues.push('Wunschkunden beschreiben.');
  if(meta.leadSource==='research'&&!meta.region)issues.push('Region für die Lead-Recherche ergänzen.');
  if(meta.leadSource==='upload'&&!project.recipients.length)issues.push('Kontaktliste hochladen oder Lead-Recherche wählen.');
  if(!meta.designService&&sideNames(project).some(side=>project.sides[side].background.kind==='blank'&&!project.sides[side].fields.length))issues.push('Beide Kartenseiten gestalten oder Gestaltung anfragen.');
  if(project.sample&&meta.leadSource==='upload')issues.push('Die fiktiven Beispielkontakte durch eigene Kontakte ersetzen oder Lead-Recherche wählen.');
- if(meta.builder)issues.push(...campaignReadiness(project,meta).errors);return [...new Set(issues)];
+ issues.push(...campaignReadiness(project,meta).errors);return [...new Set(issues)];
 }
