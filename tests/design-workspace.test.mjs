@@ -26,9 +26,9 @@ test('coupon code stays inside white artwork inset after PFS aspect ratio conver
 test('campaign sharing resolves exact source IDs and never matches another campaign by name',async()=>{
  const {campaignReview}=await import('../konto/src/campaign-sharing.js');
  const reviews=[{id:'design-review',sourceKind:'designs',sourceId:'design-a'},{id:'campaign-review',sourceKind:'campaigns',sourceId:'campaign-a'}];
- const c={id:'campaign-a',meta:{designId:'design-a'}};assert.equal(campaignReview(c,reviews).id,'design-review');
+ const c={id:'campaign-a',meta:{designId:'design-a'}};assert.equal(campaignReview(c,reviews).id,'campaign-review');
  c.meta.builder={version:1};assert.equal(campaignReview(c,reviews).id,'campaign-review');
- c.id='unrelated';assert.equal(campaignReview(c,reviews),null);
+ c.id='unrelated';assert.equal(campaignReview(c,reviews).id,'design-review');c.meta.designId='another-design';assert.equal(campaignReview(c,reviews),null);
 });
 test('ZYVO PFS cover fills its panel without modifying logos, recipients or archived DIN-lang artwork',async()=>{
  const {fillZyvoCover}=await import('../studio/src/zyvo-panel.js');
