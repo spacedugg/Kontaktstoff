@@ -3,7 +3,7 @@
 // postal panel above, cover below. No changes to the printable design are made.
 export class FoldView {
  constructor(owner){
-  this.owner=owner;this.root=owner.root;this.card=owner.card;this.open=0;this.frame=0;this.playing=false;this.events=new AbortController();
+  this.owner=owner;this.root=owner.root;this.card=owner.card;this.width=210;this.height=198;this.open=0;this.frame=0;this.playing=false;this.events=new AbortController();
   if(!document.querySelector('link[data-fold-styles]')){const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/selfmailer-3d.css';link.dataset.foldStyles='';document.head.append(link);}
   this.savedStyle=this.card.getAttribute('style');this.card.classList.add('fold-enabled');this.root.classList.add('fold-stage');
   this.book=document.createElement('div');this.book.className='fold-book';
@@ -20,6 +20,7 @@ export class FoldView {
   this.resize=new ResizeObserver(()=>this.owner.paint());this.resize.observe(this.root);this.set(0);
  }
  textures(outside,inside){
+  this.width=outside.width;this.height=outside.height;
   const copy=(name,src,lower)=>{const dst=this.book.querySelector(`[data-fold-face="${name}"]`);dst.width=src.width;dst.height=Math.round(src.height/2);dst.getContext('2d').drawImage(src,0,lower?src.height/2:0,src.width,src.height/2,0,0,dst.width,dst.height);if(this.root.classList.contains('review-fold-stage')){let image=dst.parentElement.querySelector('.fold-preview-image');if(!image){image=document.createElement('img');image.className='fold-preview-image';image.alt='';image.draggable=false;dst.after(image);dst.classList.add('fold-raster-source');}image.src=dst.toDataURL('image/png');}};
   copy('postal',outside,false);copy('cover',outside,true);copy('inside-top',inside,false);copy('inside-bottom',inside,true);this.owner.paint();
  }
@@ -32,7 +33,7 @@ export class FoldView {
   this.slider.setAttribute('aria-valuetext',label);this.controls.querySelector('output').textContent=label;
   this.controls.querySelector('[data-fold-toggle]').textContent=this.open<50?'Aufklappen ↗':'Zuklappen ↙';
  }
- size(){if(this.root.clientWidth&&this.root.clientHeight){const review=this.root.classList.contains('review-fold-stage'),visibleHeight=review?99*(1+this.open/100):198;this.card.style.width=Math.round(Math.min(this.root.clientWidth*(review?.88:.8),this.root.clientHeight*(review?.76:.70)*210/visibleHeight))+'px';this.card.style.aspectRatio='210/198';}}
+ size(){if(this.root.clientWidth&&this.root.clientHeight){const review=this.root.classList.contains('review-fold-stage'),visibleHeight=review?this.height/2*(1+this.open/100):this.height;this.card.style.width=Math.round(Math.min(this.root.clientWidth*(review?.88:.8),this.root.clientHeight*(review?.76:.70)*this.width/visibleHeight))+'px';this.card.style.aspectRatio=this.width+'/'+this.height;}}
  animate(target){this.stop();const from=this.open,start=performance.now(),duration=matchMedia('(prefers-reduced-motion: reduce)').matches?0:850;this.card.classList.add('fold-moving');
   const tick=now=>{if(!this.root.isConnected){this.destroy();return;}const p=duration?Math.min(1,(now-start)/duration):1,e=p*p*(3-2*p);this.set(from+(target-from)*e);this.owner.paint();if(p<1)this.frame=requestAnimationFrame(tick);else{this.frame=0;this.card.classList.remove('fold-moving');}};this.frame=requestAnimationFrame(tick);
  }

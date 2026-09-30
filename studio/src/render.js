@@ -1,6 +1,6 @@
 import QRCode from 'qrcode';
 import {FORMATS,resolveText,resolveField,validURL,ratingValue} from './core.js';
-import {isSelfmailer,POSTAL_ZONES} from './formats.js';
+import {isSelfmailer,isPFS,postalZones,PFS_ZONES,PFS_SEPARATOR} from './formats.js';
 const images=new Map(), codes=new Map();
 export function imageFrom(src){if(images.size>=32&&!images.has(src))images.delete(images.keys().next().value);if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>{images.delete(src);reject(new Error('Das Bild konnte nicht gelesen werden.'));};image.src=src;}));return images.get(src);}
 function rect(ctx,x,y,w,h,color,r=0){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
@@ -42,7 +42,7 @@ export function drawRatingStars(ctx,field,value){
   if(fraction){ctx.save();ctx.beginPath();ctx.rect(x,y,size*fraction,size);ctx.clip();path();ctx.fillStyle=field.color;ctx.fill();ctx.restore();}
  }
 }
-export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,fields=true,panel=null,guides=false}={}){
+export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,fields=true,panel=null,guides=false,production=false}={}){
   await document.fonts.ready;
   const format=FORMATS.find(f=>f.id===campaign.format),{width:w,height:h}=format;
   const temp=document.createElement('canvas');temp.width=Math.round(w*scale);temp.height=Math.round(h*scale);
@@ -53,11 +53,12 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
   if(background.kind==='image'){const img=await imageFrom(background.data);const b=background.bleed||0;const ratio=Math.min((w+2*b)/img.width,(h+2*b)/img.height);ctx.drawImage(img,(w-img.width*ratio)/2,(h-img.height*ratio)/2,img.width*ratio,img.height*ratio);}
   const overflow=[];
   if(fields)for(const field of campaign.sides[side].fields){
+    if(isPFS(campaign)&&field.postalAddress)continue;
     const value=resolveField(field,recipient);
     if(field.background!=='transparent')rect(ctx,field.x,field.y,field.w,field.h,field.background);
     if(field.type==='shape'){continue;}
     if(field.type==='text'&&field.display==='stars'){drawRatingStars(ctx,field,value);continue;}
-    if(field.type==='image'){const selected=field.variantKey?recipient[field.variantKey]:null;const data=field.variants&&Object.hasOwn(field.variants,selected)?field.variants[selected]:field.data;const img=await imageFrom(data);const ratio=(field.fit==='cover'?Math.max:Math.min)(field.w/img.width,field.h/img.height);ctx.save();ctx.beginPath();ctx.rect(field.x,field.y,field.w,field.h);ctx.clip();ctx.drawImage(img,field.x+(field.w-img.width*ratio)/2,field.y+(field.h-img.height*ratio)/2,img.width*ratio,img.height*ratio);ctx.restore();continue;}
+    if(field.type==='image'){const selected=field.variantKey?recipient[field.variantKey]:null;const data=field.variants&&Object.hasOwn(field.variants,selected)?field.variants[selected]:field.data;const img=await imageFrom(data);const ratio=(field.fit==='cover'?Math.max:Math.min)(field.w/img.width,field.h/img.height);ctx.save();ctx.beginPath();ctx.rect(field.x,field.y,field.w,field.h);ctx.clip();if(field.fit==='stretch')ctx.drawImage(img,field.x,field.y,field.w,field.h);else ctx.drawImage(img,field.x+(field.w-img.width*ratio)/2,field.y+(field.h-img.height*ratio)/2,img.width*ratio,img.height*ratio);ctx.restore();continue;}
     if(field.type==='qr'){
       if(validURL(value)&&value.length<=1000){let code=codes.get(value);if(!code){code=await QRCode.toDataURL(value,{errorCorrectionLevel:'M',margin:4,width:800,color:{dark:'#101820',light:'#ffffff'}});if(codes.size>=128)codes.delete(codes.keys().next().value);codes.set(value,code);}const img=await imageFrom(code);const size=Math.min(field.w,field.h);ctx.drawImage(img,field.x,field.y,size,size);}
       else{rect(ctx,field.x,field.y,field.w,field.h,'#fff1f0');label(ctx,'Link fehlt',field.x+2,field.y+field.h/2,3,'#b43e36');}
@@ -71,12 +72,19 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
       layout.lines.forEach((line,i)=>ctx.fillText(line,x,field.y+ascent+i*layout.size*1.3));ctx.restore();
     }
   }
+  if(isPFS(campaign)&&side==='front'){
+   // Reserved zones are opaque even with uploaded backgrounds. The address is
+   // preview-only: the supplied Full Service template personalizes it later.
+   for(const z of PFS_ZONES)rect(ctx,z.x,z.y,z.w,z.h,'#ffffff');
+   const line=PFS_SEPARATOR;rect(ctx,line.x,line.y,line.w,line.h,'#000000');
+   if(!production){const field=campaign.sides.front.fields.find(f=>f.postalAddress);if(field){const layout=layoutText(ctx,field,resolveField(field,recipient));ctx.font=`400 ${layout.size}px Kontakt, sans-serif`;ctx.fillStyle='#000000';ctx.textAlign='left';ctx.textBaseline='top';layout.lines.forEach((line,i)=>ctx.fillText(line,field.x,field.y+i*layout.size*1.3));if(layout.overflow)overflow.push(field.id);}}
+  }
   if(guides&&isSelfmailer(campaign)){
-   ctx.save();ctx.strokeStyle='#748579';ctx.lineWidth=.25;ctx.setLineDash([2,2]);ctx.beginPath();ctx.moveTo(0,99);ctx.lineTo(210,99);ctx.stroke();
-   if(side==='front')for(const zone of POSTAL_ZONES){ctx.strokeRect(zone.x+.3,zone.y+.3,zone.w-.6,zone.h-.6);label(ctx,zone.name,zone.x+2,zone.y+3,2,'#52647c');}
+   ctx.save();ctx.strokeStyle='#748579';ctx.lineWidth=.25;ctx.setLineDash([2,2]);ctx.beginPath();ctx.moveTo(0,format.foldY);ctx.lineTo(w,format.foldY);ctx.stroke();
+   if(side==='front')for(const zone of postalZones(campaign)){ctx.strokeRect(zone.x+.3,zone.y+.3,zone.w-.6,zone.h-.6);label(ctx,zone.name,zone.x+2,zone.y+3,2,'#52647c');}
    ctx.restore();
   }
   const crop=isSelfmailer(campaign)&&panel;
-  canvas.width=temp.width;canvas.height=crop?Math.round(99*scale):temp.height;
-  canvas.getContext('2d').drawImage(temp,0,crop&&panel==='cover'?Math.round(99*scale):0,temp.width,canvas.height,0,0,canvas.width,canvas.height);return overflow;
+  canvas.width=temp.width;canvas.height=crop?Math.round(format.foldY*scale):temp.height;
+  canvas.getContext('2d').drawImage(temp,0,crop&&panel==='cover'?Math.round(format.foldY*scale):0,temp.width,canvas.height,0,0,canvas.width,canvas.height);return overflow;
 }

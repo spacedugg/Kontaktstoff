@@ -1,7 +1,7 @@
-import {PDFDocument,PDFName,PDFString,pushGraphicsState,popGraphicsState,scale,drawObject} from 'pdf-lib';
+import {PDFDocument,PDFName,PDFString,pushGraphicsState,popGraphicsState,scale,drawObject,rectangle,fill,setFillingCmykColor} from 'pdf-lib';
 import {FORMATS,checks,sideNames} from './core.js';
 import {renderCanvas,imageFrom} from './render.js';
-import {sideLabel} from './formats.js';
+import {sideLabel,isSelfmailer,isPFS,PFS_SEPARATOR} from './formats.js';
 const mm=72/25.4;
 export const PRINT_DPI=300;
 export const DEFAULT_PRINT_PROFILE='/assets/print/profiles/ISOcoated_v2_300_eci.icc';
@@ -25,7 +25,7 @@ export function detectBleed(widthMM,heightMM,format){
 // A printer PDF may hide bleed via CropBox while retaining it in MediaBox.
 // Expose that supplied artwork before PDF.js rasterizes the page.
 export async function preparePrintImport(bytes,format){
- if(format.id!=='selfmailer-dl-4')return bytes;
+ if(!isSelfmailer({format:format.id}))return bytes;
  const doc=await PDFDocument.load(bytes);let changed=false;
  for(const page of doc.getPages()){
   const box=page.getMediaBox(),rotated=Math.abs(page.getRotation().angle)%180===90;
@@ -51,7 +51,7 @@ export async function printWarnings(campaign){
    if(dpi<299)warnings.push(`${label}: Hintergrund nur ${Math.round(dpi)} dpi.`);
   }
   for(const field of fields.filter(f=>f.type==='image'))for(const data of new Set([field.data,...Object.values(field.variants||{})])){
-   const img=await imageFrom(data),dpi=(field.fit==='cover'?Math.min:Math.max)(img.width/field.w,img.height/field.h)*25.4;
+   const img=await imageFrom(data),dpi=(['cover','stretch'].includes(field.fit)?Math.min:Math.max)(img.width/field.w,img.height/field.h)*25.4;
    if(dpi<299){warnings.push(`${label}: Bildelement nur ${Math.round(dpi)} dpi.`);break;}
   }
  }
@@ -59,7 +59,7 @@ export async function printWarnings(campaign){
 }
 export async function renderPrintCanvas(campaign,side,person,{dpi=PRINT_DPI}={}){
  const f=FORMATS.find(f=>f.id===campaign.format),factor=dpi/25.4,b=3;
- const trim=document.createElement('canvas'),overflow=await renderCanvas(trim,campaign,side,person,{scale:factor});
+ const trim=document.createElement('canvas'),overflow=await renderCanvas(trim,campaign,side,person,{scale:factor,production:true});
  if(overflow.length)throw new Error(`${sideLabel(campaign,side)}: Text passt nicht ins Feld. Bitte vor dem Druck korrigieren.`);
  const out=document.createElement('canvas');out.width=Math.round((f.width+2*b)*factor);out.height=Math.round((f.height+2*b)*factor);
  const ctx=out.getContext('2d'),x=Math.round(b*factor),y=x,w=out.width-2*x,h=out.height-2*y;
@@ -73,6 +73,7 @@ export async function renderPrintCanvas(campaign,side,person,{dpi=PRINT_DPI}={})
 }
 export async function createPrintPDF(campaign,{profile,people=campaign.recipients,onProgress=()=>{},signal}={}){
  if(!FORMATS.some(f=>f.id===campaign.format))throw new Error('Unbekanntes Druckformat.');
+ if(isPFS(campaign)){const warnings=await printWarnings(campaign);if(warnings.length)throw new Error('PFS verlangt mindestens 300 dpi in den Quelldateien: '+warnings.join(' '));}
  profile??=await loadDefaultPrintProfile();
  validateICC(profile);
  if(!people.length||people.length>10)throw new Error('Bitte 1 bis 10 Empfänger pro Druck-PDF auswählen.');
@@ -99,14 +100,21 @@ export async function createPrintPDF(campaign,{profile,people=campaign.recipient
     if(signal?.aborted)throw new Error('Druckexport abgebrochen.');
     const count=Math.min(262144,rgba.length-offset)/4,chunk=new Uint8Array(count*3);
     for(let pixel=0;pixel<count;pixel++){const source=offset+pixel*4,dest=pixel*3;chunk[dest]=rgba[source];chunk[dest+1]=rgba[source+1];chunk[dest+2]=rgba[source+2];}
-    cmyk.set(lcms.cmsDoTransform(transform,chunk,count),offset);
+    const converted=lcms.cmsDoTransform(transform,chunk,count);if(isPFS(campaign))limitPFSInk(converted);cmyk.set(converted,offset);
     await new Promise(r=>setTimeout(r,0));
    }
    const img=doc.context.register(doc.context.flateStream(cmyk,{Type:'XObject',Subtype:'Image',Width:canvas.width,Height:canvas.height,ColorSpace:doc.context.obj(['ICCBased',icc]),BitsPerComponent:8}));
    const width=(f.width+6)*mm,height=(f.height+6)*mm,page=doc.addPage([width,height]);
    page.setTrimBox(3*mm,3*mm,f.width*mm,f.height*mm);page.setBleedBox(0,0,width,height);page.setCropBox(0,0,width,height);
-   const name=page.node.newXObject('Mailing',img);page.pushOperators(pushGraphicsState(),scale(width,height),drawObject(name),popGraphicsState());canvas.width=canvas.height=1;
+   const name=page.node.newXObject('Mailing',img);page.pushOperators(pushGraphicsState(),scale(width,height),drawObject(name),popGraphicsState());if(isPFS(campaign)&&side==='front'){const z=PFS_SEPARATOR;page.pushOperators(pushGraphicsState(),setFillingCmykColor(0,0,0,1),rectangle((z.x+3)*mm,height-(z.y+3+z.h)*mm,z.w*mm,z.h*mm),fill(),popGraphicsState());}canvas.width=canvas.height=1;
   }
   onProgress('PDF wird verpackt …');return await doc.save();
  }finally{if(transform)lcms.cmsDeleteTransform(transform);if(source)lcms.cmsCloseProfile(source);if(target)lcms.cmsCloseProfile(target);}
+}
+
+// Full-Service template: white stays unprinted; nonwhite total coverage is
+// constrained to 10–300%. Do not force every individual CMYK channel to 10%.
+export function limitPFSInk(bytes){
+ for(let i=0;i<bytes.length;i+=4){let total=bytes[i]+bytes[i+1]+bytes[i+2]+bytes[i+3];if(total>0&&total<26){bytes.fill(0,i,i+4);continue;}if(total>765){const k=765/total;for(let n=0;n<4;n++)bytes[i+n]=Math.floor(bytes[i+n]*k);}}
+ return bytes;
 }

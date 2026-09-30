@@ -60,7 +60,7 @@ test('campaign drafts may defer either resource and be completed later without a
    const response=await request('/api/compose',{method:'POST',account,body});assert.equal(response.status,200);
    const c=response.data;assert.equal(c.project.recipients.length,useAudience?3:0);assert.equal(c.meta.status,'draft');
    assert.equal(c.meta.designId,useDesign?d.id:'');assert.equal(c.meta.audienceId,useAudience?a.id:'');
-   assert.equal(c.project.sides.front.fields.length,useDesign?project.sides.front.fields.length:0);
+   assert.equal(c.project.sides.front.fields.filter(f=>!f.postalAddress).length,useDesign?project.sides.front.fields.length:0);
    c.project.sides=structuredClone(project.sides);c.project.recipients=structuredClone(a.recipients);
    const saved=await request('/api/campaigns/'+c.id,{method:'PUT',account,body:c});assert.equal(saved.status,200);
    const reopened=(await request('/api/campaigns/'+c.id,{account})).data;assert.equal(reopened.project.recipients.length,3);assert.deepEqual(reopened.project.sides,project.sides);

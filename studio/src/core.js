@@ -1,13 +1,13 @@
 export function ratingValue(value){const raw=String(value).trim().replace(',','.');if(!/^[0-5](?:\.\d+)?$/.test(raw))return null;const number=Number(raw);return number<=5?number:null;}
-import {FORMATS,sideNames,sideLabel,isSelfmailer,POSTAL_ZONES} from './formats.js';
+import {FORMATS,sideNames,sideLabel,isSelfmailer,isPFS,postalZones,pfsAddress} from './formats.js';
 export {FORMATS,sideNames} from './formats.js';
-export const KEYS = { company:'Firmenname', first_name:'Vorname',last_name:'Nachname',contact_role:'Funktion',email:'E-Mail',phone:'Telefon',industry:'Branche',employee_count:'Mitarbeiterzahl',source_url:'Kontaktquelle', salutation:'Ansprache', personal_note:'Persönliche Nachricht', personal_headline:'Persönliche Überschrift',product_id:'Produkt-ID',product_name:'Produktname',product_variant:'Größe / Variante',product_url:'Produktseite',cart_url:'Warenkorb-Link',checkout_id:'Checkout-ID',coupon_code:'Gutscheincode',offer_text:'Gutschein-Angebot',offer_terms:'Gutscheinbedingungen',rating_current:'Sterne: Ausgangswert',rating_example:'Sterne: Beispielwert danach', website:'Website', chatbot_url:'Ziel-Link',street:'Straße & Hausnummer',postal_code:'PLZ',city:'Ort',country:'Land' };
+export const KEYS = { company:'Firmenname', first_name:'Vorname',last_name:'Nachname',contact_role:'Funktion',email:'E-Mail',phone:'Telefon',industry:'Branche',employee_count:'Mitarbeiterzahl',source_url:'Kontaktquelle', salutation:'Ansprache', personal_note:'Persönliche Nachricht', personal_headline:'Persönliche Überschrift',product_id:'Produkt-ID',product_name:'Produktname',product_variant:'Größe / Variante',product_url:'Produktseite',cart_url:'Warenkorb-Link',checkout_id:'Checkout-ID',coupon_code:'Gutscheincode',offer_text:'Gutschein-Angebot',offer_terms:'Gutscheinbedingungen',rating_current:'Sterne: Ausgangswert',rating_example:'Sterne: Beispielwert danach', website:'Website', chatbot_url:'Ziel-Link',street:'Straße & Hausnummer',postal_code:'PLZ',city:'Ort',country:'Land',postal_salutation:'Post-Anrede (max. 28 Zeichen)',postal_name:'Postalischer Name (max. 40 Zeichen)' };
 export const uid = () => crypto.randomUUID();
 export const clone = value => structuredClone(value);
 export const clamp = (n,min,max) => Math.min(max,Math.max(min,n));
 export const validURL = value => { try { const u=new URL(value); return ['https:','http:'].includes(u.protocol) && !!u.hostname; } catch { return false; } };
 export const resolveText = (template,recipient={}) => String(template).replace(/\{\{\s*([\w-]+)\s*\}\}/g,(_,key)=>String(recipient[key] ?? ''));
-export function resolveField(field,recipient={}){const text=resolveText(field.text,recipient);if(!field.postalAddress)return text;return text.split('\n').map(v=>v.trim()).filter((v,i,lines)=>v&&(i===0||v!==lines[i-1])).join('\n');}
+export function resolveField(field,recipient={}){if(field.postalAddress==='pfs')return pfsAddress(recipient).filter(Boolean).join('\n');const text=resolveText(field.text,recipient);if(!field.postalAddress)return text;return text.split('\n').map(v=>v.trim()).filter((v,i,lines)=>v&&(i===0||v!==lines[i-1])).join('\n');}
 export const missingKeys = (template,recipient={}) => [...String(template).matchAll(/\{\{\s*([\w-]+)\s*\}\}/g)].map(m=>m[1]).filter(key=>!String(recipient[key]??'').trim());
 export function createCampaign(blank=false) {
   const field=(type,text,x,y,w,h,color='#ffffff',fontSize=12)=>({id:uid(),type,text,x,y,w,h,color,fontSize,weight:'700',align:'left',background:'transparent',autoFit:true});
@@ -50,14 +50,14 @@ export function validateCampaign(value) {
   const format=FORMATS.find(f=>f.id===value.format);
   for(const side of ['front','back']){
     const s=value.sides?.[side];
-    if(!s||!['blank','template','image'].includes(s.background?.kind)||!Array.isArray(s.fields)||s.fields.length>(value.format==='selfmailer-dl-4'?80:40))throw new Error('Ungültige Designseite.');
+    if(!s||!['blank','template','image'].includes(s.background?.kind)||!Array.isArray(s.fields)||s.fields.length>(isSelfmailer(value)?100:40))throw new Error('Ungültige Designseite.');
     if(s.background.color!==undefined&&!/^#[0-9a-f]{6}$/i.test(s.background.color))throw new Error('Ungültige Flächenfarbe.');
     if(s.background.kind==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s.background.data)||s.background.data.length>16000000||![s.background.width,s.background.height].every(n=>Number.isFinite(n)&&n>0)))throw new Error('Ungültige Bilddatei im Projekt.');
-    if(s.background.bleed!==undefined&&(![0,3].includes(s.background.bleed)||s.background.kind!=='image'||(s.background.bleed===3&&(value.format!=='selfmailer-dl-4'||Math.abs(s.background.width/s.background.height-216/204)>.005))))throw new Error('Ungültiger Design-Beschnitt.');
+    if(s.background.bleed!==undefined&&(![0,3].includes(s.background.bleed)||s.background.kind!=='image'||(s.background.bleed===3&&(!isSelfmailer(value)||Math.abs(s.background.width/s.background.height-(format.width+6)/(format.height+6))>.005))))throw new Error('Ungültiger Design-Beschnitt.');
     for(const f of s.fields){
       if(f.variantKey!==undefined||f.variants!==undefined){if(f.type!=='image'||typeof f.variantKey!=='string'||!/^\w{1,50}$/.test(f.variantKey)||!f.variants||typeof f.variants!=='object'||Array.isArray(f.variants)||Object.keys(f.variants).length>20||Object.entries(f.variants).some(([k,v])=>!/^[-\w]{1,60}$/.test(k)||['__proto__','prototype','constructor'].includes(k)||typeof v!=='string'||v.length>16000000||!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(v)))throw new Error('Ungültige Produktbild-Zuordnung.');}
       if(f.display!==undefined&&(f.display!=='stars'||f.type!=='text'))throw new Error('Ungültige Felddarstellung.');
-      if(f.fit!==undefined&&!['contain','cover'].includes(f.fit))throw new Error('Ungültige Bildanpassung.');
+      if(f.fit!==undefined&&!['contain','cover','stretch'].includes(f.fit))throw new Error('Ungültige Bildanpassung.');
       if(f.type==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f.data)||f.data.length>16000000))throw new Error('Ungültiges Bildelement.');
       if(!f||!/^[-a-zA-Z0-9_]{1,100}$/.test(f.id)||!['text','qr','image','shape'].includes(f.type)||typeof f.text!=='string'||f.text.length>5000||![f.x,f.y,f.w,f.h,f.fontSize].every(Number.isFinite)||f.x<0||f.y<0||f.w<2||f.h<2||f.x+f.w>format.width+.1||f.y+f.h>format.height+.1||f.fontSize<6||f.fontSize>80||!/^#[0-9a-f]{6}$/i.test(f.color)||!['400','700'].includes(f.weight)||!['left','center','right'].includes(f.align)||!(f.background==='transparent'||/^#[0-9a-f]{6}$/i.test(f.background))) throw new Error('Ungültige Personalisierungsfelder.');
     }
@@ -76,9 +76,10 @@ export function validateCampaign(value) {
 export function checks(campaign) {
   const issues=[];const format=FORMATS.find(f=>f.id===campaign.format);
   if(isSelfmailer(campaign)){
-    issues.push({level:'info',text:'Selfmailer: 4 Flächen auf 2 Druckseiten. Falz bei 99 mm. Für die Produktion: „Druck-PDF“ mit 3 mm Beschnitt und CMYK-Profil der Druckerei verwenden. Die Designfreigabe ersetzt keine Druckprüfung.'});
-    for(const f of campaign.sides.front.fields){if(f.type==='shape'&&f.background==='#ffffff')continue;for(const z of POSTAL_ZONES){if(f.x<z.x+z.w&&f.x+f.w>z.x&&f.y<z.y+z.h&&f.y+f.h>z.y&&!(z.id==='address'&&f.postalAddress))issues.push({level:'error',text:'Außenseite: Ein Element überlagert die Zone „'+z.name+'“. Bitte im Layout verschieben.'});}}
+    issues.push({level:'info',text:`Selfmailer: 4 Flächen auf 2 Druckseiten. Falz bei ${format.foldY} mm. Druck-PDF: ${format.width+6} × ${format.height+6} mm, 3 mm Beschnitt.${isPFS(campaign)?' Postanschrift wird im Lettershop ergänzt; die Zone bleibt in der Druckdatei leer.':''}`});
+    for(const f of campaign.sides.front.fields){if(f.type==='shape'&&(f.background==='#ffffff'||isPFS(campaign)))continue;for(const z of postalZones(campaign)){if(f.x<z.x+z.w&&f.x+f.w>z.x&&f.y<z.y+z.h&&f.y+f.h>z.y&&!(z.id==='address'&&f.postalAddress))issues.push({level:'error',text:'Außenseite: Ein Element überlagert die Zone „'+z.name+'“. Bitte im Layout verschieben.'});}}
   }
+  if(isPFS(campaign))for(const r of campaign.recipients){const lines=pfsAddress(r);if(lines.some((line,i)=>[...line].length>(i===0?28:40)))issues.push({level:'error',text:'Postanschrift: Anrede maximal 28 Zeichen, Name, Straße und Ort jeweils maximal 40 Zeichen.'});}
   if(campaign.sample)issues.push({level:'info',text:'Beispielkampagne: Empfänger sind fiktiv. Die QR-Codes enthalten Demo-Links; vor dem Einsatz durch eigene Ziele ersetzen.'});
   if(!campaign.recipients.length)issues.push({level:'error',text:'Noch keine Empfänger vorhanden.'});
   for(const side of sideNames(campaign)){const label=sideLabel(campaign,side);
@@ -90,13 +91,14 @@ export function checks(campaign) {
       if(Math.abs(s.background.width/s.background.height-format.width/format.height)>.035)issues.push({level:'warning',text:`${label}: Das Bildformat weicht ab. Das Design wird vollständig mit weißen Rändern eingepasst.`});
     }
     for(const f of s.fields){
-      if(f.fit!==undefined&&!['contain','cover'].includes(f.fit))throw new Error('Ungültige Bildanpassung.');
+      if(f.fit!==undefined&&!['contain','cover','stretch'].includes(f.fit))throw new Error('Ungültige Bildanpassung.');
       if(f.type==='image'&&(!/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f.data)||f.data.length>16000000))throw new Error('Ungültiges Bildelement.');
-      if(f.type!=='shape'&&(f.x<5||f.y<5||f.x+f.w>format.width-5||f.y+f.h>format.height-5))issues.push({level:'warning',text:`${label}: Ein Feld liegt außerhalb des 5-mm-Sicherheitsabstands.`});
+      if(f.type!=='shape'&&(f.x<(format.safe||5)||f.y<(format.safe||5)||f.x+f.w>format.width-(format.safe||5)||f.y+f.h>format.height-(format.safe||5)))issues.push({level:isPFS(campaign)&&['text','qr'].includes(f.type)?'error':'warning',text:`${label}: Ein Feld liegt außerhalb des ${format.safe||5}-mm-Sicherheitsabstands.`});
       if(f.type==='qr'&&Math.min(f.w,f.h)<20)issues.push({level:'warning',text:`${label}: Ein QR-Code ist kleiner als 20 mm.`});
       if(f.type==='image'&&f.variantKey&&campaign.recipients.some(r=>!Object.hasOwn(f.variants||{},r[f.variantKey])))issues.push({level:'error',text:`${label}: Für mindestens eine Produkt-ID fehlt das passende Bild.`});
       if(f.type==='shape'||f.type==='image')continue;
       if(f.display==='stars'&&campaign.recipients.some(r=>ratingValue(resolveText(f.text,r))===null))issues.push({level:'error',text:`${label}: Sterne benötigen einen Wert zwischen 0 und 5.`});
+      if(f.postalAddress==='pfs')continue;
       const missing=campaign.recipients.filter(r=>f.postalAddress?(![r.company,r.first_name,r.last_name].some(v=>v?.trim())||missingKeys(f.text,r).some(k=>!['company','first_name','last_name'].includes(k))):missingKeys(f.text,r).length);
       if(missing.length)issues.push({level:'error',text:`${label}: ${missing.length} Empfänger ohne Wert für „${f.text}“.`});
       if(f.type==='qr'){

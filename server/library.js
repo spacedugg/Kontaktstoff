@@ -1,3 +1,4 @@
+import {toPFSSelfmailer} from '../studio/src/pfs-selfmailer.js';
 import {randomUUID,randomBytes,createHash,createCipheriv,createDecipheriv} from 'node:crypto';
 import {HTTPError,text,payload} from './validation.js';
 import {createCampaign,validateCampaign,sideNames} from '../studio/src/core.js';
@@ -14,7 +15,7 @@ function proof(project,index=0){
  // Share only the chosen preview, never the complete mailing list or service metadata.
  const r=project.recipients[index]||{id:'preview',first_name:'Anna',last_name:'Beispiel',company:'Beispielunternehmen',salutation:'Hallo Anna,',chatbot_url:'https://example.org/',cart_url:'https://example.org/'};
  const keys=new Set(sideNames(project).map(side=>project.sides[side]).flatMap(s=>s.fields.flatMap(f=>[...f.text.matchAll(/\{\{\s*([\w-]+)\s*\}\}/g)].map(m=>m[1]))));
- for(const s of sideNames(project).map(side=>project.sides[side]))for(const f of s.fields)if(f.variantKey)keys.add(f.variantKey);
+ for(const s of sideNames(project).map(side=>project.sides[side]))for(const f of s.fields){if(f.variantKey)keys.add(f.variantKey);if(f.postalAddress==='pfs')for(const key of ['first_name','last_name','company'])keys.add(key);}
  const recipient={id:'preview'};for(const key of keys)if(typeof r[key]==='string')recipient[key]=r[key];
  const sides=structuredClone(project.sides);if(sideNames(project).length===1)sides.back={background:{kind:'blank',color:'#ffffff'},fields:[]};for(const s of Object.values(sides))for(const f of s.fields)if(f.variants){f.data=f.variants[r[f.variantKey]]||f.data;delete f.variants;delete f.variantKey;}
  return {version:1,id:'proof',name:project.name,format:project.format,updatedAt:0,sample:project.sample===true,sides,recipients:[recipient]};
@@ -100,7 +101,7 @@ export function libraryService(db,{origin,limited,reviewLinkKey}){
    const a=input.audienceId?(await q("SELECT * FROM library WHERE id=$1 AND user_id=$2 AND kind='audiences' AND deleted_at IS NULL",[input.audienceId,user.id])).rows[0]:null;
    if((input.designId&&!d)||(input.audienceId&&!a))fail(404,'Bitte ein Design oder eine Zielgruppe aus deinem Konto auswählen.');
    if((d&&Number(input.designRevision)!==Number(d.revision))||(a&&Number(input.audienceRevision)!==Number(a.revision)))fail(409,'Design oder Zielgruppe wurde geändert. Bitte neu laden.');
-   const project=d?JSON.parse(d.payload).project:createCampaign(true),audience=a?JSON.parse(a.payload):null;
+   const project=d?JSON.parse(d.payload).project:toPFSSelfmailer(createCampaign(true)),audience=a?JSON.parse(a.payload):null;
    project.id=randomUUID();project.name=text(input.name||'',120);if(!project.name)fail(400,'Bitte einen Kampagnennamen eingeben.');
    // Template preview contacts never become actual recipients when the audience is deferred.
    project.recipients=audience?.recipients||[];project.sample=false;project.updatedAt=Date.now();
@@ -140,7 +141,7 @@ export function libraryService(db,{origin,limited,reviewLinkKey}){
     if(r.status==='revoked')fail(409,'Bitte zuerst einen neuen Freigabelink erstellen.');
     const s=await source(q,r.source_kind,r.source_id,user.id);if(Number(input.sourceRevision)!==Number(s.revision))fail(409,'Bitte das aktuelle Design laden.');const snapshot=proof(JSON.parse(s.payload).project,Number(r.recipient_index)),version=Number(r.version)+1;
     await q('INSERT INTO review_versions(review_id,version,payload,created_at) VALUES($1,$2,$3,$4)',[id,version,JSON.stringify(snapshot),at]);
-    const changed=await q("UPDATE reviews SET version=$1,revision=revision+1,status='open',fingerprint=$2,updated_at=$3 WHERE id=$4 AND revision=$5 RETURNING id",[version,hash(JSON.stringify(snapshot)),at,id,r.revision]);if(!changed.rows.length)fail(409,'Bitte neu laden.');
+    const changed=await q("UPDATE reviews SET version=$1,revision=revision+1,status='open',fingerprint=$2,updated_at=$3,title=$6 WHERE id=$4 AND revision=$5 RETURNING id",[version,hash(JSON.stringify(snapshot)),at,id,r.revision,snapshot.name]);if(!changed.rows.length)fail(409,'Bitte neu laden.');
    }else if(action==='comment'){
     if(r.status==='approved'||r.status==='revoked'||Number(input.version)!==Number(r.version))fail(409,'Dieser Designstand kann nicht kommentiert werden. Bitte den aktuellen Stand laden.');
     const message=text(input.text||'',2000);if(!message)fail(400,'Bitte deinen Änderungswunsch eintragen.');

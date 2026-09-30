@@ -1,3 +1,21 @@
+# Aktuelle verbindliche Druckvorlage: PFS Standard Maxi
+
+Ab 30.09.2026 gilt für neue und umgestellte Designs `selfmailer-maxi-4`:
+- geschlossen 235 × 125 mm, offen 235 × 250 mm; Druckdatei 241 × 256 mm mit 3 mm Beschnitt;
+- Falz bei 125 mm, wichtige Inhalte mindestens 3 mm vom Schnitt entfernt;
+- unveränderbare weiße Frankier-, Anschrift- und Codierzonen sowie 1,2 mm schwarzer Trennstrich mit 5 mm Ruhezone;
+- Anschrift wird vom Lettershop eingesetzt und bleibt in der Druckdatei frei; nur Vorschauen zeigen den Beispielkontakt;
+- 300 dpi Mindestauflösung der Quelldateien wird vor Druckexport geprüft; geringer aufgelöste Bilder sperren den Druckdownload;
+- CMYK-Export mit maximal 300 % Gesamtfarbauftrag, Weiß ohne Farbauftrag. Farben unter 10 % Gesamtdeckung werden ausgespart;
+- keine Hilfslinien, Kommentare, Formularfelder oder Transparenzen im Druck-PDF. Schrift ist im 300-dpi-Bild enthalten; der Export ist gerastert, kein PDF/X;
+- Sonderfarben sind nicht unterstützt und müssen separat mit der Druckerei abgestimmt werden.
+
+Originalvorgabe: `/assets/print/pfs_template_selfmailer_4-seiter.pdf`.
+Vorlagenpaket: `/assets/print/kontaktstoff-pfs-maxi-vorlagen.zip`.
+Historische Freigabeversionen behalten ihr ursprüngliches Format und bleiben unverändert.
+
+## Historische DIN-lang-Spezifikation
+
 # DIN-lang-Selfmailer (vierseitig)
 
 Format-ID `selfmailer-dl-4`. Grundlage ist die vom Nutzer bereitgestellte

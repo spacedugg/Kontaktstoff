@@ -1,4 +1,4 @@
-import {toSelfmailer} from '../../studio/src/selfmailer.js';
+import {toPFSSelfmailer as toSelfmailer} from '../../studio/src/pfs-selfmailer.js';
 import {isSelfmailer,sideLabel,formatCaption} from '../../studio/src/formats.js';
 import {api} from './api.js';
 import {BUILD_STEPS,hasDesign,campaignReadiness} from './builder-model.js';
