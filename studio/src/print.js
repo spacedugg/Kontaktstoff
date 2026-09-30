@@ -1,8 +1,9 @@
-import {PDFDocument,PDFName,PDFString,pushGraphicsState,popGraphicsState,scale,drawObject,rectangle,fill,setFillingCmykColor} from 'pdf-lib';
+import {PDFDocument,PDFName,PDFString} from 'pdf-lib';
 import {FORMATS,checks,sideNames} from './core.js';
 import {renderCanvas,imageFrom} from './render.js';
-import {sideLabel,isSelfmailer,isPFS,PFS_SEPARATOR} from './formats.js';
+import {sideLabel,isSelfmailer,isPFS} from './formats.js';
 import {imageFrame} from './bleed.js';
+import {drawPrintArtwork} from './print-orientation.js';
 const mm=72/25.4;
 export const PRINT_DPI=300;
 export const DEFAULT_PRINT_PROFILE='/assets/print/profiles/ISOcoated_v2_300_eci.icc';
@@ -115,7 +116,7 @@ export async function createPrintPDF(campaign,{profile,people=campaign.recipient
    const img=doc.context.register(doc.context.flateStream(cmyk,{Type:'XObject',Subtype:'Image',Width:canvas.width,Height:canvas.height,ColorSpace:doc.context.obj(['ICCBased',icc]),BitsPerComponent:8}));
    const width=(f.width+6)*mm,height=(f.height+6)*mm,page=doc.addPage([width,height]);
    page.setTrimBox(3*mm,3*mm,f.width*mm,f.height*mm);page.setBleedBox(0,0,width,height);page.setCropBox(0,0,width,height);
-   const name=page.node.newXObject('Mailing',img);page.pushOperators(pushGraphicsState(),scale(width,height),drawObject(name),popGraphicsState());if(isPFS(campaign)&&side==='front'){const z=PFS_SEPARATOR;page.pushOperators(pushGraphicsState(),setFillingCmykColor(0,0,0,1),rectangle((z.x+3)*mm,height-(z.y+3+z.h)*mm,z.w*mm,z.h*mm),fill(),popGraphicsState());}canvas.width=canvas.height=1;
+   const name=page.node.newXObject('Mailing',img);drawPrintArtwork(page,campaign,side,name);canvas.width=canvas.height=1;
   }
   onProgress('PDF wird verpackt …');return await doc.save();
  }finally{if(transform)lcms.cmsDeleteTransform(transform);if(source)lcms.cmsCloseProfile(source);if(target)lcms.cmsCloseProfile(target);}
