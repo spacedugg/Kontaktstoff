@@ -113,8 +113,9 @@ export async function createPrintPDF(campaign,{profile,people=campaign.recipient
 }
 
 // Full-Service template: white stays unprinted; nonwhite total coverage is
-// constrained to 10–300%. Do not force every individual CMYK channel to 10%.
+// constrained to 10–300%. Preserve pale artwork instead of erasing it to white.
+// Do not force every individual CMYK channel to 10%.
 export function limitPFSInk(bytes){
- for(let i=0;i<bytes.length;i+=4){let total=bytes[i]+bytes[i+1]+bytes[i+2]+bytes[i+3];if(total>0&&total<26){bytes.fill(0,i,i+4);continue;}if(total>765){const k=765/total;for(let n=0;n<4;n++)bytes[i+n]=Math.floor(bytes[i+n]*k);}}
+ for(let i=0;i<bytes.length;i+=4){let total=bytes[i]+bytes[i+1]+bytes[i+2]+bytes[i+3];if(total>0&&total<26){let largest=0,sum=0;for(let n=0;n<4;n++){if(bytes[i+n]>bytes[i+largest])largest=n;}for(let n=0;n<4;n++){bytes[i+n]=Math.floor(bytes[i+n]*26/total);sum+=bytes[i+n];}bytes[i+largest]+=26-sum;continue;}if(total>765){const k=765/total;for(let n=0;n<4;n++)bytes[i+n]=Math.floor(bytes[i+n]*k);}}
  return bytes;
 }
