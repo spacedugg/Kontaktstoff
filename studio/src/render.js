@@ -1,6 +1,7 @@
 import QRCode from 'qrcode';
 import {FORMATS,resolveText,resolveField,validURL,ratingValue} from './core.js';
 import {isSelfmailer,isPFS,postalZones,PFS_ZONES,PFS_SEPARATOR} from './formats.js';
+import {bleedRect,imageFrame} from './bleed.js';
 const images=new Map(), codes=new Map();
 export function imageFrom(src){if(images.size>=32&&!images.has(src))images.delete(images.keys().next().value);if(!images.has(src))images.set(src,new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=()=>{images.delete(src);reject(new Error('Das Bild konnte nicht gelesen werden.'));};image.src=src;}));return images.get(src);}
 function rect(ctx,x,y,w,h,color,r=0){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
@@ -42,23 +43,23 @@ export function drawRatingStars(ctx,field,value){
   if(fraction){ctx.save();ctx.beginPath();ctx.rect(x,y,size*fraction,size);ctx.clip();path();ctx.fillStyle=field.color;ctx.fill();ctx.restore();}
  }
 }
-export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,fields=true,panel=null,guides=false,production=false}={}){
+export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,fields=true,panel=null,guides=false,production=false,bleed=0}={}){
   await document.fonts.ready;
   const format=FORMATS.find(f=>f.id===campaign.format),{width:w,height:h}=format;
-  const temp=document.createElement('canvas');temp.width=Math.round(w*scale);temp.height=Math.round(h*scale);
-  const ctx=temp.getContext('2d');ctx.scale(scale,scale);rect(ctx,0,0,w,h,'#ffffff');
+  const temp=document.createElement('canvas');temp.width=Math.round((w+2*bleed)*scale);temp.height=Math.round((h+2*bleed)*scale);
+  const ctx=temp.getContext('2d');ctx.scale(scale,scale);ctx.translate(bleed,bleed);rect(ctx,-bleed,-bleed,w+2*bleed,h+2*bleed,'#ffffff');
   const background=campaign.sides[side].background;
-  if(background.kind==='blank'&&background.color)rect(ctx,0,0,w,h,background.color);
+  if(background.kind==='blank'&&background.color)rect(ctx,-bleed,-bleed,w+2*bleed,h+2*bleed,background.color);
   if(background.kind==='template')template(ctx,side,w,h);
   if(background.kind==='image'){const img=await imageFrom(background.data);const b=background.bleed||0;const ratio=Math.min((w+2*b)/img.width,(h+2*b)/img.height);ctx.drawImage(img,(w-img.width*ratio)/2,(h-img.height*ratio)/2,img.width*ratio,img.height*ratio);}
   const overflow=[];
   if(fields)for(const field of campaign.sides[side].fields){
     if(isPFS(campaign)&&field.postalAddress)continue;
     const value=resolveField(field,recipient);
-    if(field.background!=='transparent')rect(ctx,field.x,field.y,field.w,field.h,field.background);
+    if(field.background!=='transparent'){const r=field.type==='shape'&&bleed?bleedRect(field,format,bleed):field;rect(ctx,r.x,r.y,r.w,r.h,field.background);}
     if(field.type==='shape'){continue;}
     if(field.type==='text'&&field.display==='stars'){drawRatingStars(ctx,field,value);continue;}
-    if(field.type==='image'){const selected=field.variantKey?recipient[field.variantKey]:null;const data=field.variants&&Object.hasOwn(field.variants,selected)?field.variants[selected]:field.data;const img=await imageFrom(data);const ratio=(field.fit==='cover'?Math.max:Math.min)(field.w/img.width,field.h/img.height);ctx.save();ctx.beginPath();ctx.rect(field.x,field.y,field.w,field.h);ctx.clip();if(field.fit==='stretch')ctx.drawImage(img,field.x,field.y,field.w,field.h);else ctx.drawImage(img,field.x+(field.w-img.width*ratio)/2,field.y+(field.h-img.height*ratio)/2,img.width*ratio,img.height*ratio);ctx.restore();continue;}
+    if(field.type==='image'){const selected=field.variantKey?recipient[field.variantKey]:null;const data=field.variants&&Object.hasOwn(field.variants,selected)?field.variants[selected]:field.data;const img=await imageFrom(data);const r=imageFrame(field,format),ratio=(field.fit==='cover'?Math.max:Math.min)(r.w/img.width,r.h/img.height);ctx.save();ctx.beginPath();ctx.rect(r.x,r.y,r.w,r.h);ctx.clip();if(field.fit==='stretch')ctx.drawImage(img,r.x,r.y,r.w,r.h);else ctx.drawImage(img,r.x+(r.w-img.width*ratio)/2,r.y+(r.h-img.height*ratio)/2,img.width*ratio,img.height*ratio);ctx.restore();continue;}
     if(field.type==='qr'){
       if(validURL(value)&&value.length<=1000){let code=codes.get(value);if(!code){code=await QRCode.toDataURL(value,{errorCorrectionLevel:'M',margin:4,width:800,color:{dark:'#101820',light:'#ffffff'}});if(codes.size>=128)codes.delete(codes.keys().next().value);codes.set(value,code);}const img=await imageFrom(code);const size=Math.min(field.w,field.h);ctx.drawImage(img,field.x,field.y,size,size);}
       else{rect(ctx,field.x,field.y,field.w,field.h,'#fff1f0');label(ctx,'Link fehlt',field.x+2,field.y+field.h/2,3,'#b43e36');}
@@ -75,7 +76,7 @@ export async function renderCanvas(canvas,campaign,side,recipient,{scale=5,field
   if(isPFS(campaign)&&side==='front'){
    // Reserved zones are opaque even with uploaded backgrounds. The address is
    // preview-only: the supplied Full Service template personalizes it later.
-   for(const z of PFS_ZONES)rect(ctx,z.x,z.y,z.w,z.h,'#ffffff');
+   for(const z of PFS_ZONES){const r=bleed?bleedRect(z,format,bleed):z;rect(ctx,r.x,r.y,r.w,r.h,'#ffffff');}
    const line=PFS_SEPARATOR;rect(ctx,line.x,line.y,line.w,line.h,'#000000');
    if(!production){const field=campaign.sides.front.fields.find(f=>f.postalAddress);if(field){const layout=layoutText(ctx,field,resolveField(field,recipient));ctx.font=`400 ${layout.size}px Kontakt, sans-serif`;ctx.fillStyle='#000000';ctx.textAlign='left';ctx.textBaseline='top';layout.lines.forEach((line,i)=>ctx.fillText(line,field.x,field.y+i*layout.size*1.3));if(layout.overflow)overflow.push(field.id);}}
   }

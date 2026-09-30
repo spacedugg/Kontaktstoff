@@ -2,6 +2,7 @@ import {PDFDocument,PDFName,PDFString,pushGraphicsState,popGraphicsState,scale,d
 import {FORMATS,checks,sideNames} from './core.js';
 import {renderCanvas,imageFrom} from './render.js';
 import {sideLabel,isSelfmailer,isPFS,PFS_SEPARATOR} from './formats.js';
+import {imageFrame} from './bleed.js';
 const mm=72/25.4;
 export const PRINT_DPI=300;
 export const DEFAULT_PRINT_PROFILE='/assets/print/profiles/ISOcoated_v2_300_eci.icc';
@@ -51,7 +52,7 @@ export async function printWarnings(campaign){
    if(dpi<299)warnings.push(`${label}: Hintergrund nur ${Math.round(dpi)} dpi.`);
   }
   for(const field of fields.filter(f=>f.type==='image'))for(const data of new Set([field.data,...Object.values(field.variants||{})])){
-   const img=await imageFrom(data),dpi=(['cover','stretch'].includes(field.fit)?Math.min:Math.max)(img.width/field.w,img.height/field.h)*25.4;
+   const img=await imageFrom(data),r=imageFrame(field,f),dpi=(['cover','stretch'].includes(field.fit)?Math.min:Math.max)(img.width/r.w,img.height/r.h)*25.4;
    if(dpi<299){warnings.push(`${label}: Bildelement nur ${Math.round(dpi)} dpi.`);break;}
   }
  }
@@ -59,6 +60,14 @@ export async function printWarnings(campaign){
 }
 export async function renderPrintCanvas(campaign,side,person,{dpi=PRINT_DPI}={}){
  const f=FORMATS.find(f=>f.id===campaign.format),factor=dpi/25.4,b=3;
+ // Native layouts and supplied bleed are rendered directly at their physical
+ // coordinates. No trim resampling or stretched edge pixels at the cut line.
+ const background=campaign.sides[side].background;
+ if(background.kind==='blank'||background.kind==='image'&&background.bleed===3){
+  const canvas=document.createElement('canvas'),overflow=await renderCanvas(canvas,campaign,side,person,{scale:factor,production:true,bleed:b});
+  if(overflow.length)throw new Error(`${sideLabel(campaign,side)}: Text passt nicht ins Feld. Bitte vor dem Druck korrigieren.`);
+  return canvas;
+ }
  const trim=document.createElement('canvas'),overflow=await renderCanvas(trim,campaign,side,person,{scale:factor,production:true});
  if(overflow.length)throw new Error(`${sideLabel(campaign,side)}: Text passt nicht ins Feld. Bitte vor dem Druck korrigieren.`);
  const out=document.createElement('canvas');out.width=Math.round((f.width+2*b)*factor);out.height=Math.round((f.height+2*b)*factor);
