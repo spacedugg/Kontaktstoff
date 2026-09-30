@@ -1,7 +1,4 @@
-// Tilt within the current reading orientation. Turning the paper over is an
-// explicit horizontal-axis action because the printed spreads are head-to-head.
-export function tiltFold(state,dx,dy){
- const base=Math.round(state.x/180)*180;
- return {x:base+Math.max(-35,Math.min(35,state.x-base+dx)),y:Math.max(-55,Math.min(55,state.y+dy))};
-}
+// Keep angles continuous across complete turns so pointer and keyboard gestures
+// never hit an artificial stop or jump when crossing 180/360 degrees.
+export function rotateFold(state,dx,dy){return {x:state.x+dx,y:state.y+dy};}
 export const turnFold=x=>Math.round(x/180)*180+180;

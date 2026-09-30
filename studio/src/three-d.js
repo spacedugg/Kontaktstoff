@@ -1,4 +1,4 @@
-import {tiltFold,turnFold} from './fold-navigation.js';
+import {rotateFold,turnFold} from './fold-navigation.js';
 import {FoldView} from './fold-view.js';
 const viewers=new WeakMap();
 // A two-sided CSS 3D card. Both faces use the same renderer as PDF and 2D proof.
@@ -30,7 +30,7 @@ export class Mailing3D {
           this.state.panY += event.key === 'ArrowDown' ? d : event.key === 'ArrowUp' ? -d : 0;
         } else {
           const dy=event.key==='ArrowRight'?d:event.key==='ArrowLeft'?-d:0,dx=event.key==='ArrowUp'?d:event.key==='ArrowDown'?-d:0;
-          if(this.fold)Object.assign(this.state,tiltFold(this.state,dx,dy));else{this.state.y+=dy;this.state.x+=dx;}
+          if(this.fold)Object.assign(this.state,rotateFold(this.state,dx,dy));else{this.state.y+=dy;this.state.x+=dx;}
         }
         this.paint();
       }
@@ -68,7 +68,7 @@ export class Mailing3D {
       this.state.panX += next.x - previous.x;
       this.state.panY += next.y - previous.y;
     } else {
-      if(this.fold)Object.assign(this.state,tiltFold(this.state,-(next.y-previous.y)*.4,(next.x-previous.x)*.55));
+      if(this.fold)Object.assign(this.state,rotateFold(this.state,-(next.y-previous.y)*.4,(next.x-previous.x)*.55));
       else{this.state.y+=(next.x-previous.x)*.55;this.state.x-=(next.y-previous.y)*.4;}
     }
     this.pointers.set(event.pointerId, next); this.paint();
@@ -90,7 +90,7 @@ export class Mailing3D {
     s.panY = Math.max(-this.root.clientHeight * .4, Math.min(this.root.clientHeight * .4, s.panY));
     this.card.style.transform = `translate3d(${s.panX}px, ${s.panY}px, 0) scale(${s.scale}) rotateX(${s.x}deg) rotateY(${s.y}deg)`;
     this.root.dataset.face = Math.cos(s.y * Math.PI / 180) >= 0 ? 'front' : 'back';
-    if(this.fold)this.root.dataset.face=Math.cos(s.x*Math.PI/180)>=0?'front':'back';
+    if(this.fold)this.root.dataset.face=Math.cos(s.x*Math.PI/180)*Math.cos(s.y*Math.PI/180)>=0?'front':'back';
     this.onViewChange?.();
     const label = this.root.parentElement.querySelector('#three-d-position');
     if (label) label.textContent = `${this.fold?(this.fold.open>50?'Aufgeklappt':this.root.dataset.face==='front'?'Titelseite':'Postanschrift'):(this.root.dataset.face === 'front' ? 'Vorderseite' : 'Rückseite')} · ${Math.round(s.scale * 100)} %`;
