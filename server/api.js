@@ -80,6 +80,7 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
    if(pathname==='/api/auth/me'&&req.method==='GET'){send(res,200,user?{user:await services.publicUser(user),csrf:user.csrf}:{user:null});return true;}
    if(!user)throw new HTTPError(401,'Bitte melde dich an, um deine Kampagne im Konto zu speichern.');
    if(!['GET','HEAD'].includes(req.method)&&req.headers['x-csrf-token']!==user.csrf)throw new HTTPError(403,'Die Sitzung wurde erneuert. Bitte lade die Seite neu.');
+   if(pathname==='/api/reviews'||pathname.startsWith('/api/reviews/'))await services.requireOperator(user);
    if(pathname.startsWith('/api/library/')||pathname==='/api/compose'||pathname==='/api/reviews'||pathname.startsWith('/api/reviews/')){send(res,200,await libraries.owner(pathname,req.method,['GET','HEAD'].includes(req.method)?{}:await body(req),user));return true;}
    if(pathname==='/api/auth/send-verification'&&req.method==='POST'){await limited('verify:'+user.id,3);if(!await services.verified(user))await services.sendToken(user,'verify');send(res,200,{ok:true});return true;}
    if(pathname==='/api/operator/proposals'||pathname.startsWith('/api/operator/proposals/')){

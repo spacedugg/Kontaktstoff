@@ -1,3 +1,4 @@
+import {tiltFold,turnFold} from './fold-navigation.js';
 import {FoldView} from './fold-view.js';
 const viewers=new WeakMap();
 // A two-sided CSS 3D card. Both faces use the same renderer as PDF and 2D proof.
@@ -28,8 +29,8 @@ export class Mailing3D {
           this.state.panX += event.key === 'ArrowRight' ? d : event.key === 'ArrowLeft' ? -d : 0;
           this.state.panY += event.key === 'ArrowDown' ? d : event.key === 'ArrowUp' ? -d : 0;
         } else {
-          this.state.y += event.key === 'ArrowRight' ? d : event.key === 'ArrowLeft' ? -d : 0;
-          this.state.x += event.key === 'ArrowUp' ? d : event.key === 'ArrowDown' ? -d : 0;
+          const dy=event.key==='ArrowRight'?d:event.key==='ArrowLeft'?-d:0,dx=event.key==='ArrowUp'?d:event.key==='ArrowDown'?-d:0;
+          if(this.fold)Object.assign(this.state,tiltFold(this.state,dx,dy));else{this.state.y+=dy;this.state.x+=dx;}
         }
         this.paint();
       }
@@ -67,8 +68,8 @@ export class Mailing3D {
       this.state.panX += next.x - previous.x;
       this.state.panY += next.y - previous.y;
     } else {
-      this.state.y += (next.x - previous.x) * .55;
-      this.state.x -= (next.y - previous.y) * .4;
+      if(this.fold)Object.assign(this.state,tiltFold(this.state,-(next.y-previous.y)*.4,(next.x-previous.x)*.55));
+      else{this.state.y+=(next.x-previous.x)*.55;this.state.x-=(next.y-previous.y)*.4;}
     }
     this.pointers.set(event.pointerId, next); this.paint();
   }
@@ -81,7 +82,7 @@ export class Mailing3D {
   reset() { this.fold?.stop();this.fold?.set(0);this.state = { x: -12, y: -24, panX: 0, panY: 0, scale: 1 }; this.paint(); }
   front() { this.fold?.stop();this.fold?.set(0);this.state.x = -8; this.state.y = -12; this.paint(); }
   back() { this.fold?.stop();this.fold?.set(0);this.state.x = this.fold?168:-8; this.state.y = this.fold?12:168; this.paint(); }
-  flip() { this.fold?.stop();if(this.fold)this.state.x+=180;else this.state.y += 180; this.paint(); }
+  flip() { this.fold?.stop();if(this.fold){this.state.x=turnFold(this.state.x);this.state.y=0;}else this.state.y += 180; this.paint(); }
   paint() {
     const s = this.state;
     this.fold?.size();if(!this.fold)s.x = Math.max(-75, Math.min(75, s.x)); s.scale = Math.max(.55, Math.min(1.8, s.scale));

@@ -21,6 +21,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let campaign=createCampaign(), side='front', selected=campaign.sides.front.fields[0]?.id, recipientIndex=0, view='design', guides=true;
 let cloudRecord=null,cloudPath='/campaigns/';
+let workspaceUser=null;
 let previewExtrasContext=null,editorMode='content';
 const editableFields=()=>campaign.sides[side].fields.filter(f=>editorMode==='layout'||['text','qr'].includes(f.type));
 const firstEditable=()=>editableFields().find(f=>f.type==='text'&&f.text.includes('{{'))||editableFields()[0];
@@ -56,7 +57,7 @@ function modal(title,body,buttons=[{id:'cancel',label:'Schließen'}]){
 }
 async function confirm(title,message,action='Bestätigen'){return await modal(title,`<p>${escape(message)}</p>`,[{id:'cancel',label:'Abbrechen'},{id:'ok',label:action,primary:true}])==='ok';}
 function renderUI(inspector=true,table=true,guide=true){
- $('#share-review').hidden=!(view==='preview'&&cloudRecord&&!cloudPath.includes('library')&&!reviewReturn());$('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=reviewReturn()?'Speichern & zur Abstimmung →':builderReturn()?'Speichern & zurück zur Kampagne →':cloudPath.includes('library')?'Freigabe & Feedback →':'Kampagne anfragen →';
+ $('#share-review').hidden=!(workspaceUser?.operator&&view==='preview'&&cloudRecord&&!cloudPath.includes('library')&&!reviewReturn());$('#request-campaign').hidden=view!=='preview';$('#request-campaign').textContent=reviewReturn()?'Speichern & zur Abstimmung →':builderReturn()?'Speichern & zurück zur Kampagne →':cloudPath.includes('library')?(workspaceUser?.operator?'Kundenlink & Feedback →':'Zurück zu meinen Designs →'):'Kampagne anfragen →';
  if(!sideNames(campaign).includes(side))side='front';
  document.body.classList.toggle('single-sided',sideNames(campaign).length===1);
  document.documentElement.style.setProperty('--mailing-ratio',format().width+'/'+format().height);
@@ -306,7 +307,7 @@ async function showDashboard(){
  for(const c of dashboardCampaigns){if(view!=='dashboard'||version!==dashboardVersion)break;const canvas=$(`[data-dashboard-thumb="${c.id}"]`);if(canvas)try{await renderCanvas(canvas,c,'front',c.recipients[0]||{company:'Ihr Unternehmen',salutation:'Guten Tag,',chatbot_url:'https://chattastic.de/'},{scale:2});}catch{canvas.replaceWith(document.createTextNode('Vorschau nicht verfügbar'));}}
 }
 const builderReturn=()=>{const p=new URLSearchParams(location.search),id=p.get('build');return id&&/^[\w-]+$/.test(id)?'/konto/?tab=build&id='+encodeURIComponent(id)+'&step='+(p.get('view')==='recipients'?'2':'1'):null;};
-const reviewReturn=()=>{const id=new URLSearchParams(location.search).get('review');return id&&/^[\w-]+$/.test(id)?'/konto/?tab=reviews&review='+encodeURIComponent(id):null;};
+const reviewReturn=()=>{if(!workspaceUser?.operator)return null;const id=new URLSearchParams(location.search).get('review');return id&&/^[\w-]+$/.test(id)?'/konto/?tab=designs&review='+encodeURIComponent(id):null;};
 const campaignList=async()=>{if(cloudRecord?.id===campaign.id||new URLSearchParams(location.search).has('workspace')){await flushSave();if(!saveFailed)location.href=reviewReturn()||builderReturn()||'/konto/';}else await showDashboard();};
 $('#dashboard-view').onclick=async e=>{
  const b=e.target.closest('button');if(!b)return;
@@ -521,8 +522,8 @@ $('#tutorial-view').addEventListener('click',async e=>{
 
 });
 
-$('#share-review').onclick=async()=>{await flushSave();if(!saveFailed&&cloudRecord)location.href='/konto/?tab=reviews&source=campaigns:'+encodeURIComponent(cloudRecord.id);};
-$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=reviewReturn()||builderReturn()||(cloudPath.includes('library')?'/konto/?tab=reviews&source=designs:'+encodeURIComponent(cloudRecord.id):cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id));};
+$('#share-review').onclick=async()=>{await flushSave();if(!saveFailed&&cloudRecord)location.href='/konto/?tab=designs&source=campaigns:'+encodeURIComponent(cloudRecord.id);};
+$('#request-campaign').onclick=async()=>{await flushSave();if(saveFailed)return;location.href=reviewReturn()||builderReturn()||(cloudPath.includes('library')?(workspaceUser?.operator?'/konto/?tab=designs&source=designs:'+encodeURIComponent(cloudRecord.id):'/konto/?tab=designs'):cloudRecord?.id===campaign.id?'/konto/?tab=brief&id='+encodeURIComponent(campaign.id):'/konto/?request='+encodeURIComponent(campaign.id));};
 $('#workspace-link').onclick=async e=>{e.preventDefault();await flushSave();if(saveFailed)return;location.href=reviewReturn()||builderReturn()||(cloudPath.includes('library')?'/konto/?tab=designs':cloudRecord?.id===campaign.id?'/konto/?id='+encodeURIComponent(campaign.id):'/konto/');};
 window.addEventListener('beforeunload',()=>{clearTimeout(saveTimer);flushSave();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
@@ -535,8 +536,8 @@ const params=new URLSearchParams(location.search);
 if(reviewReturn()){$('#workspace-link').textContent='Zurück zur Abstimmung';$('#request-campaign').textContent='Speichern & zur Abstimmung →';}
 try{
  const campaigns=await listCampaigns();const latest=campaigns.sort((a,b)=>b.updatedAt-a.updatedAt)[0];
- if(params.has('design')){cloudPath='/library/designs/';await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI(cloudPath+encodeURIComponent(params.get('design')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('In der Designbibliothek gespeichert');}
- else if(params.has('cloud')){await workspaceAPI('/auth/me');cloudRecord=await workspaceAPI('/campaigns/'+encodeURIComponent(params.get('cloud')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('Im Konto gespeichert');}
+ if(params.has('design')){cloudPath='/library/designs/';workspaceUser=(await workspaceAPI('/auth/me')).user;cloudRecord=await workspaceAPI(cloudPath+encodeURIComponent(params.get('design')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('In der Designbibliothek gespeichert');}
+ else if(params.has('cloud')){workspaceUser=(await workspaceAPI('/auth/me')).user;cloudRecord=await workspaceAPI('/campaigns/'+encodeURIComponent(params.get('cloud')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('Im Konto gespeichert');}
  else if(params.has('local')){const local=campaigns.find(c=>c.id===params.get('local'));if(!local)throw Error('Dieser lokale Entwurf wurde nicht gefunden.');campaign=validateCampaign(local);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';}
  else if(params.has('tutorial')||params.get('start')==='1'){view='start';}
  else if(CLIENT_CAMPAIGNS.some(c=>c.id===params.get('client'))){campaign=createClientCampaign(params.get('client'));try{const draft=sessionStorage.getItem('kontaktstoff-client-draft');if(draft){const candidate=validateCampaign(JSON.parse(draft));if(candidate.templateId===campaign.templateId){campaign=candidate;campaign.id=uid();}sessionStorage.removeItem('kontaktstoff-client-draft');}}catch{}hasActive=true;view='preview';await saveCampaign(campaign);}
