@@ -30,4 +30,12 @@ test('proposal payload refuses unsafe URLs/assets and personalized render data c
 
 test('compressed website responses are decoded with a strict output limit',()=>{const b=gzipSync(Buffer.from('a'.repeat(10000)));assert.equal(decodeResponse(b,'gzip',12000).length,10000);assert.throws(()=>decodeResponse(b,'gzip',1000),e=>e.status===422);});
 
-test('selfmailer proposal retains custom offer, branding and personalized CTA',()=>{const d=validateProposal({...MMS_PROPOSAL,cardCta:'Mein Termin',color:'#123456'}),p=proposalProject(d);assert.equal(p.format,'selfmailer-maxi-4');assert.ok(p.sides.back.fields.some(f=>f.text===d.offer));assert.ok(p.sides.back.fields.some(f=>f.brandRole==='cta'&&f.text===d.cardCta));assert.ok(p.sides.front.fields.some(f=>f.background===d.color));});
+test('selfmailer proposal retains custom offer, branding and personalized CTA',()=>{const d=validateProposal({...MMS_PROPOSAL,cardCta:'Mein Termin',color:'#123456'}),p=proposalProject(d);assert.equal(p.format,'selfmailer-dl-4');assert.ok(p.sides.back.fields.some(f=>f.text===d.offer));assert.ok(p.sides.back.fields.some(f=>f.brandRole==='cta'&&f.text===d.cardCta));assert.ok(p.sides.front.fields.some(f=>f.background===d.color));});
+
+ test('new proposals default to DIN lang while explicit existing print formats are retained',()=>{
+ const {format,...draft}=MMS_PROPOSAL;
+ assert.equal(validateProposal(draft).format,'selfmailer-dl-4');
+ assert.equal(proposalProject(draft).format,'selfmailer-dl-4');
+ assert.equal(suggestProposal({name:'Beispiel',url:'https://example.org/',description:'Service'},'b2b').format,'selfmailer-dl-4');
+ for(const format of ['a5-landscape','selfmailer-maxi-4'])assert.equal(proposalProject(validateProposal({...draft,format})).format,format);
+ });

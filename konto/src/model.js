@@ -1,6 +1,6 @@
 export const SALES={new:'Noch offen',conversation:'Im Gespräch',appointment:'Termin vereinbart',won:'Kunde gewonnen',lost:'Kein Interesse'};
 export const SHIPPING={pending:'Noch nicht versendet',sent:'Versendet',returned:'Rückläufer'};
-export const defaults=()=>({designService:false,leadSource:'upload',audience:'',region:'',companySize:'',roles:'',exclusions:'',quantity:250,formatRequest:'a5',planning:null,goal:'appointment',targetURL:'',launchDate:'',notes:'',cost:0,status:'draft',outcomes:{}});
+export const defaults=()=>({designService:false,leadSource:'upload',audience:'',region:'',companySize:'',roles:'',exclusions:'',quantity:250,formatRequest:'selfmailer-dl-4',planning:null,goal:'appointment',targetURL:'',launchDate:'',notes:'',cost:0,status:'draft',outcomes:{}});
 export function metrics(project,meta,visits=[]){
  const rows=project.recipients.map(r=>({...r,...(meta.outcomes?.[r.id]||{})}));
  const sent=rows.filter(r=>r.shipping==='sent').length,conversations=rows.filter(r=>['conversation','appointment','won'].includes(r.sales)).length,appointments=rows.filter(r=>['appointment','won'].includes(r.sales)).length,won=rows.filter(r=>r.sales==='won').length;

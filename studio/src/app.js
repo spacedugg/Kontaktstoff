@@ -1,6 +1,7 @@
 import {printProfileSettings,bindPrintProfile} from './print-profile.js';
 import {preparePrintImport,detectBleed,printWarnings,renderPrintCanvas,createPrintPDF} from './print.js';
-import {toPFSSelfmailer as toSelfmailer} from './pfs-selfmailer.js';
+import {toSelfmailer} from './selfmailer.js';
+import {toPFSSelfmailer} from './pfs-selfmailer.js';
 import {isSelfmailer,sideLabel,formatCaption,postalZones} from './formats.js';
 import {api as workspaceAPI} from '../../konto/src/api.js';
 import {openCSVImport} from './csv-dialog.js';
@@ -108,7 +109,7 @@ function renderUI(inspector=true,table=true,guide=true){
  if(view==='setup'&&guide)$('#setup-view').innerHTML=guideHTML(campaign);
  $('#three-d-front-button').textContent=isSelfmailer(campaign)?'Titelseite':'Vorderseite';$('#three-d-back-button').textContent=isSelfmailer(campaign)?'Postanschrift':'Rückseite';$('#preview-mode-2d').textContent=isSelfmailer(campaign)?'▤ Druckbogen · 2D':'▤ Beide Seiten';$('#three-d-view').hidden=previewMode!=='3d';$('#proof-spread').hidden=previewMode!=='2d';
  for(const mode of ['2d','3d']){const b=$('#preview-mode-'+mode);b.classList.toggle('active',previewMode===mode);b.setAttribute('aria-pressed',String(previewMode===mode));}
- $('#format-short').textContent=format().name;$('#format-select').innerHTML=FORMATS.filter(f=>f.id==='selfmailer-maxi-4'||f.id===campaign.format).map(f=>`<option value="${f.id}">${escape(f.name)}</option>`).join('');
+ $('#format-short').textContent=format().name;$('#format-select').innerHTML=FORMATS.filter(f=>f.id===campaign.format||(!isSelfmailer(campaign)&&f.id==='selfmailer-dl-4')).map(f=>`<option value="${f.id}">${escape(f.name)}</option>`).join('');
  $('#side-title').textContent=sideLabel(campaign,side);$('#format-select').value=campaign.format;
  $('#dimensions').textContent=formatCaption(campaign);$('#width-label').textContent=`${format().width} mm`;$('#design-scale').textContent=format().name;
  $('#artboard').style.aspectRatio=`${format().width}/${format().height}`;
@@ -261,7 +262,7 @@ for(const element of [$('#upload-button'),$('#canvas-scroll')]){
 $('#background-remove').onclick=async()=>{if(await confirm('Hintergrund entfernen?','Deine persönlichen Felder bleiben erhalten. Den Hintergrund kannst du anschließend neu hochladen.','Entfernen'))commit(()=>campaign.sides[side].background={kind:'blank'});};
 $('#format-select').onchange=async e=>{
  const next=FORMATS.find(f=>f.id===e.target.value),old=format();if(!next||next.id===old.id)return;
- if(next.id==='selfmailer-maxi-4'){if(await confirm('Als Selfmailer gestalten?','Aus dem bisherigen Design werden vier Flächen: Titel und Anschrift außen, Nachricht und Angebot innen. Prüfe anschließend Texte und Postanschriften. Rückgängig ist möglich.','Selfmailer übernehmen'))commit(()=>{campaign=toSelfmailer(campaign);side='front';selected=null;});else e.target.value=campaign.format;return;}
+ if(next.id==='selfmailer-dl-4'||next.id==='selfmailer-maxi-4'){if(await confirm('Als Selfmailer gestalten?','Aus dem bisherigen Design werden vier Flächen: Titel und Anschrift außen, Nachricht und Angebot innen. Prüfe anschließend Texte und Postanschriften. Rückgängig ist möglich.','Selfmailer übernehmen'))commit(()=>{campaign=next.id==='selfmailer-maxi-4'?toPFSSelfmailer(campaign):toSelfmailer(campaign);side='front';selected=null;});else e.target.value=campaign.format;return;}
  if(await confirm('Format ändern?',`Das Mailing wird auf ${next.width} × ${next.height} mm umgestellt. Positionen werden proportional angepasst. Prüfe danach beide Seiten und lade bei Bedarf passende Designs hoch.`,'Format übernehmen')){
   const backgrounds={};for(const [side,s] of Object.entries(campaign.sides))if(s.background.bleed===3){const image=await imageFrom(s.background.data),canvas=document.createElement('canvas');canvas.width=Math.round(image.width*old.width/(old.width+6));canvas.height=Math.round(image.height*old.height/(old.height+6));canvas.getContext('2d').drawImage(image,image.width*3/(old.width+6),image.height*3/(old.height+6),image.width*old.width/(old.width+6),image.height*old.height/(old.height+6),0,0,canvas.width,canvas.height);backgrounds[side]={...s.background,data:canvas.toDataURL(),width:canvas.width,height:canvas.height,bleed:0};}
   commit(()=>{for(const [side,s] of Object.entries(campaign.sides)){if(backgrounds[side])s.background=backgrounds[side];for(const f of s.fields){f.x=f.x/old.width*next.width;f.y=f.y/old.height*next.height;f.w=f.w/old.width*next.width;f.h=f.h/old.height*next.height;if(f.type==='qr')f.w=f.h=Math.min(f.w,f.h);}}campaign.format=next.id;});
@@ -541,7 +542,7 @@ try{
  else if(params.has('cloud')){workspaceUser=(await workspaceAPI('/auth/me')).user;cloudRecord=await workspaceAPI('/campaigns/'+encodeURIComponent(params.get('cloud')));campaign=validateCampaign(cloudRecord.project);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';saveState('Im Konto gespeichert');}
  else if(params.has('local')){const local=campaigns.find(c=>c.id===params.get('local'));if(!local)throw Error('Dieser lokale Entwurf wurde nicht gefunden.');campaign=validateCampaign(local);hasActive=true;view=['design','recipients','preview'].includes(params.get('view'))?params.get('view'):'design';}
  else if(params.has('tutorial')||params.get('start')==='1'){view='start';}
- else if(CLIENT_CAMPAIGNS.some(c=>c.id===params.get('client'))){campaign=createClientCampaign(params.get('client'));try{const draft=sessionStorage.getItem('kontaktstoff-client-draft');if(draft){const candidate=validateCampaign(JSON.parse(draft));if(candidate.templateId===campaign.templateId){campaign=candidate;campaign.id=uid();}sessionStorage.removeItem('kontaktstoff-client-draft');}}catch{}hasActive=true;view='preview';await saveCampaign(campaign);}
+ else if(CLIENT_CAMPAIGNS.some(c=>c.id===params.get('client'))){campaign=toSelfmailer(createClientCampaign(params.get('client')));try{const draft=sessionStorage.getItem('kontaktstoff-client-draft');if(draft){const candidate=validateCampaign(JSON.parse(draft));if(candidate.templateId===campaign.templateId){campaign=candidate;campaign.id=uid();}sessionStorage.removeItem('kontaktstoff-client-draft');}}catch{}hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.has('example')){campaign=createExampleCampaign(params.get('example'));hasActive=true;view='preview';await saveCampaign(campaign);}
  else if(params.get('start')==='blank'){view='start';}
  else if(params.has('template')){campaign=toSelfmailer(createTemplate(params.get('template')));campaign.onboarding.active=false;hasActive=true;view='design';await saveCampaign(campaign);}

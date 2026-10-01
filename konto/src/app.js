@@ -1,7 +1,7 @@
 import {reviewProgress} from './review-project.js';
 import {campaignReviewSource,campaignReview} from './campaign-sharing.js';
 import {isSelfmailer} from '../../studio/src/formats.js';
-import {toPFSSelfmailer as toSelfmailer} from '../../studio/src/pfs-selfmailer.js';
+import {toSelfmailer} from '../../studio/src/selfmailer.js';
 import {mountSales} from './sales-tools.js';
 import {mountBuilder} from './builder.js';
 import {BUILD_STEPS} from './builder-model.js';
