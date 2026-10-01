@@ -24,7 +24,7 @@ test('personal page and social image expose published snapshots only; inquiries 
  }finally{await db.close();}
 });
 test('page metadata escapes company names and never embeds executable proposal content',()=>{
- const page=proposalHTML({slug:'example-123',proposal:{...MMS_PROPOSAL,company:'\"><script>alert(1)</script>',intro:'A & B'}},origin);assert.ok(page.includes('&lt;script&gt;'));assert.ok(!page.includes('<script>alert(1)</script>'));assert.equal(proposalHref('example-123',origin),origin+'/idee/example-123/');
+ const page=proposalHTML({slug:'example-123',proposal:{...MMS_PROPOSAL,company:'\"><script>alert(1)</script>',intro:'A & B'}},origin);assert.ok(page.includes('&lt;script&gt;'));assert.ok(!page.includes('<script>alert(1)</script>'));assert.equal(proposalHref('example-123',origin),origin+'/idee/example-123');
 });
 test('imported sales artwork strips recipient lists, notes and variants; uses a fictitious recipient and a deliberate QR target',()=>{
  const project=proposalProject(MMS_PROPOSAL);project.recipients=[{id:'customer',first_name:'Private',email:'private@example.org'}];project.brief={sender:'internal',audience:'secret',goal:'private',offer:'hidden'};
