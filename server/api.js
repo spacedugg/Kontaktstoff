@@ -1,4 +1,4 @@
-import {countRedirect,privacyMaintenance} from './privacy.js';
+import {countRedirect,countProposalView,privacyMaintenance} from './privacy.js';
 import {proposalHTML} from './proposal-page.js';
 import {proposalService} from './proposals.js';
 import {salesService} from './sales.js';
@@ -34,7 +34,9 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
    if(pathname.startsWith('/idee/')){
     if(!['GET','HEAD'].includes(req.method))throw new HTTPError(405,'Methode nicht erlaubt.');
     const slug=pathname.slice(6);if(!/^[a-z0-9-]{1,100}$/.test(slug))throw new HTTPError(404,'Diese Seite ist nicht verfügbar.');
-    const page=await proposals.public(slug);res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'});res.end(req.method==='HEAD'?'':proposalHTML(page,origin));return true;
+    const page=await proposals.public(slug);
+    if(countProposalView(req)){const viewer=await session(req);if(!viewer||!(await services.publicUser(viewer)).operator){try{await proposals.recordView(slug);}catch{console.error('Kontaktstoff: Verkaufsseiten-Aufruf konnte nicht gezählt werden.');}}}
+    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'});res.end(req.method==='HEAD'?'':proposalHTML(page,origin));return true;
    }
    if(pathname==='/api/proposal-image'&&['GET','HEAD'].includes(req.method)){
     const {proposal}=await proposals.public(text(url.searchParams.get('slug')||req.query?.slug||'',100),{includeImage:true});

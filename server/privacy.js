@@ -14,3 +14,11 @@ export function privacyMaintenance(db,{now=Date.now,interval=3600000}={}){
   return running;
  };
 }
+
+// Only actual document requests. Never store headers, IPs, cookies or visitor IDs.
+export function countProposalView(req){
+ const h=req.headers;
+ return countRedirect(req)&&!/(prefetch|prerender)/i.test([h.purpose,h['sec-purpose'],h['x-purpose']].join(' '))
+  &&(!h['sec-fetch-dest']||h['sec-fetch-dest']==='document')
+  &&!/linkedin|whatsapp|telegram|discord|skype|pinterest|embedly|iframely|headless|lighthouse/i.test(h['user-agent']||'');
+}
