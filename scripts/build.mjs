@@ -1,3 +1,4 @@
+import {addPrivacyLinks} from './privacy-pages.mjs';
 import {buildClientPages} from './client-pages.mjs';
 import { build } from 'esbuild';
 import { copyFile, mkdir, cp, rm } from 'node:fs/promises';
@@ -20,7 +21,7 @@ for (const [pkg, file] of [['pdfjs-dist','LICENSE'],['pdf-lib','LICENSE.md'],['q
 }
 await rm('dist', {recursive:true, force:true});
 await mkdir('dist/studio', {recursive:true});
-for (const file of ['index.html','app.js','style.css','case-studies.json','assets','logo-ideen','fuer','freigabe','admin','branchen','ratgeber','wissen','404.html','agb.html','datenschutz.html','impressum.html','kontakt.html','vergleich.html','widerruf.html','favicon.ico','favicon.svg','favicon-48.png','apple-touch-icon.png','site.webmanifest','robots.txt','sitemap.xml']) await cp(file, `dist/${file}`, {recursive:true});
+for (const file of ['index.html','app.js','style.css','case-studies.json','assets','logo-ideen','fuer','freigabe','admin','branchen','ratgeber','wissen','404.html','agb.html','datenschutz.html','cookies.html','impressum.html','kontakt.html','vergleich.html','widerruf.html','favicon.ico','favicon.svg','favicon-48.png','apple-touch-icon.png','site.webmanifest','robots.txt','sitemap.xml']) await cp(file, `dist/${file}`, {recursive:true});
 await mkdir('dist/mailings',{recursive:true});
 for(const file of ['index.html','style.css','app.js'])await copyFile(`mailings/${file}`,`dist/mailings/${file}`);
 await mkdir('dist/konto',{recursive:true});
@@ -28,5 +29,6 @@ for(const file of ['index.html','style.css','workflow.css','app.js'])await copyF
 await mkdir('dist/clients',{recursive:true});
 for(const file of ['app.js','style.css','base.css'])await copyFile(`clients/${file}`,`dist/clients/${file}`);
 for (const file of ['index.html','styles.css','workspace.css','app.js','app.js.LEGAL.txt','vendor']) await cp(`studio/${file}`, `dist/studio/${file}`, {recursive:true});
+await addPrivacyLinks('dist');
 await import('./check-deployment.mjs');
 console.log('Studio gebaut: /studio/ · Statische Veröffentlichung unter dist/.');

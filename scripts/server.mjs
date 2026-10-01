@@ -3,10 +3,12 @@ import {createAPI} from '../server/api.js';
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
-const root = process.cwd();
+const root = path.resolve(process.env.STATIC_ROOT||process.cwd());
+const securityHeaders=JSON.parse(await readFile(new URL('../vercel.json',import.meta.url),'utf8')).headers.find(rule=>rule.source==='/(.*)').headers;
 const api=createAPI(await connectDB(),{origin:process.env.PUBLIC_ORIGIN||`http://127.0.0.1:${process.env.PORT||4177}`});
 const mime = {'.html':'text/html; charset=utf-8','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.ttf':'font/ttf','.json':'application/json','.pdf':'application/pdf','.wasm':'application/wasm'};
 http.createServer(async(req,res)=>{
+  for(const {key,value} of securityHeaders)res.setHeader(key,value);
   if(await api(req,res))return;
   try {
     const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);

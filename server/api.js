@@ -1,3 +1,4 @@
+import {countRedirect,privacyMaintenance} from './privacy.js';
 import {proposalHTML} from './proposal-page.js';
 import {proposalService} from './proposals.js';
 import {salesService} from './sales.js';
@@ -24,10 +25,12 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
  const load=async(q,id,user)=>{const result=await q('SELECT * FROM campaigns WHERE id=$1 AND user_id=$2 AND deleted_at IS NULL',[id,user]);if(!result.rows[0])throw new HTTPError(404,'Kampagne nicht gefunden.');return result.rows[0];};
  const sales=salesService(db),proposals=proposalService(db);
  const libraries=libraryService(db,{origin,limited,reviewLinkKey});
+ const cleanExpired=privacyMaintenance(db);
  return async function handle(req,res){
   const url=new URL(req.url,origin),pathname=url.pathname.replace(/\/$/,'');
   if(!pathname.startsWith('/api/')&&!pathname.startsWith('/r/')&&!pathname.startsWith('/idee/'))return false;
   try{
+   await cleanExpired();
    if(pathname.startsWith('/idee/')){
     if(!['GET','HEAD'].includes(req.method))throw new HTTPError(405,'Methode nicht erlaubt.');
     const slug=pathname.slice(6);if(!/^[a-z0-9-]{1,100}$/.test(slug))throw new HTTPError(404,'Diese Seite ist nicht verfügbar.');
@@ -43,7 +46,7 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
     const token=pathname.slice(3);const result=await db.query('SELECT links.*,campaigns.payload FROM links JOIN campaigns ON campaigns.id=links.campaign_id WHERE links.token=$1 AND campaigns.deleted_at IS NULL',[token]);const link=result.rows[0];
     if(!link||!JSON.parse(link.payload).project.recipients.some(r=>r.id===link.recipient_id))throw new HTTPError(404,'Dieser Kampagnen-Link ist nicht mehr verfügbar.');
     // Count requests, not people. HEAD and common automated previews do not count.
-    if(req.method==='GET'&&!/bot|crawler|spider|preview|slack|facebookexternalhit/i.test(req.headers['user-agent']||''))await db.query('INSERT INTO visits(id,token,created_at) VALUES($1,$2,$3)',[randomUUID(),token,Date.now()]);
+    if(countRedirect(req))await db.query('INSERT INTO visits(id,token,created_at) VALUES($1,$2,$3)',[randomUUID(),token,Date.now()]);
     res.writeHead(302,{Location:link.target,'Cache-Control':'no-store','Referrer-Policy':'no-referrer','X-Robots-Tag':'noindex, nofollow'});res.end();return true;
    }
    if(pathname==='/api/health'){try{await db.query('SELECT 1');}catch{send(res,503,{available:false,storage:process.env.DATABASE_URL?'postgres':'local'});return true;}send(res,200,{available:true,storage:process.env.DATABASE_URL?'postgres':'local',origin,email:mailer.configured});return true;}

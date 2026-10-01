@@ -38,7 +38,7 @@ WISSEN = [  # Wissenswertes: kurze Antworten auf konkrete Fragen
 KONTAKTSTOFF_MENUE = [('/#plattform', 'Plattform'), ('/#vorteil', 'Warum Post?'), ('/#cases', 'Beispiele'),
                       ('/#preise', 'Preise'), ('/#planen', 'Kampagne planen'), ('/vergleich', 'Anbieter im Vergleich')]
 BRANCHEN = ['agenturen', 'it-dienstleister', 'recruiting', 'industrie', 'gewerbeenergie']
-RECHTLICHES = [('impressum', 'Impressum'), ('datenschutz', 'Datenschutz'), ('agb', 'AGB'),
+RECHTLICHES = [('impressum', 'Impressum'), ('datenschutz', 'Datenschutz'), ('cookies', 'Cookies & Browserspeicher'), ('agb', 'AGB'),
                ('widerruf', 'Widerruf'), ('kontakt', 'Kontakt')]
 
 e = html.escape
@@ -214,11 +214,8 @@ def uebersicht(ordner, titel, h1, lead, beschreibung, eintraege, intro_html=''):
 
 
 RECHT_INHALT = {
-    'impressum': ('Impressum', '<p>Die vollständigen Anbieterangaben nach § 5 Digitale-Dienste-Gesetz werden vor dem öffentlichen Marktstart ergänzt: Unternehmensname, Rechtsform, Vertretungsberechtigte, ladungsfähige Anschrift, Kontaktangaben sowie gegebenenfalls Registereintrag und Umsatzsteuer-Identifikationsnummer.</p><p>Diese Website zeigt die Marke und die geplante Leistung von Kontaktstoff. Über die Website können derzeit keine Bestellungen aufgegeben werden.</p>'),
-    'datenschutz': ('Datenschutz', '<p>Die Website und der Kampagnenrechner verarbeiten deine Eingaben lokal im Browser. Die Website versendet keine Formulardaten, speichert keine Eingaben und setzt kein eigenes Marketing-Tracking ein.</p><p>Die Schriftdateien werden zusammen mit der Website ausgeliefert. Der Hosting-Anbieter verarbeitet beim Seitenaufruf technische Verbindungsdaten.</p><p>Für den öffentlichen Betrieb werden die verantwortliche Stelle, der Hosting-Dienstleister, die tatsächlichen Verarbeitungen und Kontaktwege in einer vollständigen Datenschutzerklärung ergänzt.</p>'),
-    'agb': ('Allgemeine Geschäftsbedingungen', '<p>Die Allgemeinen Geschäftsbedingungen für Kampagnen, Creditpakete und Zusatzservices werden vor dem öffentlichen Marktstart hier veröffentlicht.</p><p>Das Angebot von Kontaktstoff richtet sich an Unternehmen.</p>'),
-    'widerruf': ('Widerruf', '<p>Informationen zum Widerruf werden vor dem öffentlichen Marktstart hier veröffentlicht.</p><p>Das Angebot von Kontaktstoff richtet sich an Unternehmen.</p>'),
-    'kontakt': ('Kontakt', '<p>Die Kontaktangaben werden vor dem öffentlichen Marktstart ergänzt.</p><p>Du kannst deine Kampagne schon jetzt mit dem <a href="/#planen">Kampagnenrechner</a> planen und dir ein Briefing herunterladen.</p>'),
+    slug: (title, (ROOT / 'inhalte' / 'recht' / f'{slug}.html').read_text(encoding='utf-8'))
+    for slug, title in [('impressum', 'Impressum'), ('datenschutz', 'Datenschutz'), ('cookies', 'Cookies & Browserspeicher'), ('kontakt', 'Kontakt'), ('agb', 'Vertragsinformationen'), ('widerruf', 'Angebot für Unternehmen')]
 }
 
 
