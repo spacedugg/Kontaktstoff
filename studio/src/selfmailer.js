@@ -1,3 +1,4 @@
+import {styleMMS} from './mms-selfmailer.js';
 import {applyRehaSleepOffer} from './reha-offer.js';
 import {styleBewertungspushSelfmailer} from './bewertungspush-selfmailer.js';
 import {uid} from './core.js';
@@ -30,6 +31,7 @@ export function toSelfmailer(source){
  const signature=value('signature')||(mms?textAt('back',6):review?'Ihr Team von BewertungsPush':id==='reha-sleep'?'Ihr RehaSleep-Team':'Dein Team von '+brand);
  c.format='selfmailer-dl-4';c.selfmailer={version:1,sourceFormat:source.format};
  if(review)return styleBewertungspushSelfmailer(c);
+ if(mms)return styleMMS(c,original);
  if(!all.length&&Object.values(original).every(s=>s.background.kind==='blank'))return c;
  // Upper outside panel is the postal back; lower panel is the cover.
  let front=[s(0,0,210,99,'#ffffff'),brandAt(10,10,100),t('PERSÖNLICH FÜR',10,36,104,5,8,accent,'','700'),t('{{company}}',10,46,108,17,18,ink,'','700'),t(review||id==='reha-sleep'?'Persönlich für Sie.':'Persönlich für dich.',10,70,105,10,10,ink),

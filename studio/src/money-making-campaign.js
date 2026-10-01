@@ -1,7 +1,7 @@
 import {createCampaign,uid} from './core.js';
 export function createMoneyMakingCampaign(){
  const client={id:'money-making-sprint',name:'Money Making Sprint',target:'https://www.money-making-sprint.de/termin'};
- const c=createCampaign(true),black='#131216',white='#faf8f2',lime='#dbff00',purple='#7338ea';
+ const c=createCampaign(true),black='#131216',white='#faf8f2',lime='#e0ff00',purple='#6829cc';
  const text=(value,x,y,w,h,size=12,color=black,weight='400')=>({id:uid(),type:'text',text:value,x,y,w,h,fontSize:size,color,weight,align:'left',background:'transparent',autoFit:true});
  const shape=(x,y,w,h,color)=>({...text('',x,y,w,h),type:'shape',background:color});
  c.name=client.name+' · Dein nächster Kunde';c.templateId=client.id;c.sample=true;c.onboarding={active:false,step:5,personalizationSkipped:false};
@@ -14,7 +14,7 @@ export function createMoneyMakingCampaign(){
  c.sides.front={background:{kind:'blank',color:black},fields:[
   shape(198,0,12,148,purple),text('MONEY MAKING SPRINT',13,11,154,9,13,white,'700'),text('↗',174,8,19,19,34,lime,'700'),
   shape(13,35,100,17,lime),text('Hey {{first_name}},',17,38,92,13,23,black,'700'),
-  text('wer holt den\\nnächsten Kunden\\nfür euch rein?'.replaceAll('\\n','\n'),13,61,176,53,38,white,'700'),
+  text('Gute Arbeit.\\nAber wo bleibt\\nder nächste Kunde?'.replaceAll('\\n','\n'),13,61,176,53,38,white,'700'),
   text('EINE PERSÖNLICHE FRAGE AN',13,125,117,6,8,'#b8b2c2','700'),text('{{company}}',13,134,154,9,15,white,'700'),text('VON JAKOB',163,132,29,7,8,lime,'700')
  ]};
  c.sides.back={background:{kind:'blank',color:white},fields:[

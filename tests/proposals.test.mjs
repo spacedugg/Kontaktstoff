@@ -39,3 +39,14 @@ test('selfmailer proposal retains custom offer, branding and personalized CTA',(
  assert.equal(suggestProposal({name:'Beispiel',url:'https://example.org/',description:'Service'},'b2b').format,'selfmailer-dl-4');
  for(const format of ['a5-landscape','selfmailer-maxi-4'])assert.equal(proposalProject(validateProposal({...draft,format})).format,format);
  });
+
+test('MMS proposal uses its brand palette, concrete service and direct booking CTA on four editable panels',()=>{
+ const d=validateProposal(MMS_PROPOSAL),p=proposalProject(d),f=Object.values(p.sides).flatMap(s=>s.fields);
+ assert.equal(p.selfmailer.design,'mms-brand-2026');assert.equal(p.format,'selfmailer-dl-4');
+ for(const color of ['#101010','#e0ff00','#6829cc'])assert.ok(f.some(v=>v.background===color));
+ assert.ok(f.some(v=>v.brandRole==='headline'&&v.text===d.cardHeadline));
+ assert.ok(f.some(v=>v.brandRole==='cta'&&v.text===d.cardCta));
+ assert.ok(f.some(v=>v.brandRole==='body'&&v.text==='{{personal_note}}'));
+ assert.equal(proposalPerson(d).chatbot_url,'https://www.money-making-sprint.de/termin');
+ for(const term of ['Positionierung','Angebot','Vertriebsprozess'])assert.ok(d.offer.includes(term));
+});
