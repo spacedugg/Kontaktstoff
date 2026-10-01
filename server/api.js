@@ -1,3 +1,4 @@
+import {proposalHTML} from './proposal-page.js';
 import {proposalService} from './proposals.js';
 import {salesService} from './sales.js';
 import {ADMIN_ID,ADMIN_EMAIL,validAdminHash,adminLogin} from './admin-auth.js';
@@ -25,8 +26,18 @@ export function createAPI(db,{origin=process.env.PUBLIC_ORIGIN||'http://127.0.0.
  const libraries=libraryService(db,{origin,limited,reviewLinkKey});
  return async function handle(req,res){
   const url=new URL(req.url,origin),pathname=url.pathname.replace(/\/$/,'');
-  if(!pathname.startsWith('/api/')&&!pathname.startsWith('/r/'))return false;
+  if(!pathname.startsWith('/api/')&&!pathname.startsWith('/r/')&&!pathname.startsWith('/idee/'))return false;
   try{
+   if(pathname.startsWith('/idee/')){
+    if(!['GET','HEAD'].includes(req.method))throw new HTTPError(405,'Methode nicht erlaubt.');
+    const slug=pathname.slice(6);if(!/^[a-z0-9-]{1,100}$/.test(slug))throw new HTTPError(404,'Diese Seite ist nicht verfügbar.');
+    const page=await proposals.public(slug);res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'});res.end(req.method==='HEAD'?'':proposalHTML(page,origin));return true;
+   }
+   if(pathname==='/api/proposal-image'&&['GET','HEAD'].includes(req.method)){
+    const {proposal}=await proposals.public(text(url.searchParams.get('slug')||req.query?.slug||'',100),{includeImage:true});
+    if(!proposal.shareImage)throw new HTTPError(404,'Kein Vorschaubild vorhanden.');
+    const [meta,data]=proposal.shareImage.split(',');res.writeHead(200,{'Content-Type':meta.slice(5,meta.indexOf(';')),'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(req.method==='HEAD'?undefined:Buffer.from(data,'base64'));return true;
+   }
    if(pathname.startsWith('/r/')){
     if(!['GET','HEAD'].includes(req.method))throw new HTTPError(405,'Methode nicht erlaubt.');
     const token=pathname.slice(3);const result=await db.query('SELECT links.*,campaigns.payload FROM links JOIN campaigns ON campaigns.id=links.campaign_id WHERE links.token=$1 AND campaigns.deleted_at IS NULL',[token]);const link=result.rows[0];

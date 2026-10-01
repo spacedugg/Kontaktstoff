@@ -3,7 +3,7 @@ import {renderCanvas} from '../studio/src/render.js';
 import {Mailing3D} from '../studio/src/three-d.js';
 import {salesConfig} from './config.js';
 import {mountProposalPage} from './proposal-page.js';
-if(new URLSearchParams(location.search).has('konzept')||new URLSearchParams(location.search).has('vorschau'))await mountProposalPage();else await genericPage();
+if(document.body.dataset.proposalSlug||new URLSearchParams(location.search).has('konzept')||new URLSearchParams(location.search).has('vorschau'))await mountProposalPage();else await genericPage();
 async function genericPage(){
 const $=s=>document.querySelector(s),config=salesConfig(new URLSearchParams(location.search));
 const cases={

@@ -116,6 +116,10 @@
   ],
   "rewrites": [
     {
+      "source": "/idee/:slug",
+      "destination": "/api/index?proposalPage=:slug"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api/index?route=:path*"
     },
