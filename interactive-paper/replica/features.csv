@@ -1,0 +1,26 @@
+feature,area,priority,original,clone,notes
+Startseite mit Hero und Produktübersicht,marketing site,must,yes,no,S01
+Produktkarten mit Vergleich,marketing site,should,yes,no,S01 Compare-Funktion
+Kopfzeile mit Sprachwahl EN/DE/FR,marketing site,should,yes,no,
+Terminanfrage (Book a meeting),lead generation,must,yes,no,Technik der Anfrage nicht gesehen
+Produktseite mit Feature-Kacheln,marketing site,should,yes,no,S02
+Animiertes Analytics-Dashboard als Demo,marketing site,should,yes,no,S02 Zählanimation Liniendiagramm Trichter
+Vorher/Nachher-Vergleichstabelle,marketing site,could,yes,no,S02
+Zusammenarbeit in 5 Schritten,marketing site,should,yes,no,S03
+Referenzen-Übersicht,marketing site,should,yes,no,S04 mit eigenen Beispielen
+Referenz-Detailseiten,marketing site,could,unknown,no,nicht gesehen
+FAQ mit Gruppen und Akkordeon,marketing site,should,yes,no,S06 nur Fragen bekannt eigene Antworten nötig
+Blog,marketing site,could,yes,no,nicht gelesen
+Rechtsseiten (Impressum Datenschutz AGB),legal,must,yes,no,mit eigenen Angaben
+Webtool-Katalog,portal,could,yes,no,nicht gesehen
+Kampagnen im Portal anlegen,portal,could,yes,no,nur aus Text
+Web-Tool-Inhalt ändern nach dem Druck,portal,could,yes,no,laut Seite möglich
+Zielseite nach dem Antippen (mobil),tap experience,could,yes,no,S13 nicht gesehen
+Interaktionen zählen und auswerten,analytics,could,yes,no,Data Report nur als Mockup gesehen
+Leads erfassen,analytics,could,unknown,no,nur FAQ-Frage
+CRM-Anbindung,integrations,could,unknown,no,nur FAQ-Frage
+Datenschutz-konform und EU-Hosting,compliance,should,yes,no,Aussage der Seite
+Augmented Reality Erlebnisse,tap experience,could,yes,skip,eigene Inhalte und Technik nötig
+NFC-Papier herstellen und versenden,hardware,could,yes,skip,Hardware und Logistik sind nicht nachbaubar
+Kundenlogos und Fallstudien,content,could,yes,skip,gehören Dritten
+Marke Name Logo und Claims,brand,could,yes,skip,gehören Interactive Paper
