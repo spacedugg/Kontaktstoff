@@ -187,3 +187,16 @@ Gehe so vor:
 
 Regeln: Kein Kopieren von Texten, Bildern, Logos oder Namen der Referenzseite interactivepaper.com. Keine erfundenen Kunden, Zahlen oder Bewertungen. Alle Demo-Inhalte als Beispiel kennzeichnen. Schreibe auf Deutsch.
 ```
+
+
+## 11. Fortsetzung im neuen Chat · 2026-10-09
+
+Der Auftraggeber bevorzugt die Richtungen Signal und Electric und verlangt zunächst den Kontaktstoff-Colorway.
+Ein schwarzer Tech-/Banking-Auftritt wurde ausdrücklich verworfen: Die Karten sollen auffallen und Freude/Farbe vermitteln.
+
+Die erste neue Umsetzung bleibt vollständig in `web/`: Weiß, Graphit und Neongelb; Kontaktstoff-Logo und Manrope; große Typografie über eigenem Produktmotiv; Angebotsseite, mobile Empfänger-Demo und Beispiel-Auswertung.
+Header verwendet vorerst Kontaktstoff. Der eigene Produktname ist weiterhin offen.
+
+Neue Details und ehrliche Prüfgrenzen stehen in `web/README.md` und `replica/build-log.md`.
+NFC und AR/Kamera-Tracking sind weiterhin nicht implementiert. Es erfolgen keine echten Buchungen, Käufe, Datenübermittlungen oder Analysen.
+Die vorhandene Live-Seite, ihr Root-Build und `vercel.json` werden nicht geändert. Kein Merge in PR #23.

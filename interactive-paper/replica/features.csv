@@ -1,21 +1,21 @@
 feature,area,priority,original,clone,notes
-Startseite mit Hero und Produktübersicht,marketing site,must,yes,no,S01
+Startseite mit Hero und Produktübersicht,marketing site,must,yes,yes,Eigenständiger heller Kontaktstoff-Auftritt; ein NFC-Angebot
 Produktkarten mit Vergleich,marketing site,should,yes,no,S01 Compare-Funktion
 Kopfzeile mit Sprachwahl EN/DE/FR,marketing site,should,yes,no,
-Terminanfrage (Book a meeting),lead generation,must,yes,no,Technik der Anfrage nicht gesehen
+Terminanfrage (Book a meeting),lead generation,must,yes,partial,Lokaler Anfrageentwurf und ausdrücklich simulierte Beispieltermine; keine Übermittlung
 Produktseite mit Feature-Kacheln,marketing site,should,yes,no,S02
-Animiertes Analytics-Dashboard als Demo,marketing site,should,yes,no,S02 Zählanimation Liniendiagramm Trichter
+Animiertes Analytics-Dashboard als Demo,marketing site,should,yes,yes,/auswertung/ mit konsistenten Beispieldaten und Zeitraumwahl; ohne Tracking
 Vorher/Nachher-Vergleichstabelle,marketing site,could,yes,no,S02
-Zusammenarbeit in 5 Schritten,marketing site,should,yes,no,S03
+Zusammenarbeit in 5 Schritten,marketing site,should,yes,partial,Eigener Ablauf in vier Schritten; keine Produktionszusagen
 Referenzen-Übersicht,marketing site,should,yes,no,S04 mit eigenen Beispielen
 Referenz-Detailseiten,marketing site,could,unknown,no,nicht gesehen
-FAQ mit Gruppen und Akkordeon,marketing site,should,yes,no,S06 nur Fragen bekannt eigene Antworten nötig
+FAQ mit Gruppen und Akkordeon,marketing site,should,yes,yes,Eigene Antworten mit nativen Details-Elementen
 Blog,marketing site,could,yes,no,nicht gelesen
 Rechtsseiten (Impressum Datenschutz AGB),legal,must,yes,no,mit eigenen Angaben
 Webtool-Katalog,portal,could,yes,no,nicht gesehen
 Kampagnen im Portal anlegen,portal,could,yes,no,nur aus Text
 Web-Tool-Inhalt ändern nach dem Druck,portal,could,yes,no,laut Seite möglich
-Zielseite nach dem Antippen (mobil),tap experience,could,yes,no,S13 nicht gesehen
+Zielseite nach dem Antippen (mobil),tap experience,could,yes,yes,/demo/ mit simuliertem Antippen; eigene Video-Story und 3D-Beispielmodell
 Interaktionen zählen und auswerten,analytics,could,yes,no,Data Report nur als Mockup gesehen
 Leads erfassen,analytics,could,unknown,no,nur FAQ-Frage
 CRM-Anbindung,integrations,could,unknown,no,nur FAQ-Frage
@@ -24,3 +24,6 @@ Augmented Reality Erlebnisse,tap experience,could,yes,skip,eigene Inhalte und Te
 NFC-Papier herstellen und versenden,hardware,could,yes,skip,Hardware und Logistik sind nicht nachbaubar
 Kundenlogos und Fallstudien,content,could,yes,skip,gehören Dritten
 Marke Name Logo und Claims,brand,could,yes,skip,gehören Interactive Paper
+Drehbares eigenes 3D-Beispielprodukt,tap experience,must,yes,yes,Three.js erst nach Interaktion; Tastatursteuerung und Bild-Fallback; kein Kameratracking
+Eigene Video-Story mit Bedienelementen,tap experience,must,yes,yes,8 Sekunden eigenes Bildmaterial; stumm mit Untertiteln
+Kaufen / Leistung / Termin nach Erlebnis,tap experience,must,yes,yes,Drei klar gekennzeichnete Beispielansichten; keine echten Transaktionen
