@@ -25,8 +25,9 @@ Das physische NFC-Papier ist nicht nachbaubar (siehe "Nicht nachbaubar").
 | 2 | Produktseite Tap 2.0 | https://interactivepaper.com/tap | "How it works" in 3 Schritten, Analytics-Mockup, Vergleich alt/neu |
 | 3 | Collaboration | https://interactivepaper.com/collaboration | Ablauf in 5 Schritten, Creation Portal, Data Report |
 | 4 | Success stories | https://interactivepaper.com/success-stories | 17 Referenzen (Inhalte gehören Dritten) |
-| 5 | FAQ | https://interactivepaper.com/faq | Nur die Fragen sind in der Seite sichtbar. Antworten werden nachgeladen und wurden NICHT gelesen. |
-| 6 | Nicht gelesen | /blog, /de, /fr, /imprint, /terms | Bei Bedarf nachholen |
+| 5 | FAQ | https://interactivepaper.com/faq | 69 Fragen, alle Antworten im Browser aufgeklappt und gelesen (Update 2026-10-09). Quelle für Produkte, Pläne, Content-Typen. |
+| 6 | Blog | https://interactivepaper.com/blog | Nur Übersicht gesehen (SEO-Artikel), keine Details nötig |
+| 7 | Nicht gelesen | /de, /fr, /imprint, /terms, Fallstudien-Detailseiten | Bei Bedarf nachholen |
 
 Sprachen der Seite: EN, DE, FR.
 
@@ -37,11 +38,19 @@ diese tippen es mit dem Handy an und sehen interaktive Inhalte, und das Unterneh
 
 ## Produktlinie (laut Startseite)
 
-| Produkt | Claim auf der Seite | Hinweis |
+Alle drei laufen ohne App im Handy-Browser. Mindestbestellung 500 Stück, Produktion ca. 4 bis 5 Wochen (laut FAQ).
+
+| Produkt | Claim auf der Seite | Funktionsweise laut FAQ |
 | --- | --- | --- |
-| Touch | "The unbeatable storyteller" | Mehrere Tasten auf dem Papier (laut FAQ-Frage) |
-| Tap | "Record-breaking response" | Antippen öffnet Inhalt, Tap 2.0 ist neu |
-| Scan | "The affordable allrounder" | Vermutung: Scan ohne Chip, z. B. QR/Bilderkennung (nicht belegt) |
+| Touch | "The unbeatable storyteller" | Handy auf das Papier legen, drei gedruckte Tasten: Video, Quiz/Umfrage, Handlungsaufforderung (Termin, Download) |
+| Tap | "Record-breaking response" | Handy an die Karte halten, Augmented-Reality-Erlebnis startet (Video auf der Karte, dann 3D-Objekt). Tap Lite: gleiche NFC-Funktion ohne AR, günstiger |
+| Scan | "The affordable allrounder" | QR-Code plus AR und Tracking, geringste Antwortquote, günstigste Variante |
+
+Die Plattform heißt laut FAQ "Let's interact" (Marke des Anbieters, nicht übernehmen).
+Plan-Stufen: Starter (Kampagnen-Builder, 6 Monate Hosting), Professional (unbegrenztes Hosting, Data Dashboard, Content Creator),
+Enterprise (tiefe Analyse, Berater, API), Executive (CRM-Einrichtung, eigener Entwickler und Datenspezialist).
+Inhaltstypen: Video, Quiz/Umfrage, Bildergalerie, Produktmenü, Lead-Formular, AR mit 3D-Objekten, Weiterleitung, PDF-Download.
+Integrationen laut FAQ: Salesforce, HubSpot, SAP, Veeva, Pipedrive, Zoho. Optional personalisiertes Tracking einzelner Empfänger.
 
 ## Screens
 
