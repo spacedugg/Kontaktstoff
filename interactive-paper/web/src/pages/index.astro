@@ -1,0 +1,240 @@
+---
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource/ibm-plex-mono/400.css';
+import '../styles/global.css';
+import { brand } from '../brand';
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{brand.name}: Direct Mail, die auf dem Handy weiterspielt</title>
+    <meta
+      name="description"
+      content="Hochwertige Karte per Post mit NFC: ein Tipp mit dem Handy, und Video oder 3D-Produkt erscheinen auf der Karte. Entwurf, Beispielinhalte."
+    />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="wordmark" href="/" aria-label={`${brand.name}, Startseite`}>
+          <span class="wordmark__mark" aria-hidden="true"></span>
+          {brand.name}
+        </a>
+        <nav class="nav" aria-label="Hauptnavigation">
+          <span class="nav__links">
+            <a href="#erlebnis">Erlebnis</a>
+            <a href="#ablauf">Ablauf</a>
+            <a href="#formate">Formate</a>
+            <a href="#fragen">Fragen</a>
+          </span>
+          <a class="btn btn--primary btn--small" href="#termin">Termin anfragen</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="erlebnis">
+        <div class="hero__copy">
+          <h1>Direct Mail, die auf dem Handy weiterspielt.</h1>
+          <p class="hero__lead">
+            Eine hochwertige Karte per Post. Ein Tipp mit dem Handy, und Ihr Video läuft direkt auf der Karte
+            oder Ihr Produkt steht in 3D darauf. Danach: kaufen, Leistung ansehen, Termin buchen.
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--primary" href="#termin">Termin anfragen</a>
+            <button class="btn btn--ghost" type="button" data-replay>Demo noch einmal</button>
+          </div>
+          <div class="mode">
+            <span class="mode__label" id="mode-label">Auf der Karte</span>
+            <div class="mode__group" role="group" aria-labelledby="mode-label">
+              <button class="mode__btn" type="button" data-mode-btn="video" aria-pressed="true">Video</button>
+              <button class="mode__btn" type="button" data-mode-btn="product" aria-pressed="false">3D-Produkt</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero__scene-wrap">
+          <div class="scene" data-scene data-state="idle" data-mode="video">
+            <!-- Druckermarken: Schnittmarken, Passerkreuze, Farbkeil -->
+            <svg class="scene__marks" viewBox="0 0 640 660" preserveAspectRatio="none" aria-hidden="true">
+              <g fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke">
+                <path vector-effect="non-scaling-stroke" d="M0 28H22M28 0V22M618 28H640M612 0V22M0 632H22M28 638V660M618 632H640M612 638V660" />
+                <g vector-effect="non-scaling-stroke">
+                  <circle vector-effect="non-scaling-stroke" cx="14" cy="330" r="5" />
+                  <path vector-effect="non-scaling-stroke" d="M6 330H22M14 322V338" />
+                  <circle vector-effect="non-scaling-stroke" cx="626" cy="330" r="5" />
+                  <path vector-effect="non-scaling-stroke" d="M618 330H634M626 322V338" />
+                </g>
+              </g>
+              <g>
+                <rect x="276" y="9" width="12" height="9" fill="#00AEEF" />
+                <rect x="288" y="9" width="12" height="9" fill="#EC008C" />
+                <rect x="300" y="9" width="12" height="9" fill="#FFF200" />
+                <rect x="312" y="9" width="12" height="9" fill="#0C0D10" />
+              </g>
+            </svg>
+
+            <!-- Die Karte (physisch) -->
+            <div class="card" aria-hidden="true">
+              <div class="card__print">
+                <span class="card__brand">{brand.sampleCompany}</span>
+                <p class="card__headline">Für Sie<br />persönlich.</p>
+              </div>
+              <span class="card__nfc-label">Hier antippen</span>
+              <svg class="card__nfc" viewBox="0 0 92 92" fill="none">
+                <circle cx="46" cy="46" r="45" stroke="#2236FF" stroke-width="2" />
+                <circle cx="46" cy="46" r="31" stroke="#2236FF" stroke-width="2" />
+                <circle cx="46" cy="46" r="17" stroke="#2236FF" stroke-width="2" />
+                <circle cx="46" cy="46" r="6" fill="#2236FF" />
+              </svg>
+            </div>
+
+            <span class="ring" data-ring="0"></span>
+            <span class="ring" data-ring="1"></span>
+            <span class="ring" data-ring="2"></span>
+
+            <!-- Das Handy -->
+            <div class="phone" aria-hidden="true">
+              <div class="screen">
+                <div class="island"></div>
+
+                <div class="lock">
+                  <div class="lock__date">Dienstag, 14. Oktober</div>
+                  <div class="lock__time">9:41</div>
+                  <div class="notif">
+                    <span class="notif__icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round">
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                      </svg>
+                    </span>
+                    <span>
+                      <span class="notif__title" style="display:block">NFC-Karte erkannt</span>
+                      <span class="notif__text" style="display:block">Tippen, um das Erlebnis zu öffnen</span>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="ar">
+                  <div class="ar__tag">Karte erkannt</div>
+                  <div class="ar__stage">
+                    <div class="ar__card">
+                      <div class="clip">
+                        <div class="clip__sun"></div>
+                        <div class="clip__ground"></div>
+                        <div class="clip__pack"></div>
+                        <div class="clip__time">0:07</div>
+                        <div class="clip__bar"></div>
+                      </div>
+                    </div>
+                    <div class="prod">
+                      <div class="prod__shadow"></div>
+                      <div class="prod__spin">
+                        <div class="face face--top"></div>
+                        <div class="face face--front"></div>
+                        <div class="face face--back"></div>
+                        <div class="face face--left"></div>
+                        <div class="face face--right"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="brackets"><span></span><span></span><span></span><span></span></div>
+                </div>
+
+                <div class="sheet">
+                  <div class="sheet__kicker">{brand.sampleCompany}</div>
+                  <div class="sheet__title">Wie geht es weiter?</div>
+                  <div class="sheet__btn sheet__btn--main"><span>Jetzt kaufen</span><span>→</span></div>
+                  <div class="sheet__btn"><span>Leistung ansehen</span><span>→</span></div>
+                  <div class="sheet__btn"><span>Termin buchen</span><span>→</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="scene-caption">
+            <span>Beispielkarte, Beispielinhalt</span>
+            <span data-status>Karte liegt bereit</span>
+          </p>
+          <p class="sr-only" aria-live="polite" data-live></p>
+        </div>
+      </section>
+    </main>
+
+    <style is:global>
+      @keyframes ring-out {
+        0% {
+          opacity: 0.9;
+          transform: translate(0, 0) scale(0.4);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(calc(var(--u) * 150), calc(var(--u) * -190)) scale(2.6);
+        }
+      }
+      .scene[data-state='tap'] .ring {
+        animation: ring-out 1.4s cubic-bezier(0.2, 0.6, 0.3, 1) both;
+      }
+      .scene[data-state='tap'] .ring[data-ring='1'] {
+        animation-delay: 0.22s;
+      }
+      .scene[data-state='tap'] .ring[data-ring='2'] {
+        animation-delay: 0.44s;
+      }
+    </style>
+
+    <script>
+      type State = 'idle' | 'tap' | 'ar' | 'actions';
+
+      const scene = document.querySelector<HTMLElement>('[data-scene]')!;
+      const status = document.querySelector<HTMLElement>('[data-status]')!;
+      const live = document.querySelector<HTMLElement>('[data-live]')!;
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const text: Record<State, string> = {
+        idle: 'Karte liegt bereit',
+        tap: 'Tippen …',
+        ar: 'Erlebnis läuft',
+        actions: 'Danach: kaufen, ansehen, buchen',
+      };
+
+      let timers: number[] = [];
+
+      function setState(state: State) {
+        scene.dataset.state = state;
+        status.textContent = text[state];
+        live.textContent = text[state];
+      }
+
+      function play() {
+        timers.forEach(clearTimeout);
+        timers = [];
+        if (reduce) {
+          setState('actions');
+          return;
+        }
+        setState('idle');
+        timers.push(window.setTimeout(() => setState('tap'), 900));
+        timers.push(window.setTimeout(() => setState('ar'), 2300));
+        timers.push(window.setTimeout(() => setState('actions'), 4600));
+      }
+
+      document.querySelector('[data-replay]')?.addEventListener('click', play);
+
+      document.querySelectorAll<HTMLButtonElement>('[data-mode-btn]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          scene.dataset.mode = btn.dataset.modeBtn;
+          document
+            .querySelectorAll('[data-mode-btn]')
+            .forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          play();
+        });
+      });
+
+      play();
+    </script>
+  </body>
+</html>
