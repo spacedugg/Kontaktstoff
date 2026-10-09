@@ -19,7 +19,7 @@ let draft = '';
 form?.addEventListener('submit', event => {
   event.preventDefault(); if (!form.reportValidity()) return;
   const values = new FormData(form); const value = (key: string) => String(values.get(key) || '').trim();
-  draft = ['KONTAKTSTOFF · NFC DIRECT MAIL', 'Anfrageentwurf – noch nicht versendet', '', `Name: ${value('name')}`, `Unternehmen: ${value('company') || 'Nicht angegeben'}`, `E-Mail: ${value('email')}`, `Ziel: ${value('goal')}`, `Geplante Menge: ${value('quantity')}`, '', 'Idee:', value('idea') || 'Noch offen'].join('\n');
+  draft = ['KONTAKTSTOFF IMPULSE · NFC MAILINGS', 'Anfrageentwurf – noch nicht versendet', '', `Name: ${value('name')}`, `Unternehmen: ${value('company') || 'Nicht angegeben'}`, `E-Mail: ${value('email')}`, `Ziel: ${value('goal')}`, `Geplante Menge: ${value('quantity')}`, `Gestaltung: ${value('design')}`, `Zielseite: ${value('target') || 'Noch offen'}`, '', 'Idee:', value('idea') || 'Noch offen'].join('\n');
   if (summary) summary.textContent = draft; form.hidden = true; if (result) result.hidden = false;
   document.querySelector<HTMLButtonElement>('[data-download-enquiry]')?.focus();
 });

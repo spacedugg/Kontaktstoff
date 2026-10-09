@@ -1,0 +1,13 @@
+---
+const { standalone = false } = Astro.props;
+const cases = [
+  {kind:'Für Produkte',title:'Nicht nur zeigen. Erlebbar machen.',image:'experience-product.webp',alt:'NFC-Karte und Smartphone mit digitalem Kopfhörer und Produktlink',copy:'Ein Produkt in 3D entdecken, Details ansehen, Lust auf mehr bekommen. Und direkt im Shop weitermachen.',destination:'Zum Produkt im Shop',link:'/beispiel/produkt/',label:'Produkt-Beispiel ansehen'},
+  {kind:'Für Dienstleistungen',title:'Das Ergebnis vor Augen. Den Termin in Reichweite.',image:'experience-service.webp',alt:'Ein Smartphone zeigt einen hellen Büroraum als Dienstleistungsergebnis und einen Button zur Terminbuchung',copy:'Zeigen Sie, was Ihre Leistung verändert: als Bild, Video oder Vorher-Nachher-Erlebnis. Der nächste Schritt ist ein Gespräch.',destination:'Zum Buchungskalender',link:'/beispiel/beratung/',label:'Termin-Beispiel ansehen'},
+  {kind:'Für Angebote & Bundles',title:'Alles drin. Schnell verstanden.',image:'experience-bundle.webp',alt:'Eine NFC-Karte neben einem Smartphone mit visualisiertem Smartphone-und-Tarif-Bundle',copy:'Ein Tarif mit Smartphone, ein Leistungspaket oder ein besonderes Angebot. Verständlich inszeniert und direkt erreichbar.',destination:'Zur passenden Angebotsseite',link:'/beispiel/bundle/',label:'Bundle-Beispiel ansehen'},
+];
+---
+<section class:list={['page-section', 'applications-section', { 'applications-section--standalone': standalone }]} id="anwendungen" aria-labelledby="applications-title"><div class="shell">
+  <div class="section-heading-v4"><p class="section-label">Der Erlebnisraum Ihrer Marke</p><h2 id="applications-title">Ein Tap.<br />So viele Möglichkeiten.</h2><p>Was Ihre Empfänger sehen und wohin sie weitergehen, bestimmen Sie.</p></div>
+  <div class="application-grid">{cases.map(item=><article class="application-card"><a class="application-photo" href={item.link} aria-label={item.label}><img src={'/images/v4/'+item.image} width="1536" height="1024" loading="lazy" alt={item.alt} /></a><div class="application-copy"><p class="section-label">{item.kind}</p><h3>{item.title}</h3><p>{item.copy}</p><p class="destination-label"><span aria-hidden="true">↗</span> {item.destination}</p><a class="quiet-link" href={item.link}>{item.label} <span aria-hidden="true">↗</span></a></div></article>)}</div>
+  <p class="section-note">Eigene Konzeptvisualisierungen. Die Zielseiten zeigen einen Beispielablauf ohne echte Bestellung oder Buchung.</p>
+</div></section>

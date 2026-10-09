@@ -1,0 +1,51 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/impuls.css';
+export function getStaticPaths() { return ['produkt', 'beratung', 'bundle'].map(ziel => ({ params: { ziel } })); }
+const { ziel } = Astro.params;
+const service = ziel === 'beratung';
+const bundle = ziel === 'bundle';
+const brand = service ? 'raumfreude.' : bundle ? 'verbunden.' : 'morgen.';
+const title = service ? 'Gute Räume beginnen mit einem Gespräch.' : bundle ? 'Ein Paket. Alles verbunden.' : 'Ein neuer Klang für Ihren Alltag.';
+---
+<Layout title={title} compact pageClass="destination-v3">
+  <main id="main" class="example-page shell">
+    <a class="example-return" href="/#anwendungen">← Zurück zu Kontaktstoff Impulse</a>
+    <p class="example-notice">Beispiel-Zielseite · So könnte der nächste Schritt nach dem NFC-Erlebnis aussehen. Keine echte Bestellung oder Buchung.</p>
+    <div class="destination-grid">
+      <div class:list={['destination-visual', { 'destination-visual--cover': service, 'bundle-picture': bundle }]}>
+        {service ? <img src="/images/v3/service-outcome.webp" width="1536" height="1024" alt="Helles Büro als visualisiertes Planungsergebnis" /> : bundle ? <img src="/images/v4/experience-bundle.webp" width="1536" height="1024" alt="Visualisiertes Angebot aus Smartphone und Tarif auf dem Display" /> : <img src="/images/headphones-example.webp" width="1536" height="1024" alt="Frei gestalteter Beispielkopfhörer" />}
+      </div>
+      <div class="destination-copy"><p class="v3-kicker">{brand} · Beispielkampagne</p><h1>{title}</h1>
+        {service ? <><p>Sie haben gesehen, wie sich ein Raum verändern kann. In einem ersten Gespräch besprechen wir Ihre Vorstellungen und den möglichen nächsten Schritt.</p><p class="destination-fineprint">Wählen Sie einen frei erzeugten Beispieltermin. Es handelt sich nicht um echte Verfügbarkeiten.</p><div class="destination-slots" role="group" aria-label="Beispieltermine" data-destination-slots></div><button class="v3-button" type="button" data-destination-confirm disabled>Beispieltermin bestätigen <span aria-hidden="true">↗</span></button><p class="destination-message" role="status" data-destination-message hidden></p></> : bundle ? <><p>Smartphone und Tarif bilden ein gemeinsames Angebot. Diese Seite zeigt, wie Empfänger nach dem Mailing direkt zum passenden Bundle gelangen.</p><ul class="destination-list"><li>Das Paket verständlich auf einer Seite</li><li>Die passende Fortsetzung zum Mailing</li><li>Ein klarer Weg zur Beratung oder Auswahl</li></ul><button class="v3-button" type="button" data-example-action="bundle">Bundle auswählen <span aria-hidden="true">↗</span></button><p class="destination-message" role="status" data-example-message hidden></p></> : <><p>Vom Mailing direkt auf die Produktseite: Bilder, Informationen und eine klare Kaufmöglichkeit setzen das Erlebnis fort.</p><ul class="destination-list"><li>Produkt im Mittelpunkt</li><li>Details direkt erreichbar</li><li>Ein nächster Schritt ohne Umwege</li></ul><button class="v3-button" type="button" data-example-action="product">Zum Beispiel-Warenkorb <span aria-hidden="true">↗</span></button><p class="destination-message" role="status" data-example-message hidden></p></>}
+      </div>
+    </div>
+  </main>
+</Layout>
+<script>
+  document.querySelector<HTMLButtonElement>('[data-example-action]')?.addEventListener('click', event => {
+    const button = event.currentTarget as HTMLButtonElement;
+    const output = document.querySelector<HTMLElement>('[data-example-message]')!;
+    output.hidden = false;
+    output.textContent = button.dataset.exampleAction === 'bundle' ? 'Das Beispiel-Bundle wurde ausgewählt. In einer echten Kampagne würde jetzt die Angebotsstrecke des Anbieters folgen. Es wurde kein Vertrag abgeschlossen.' : 'Das Beispielprodukt liegt im Demo-Warenkorb. Es wurde nichts bestellt und keine Zahlung ausgelöst.';
+    button.textContent = button.dataset.exampleAction === 'bundle' ? 'Beispiel-Bundle ausgewählt ✓' : 'Im Demo-Warenkorb ✓';
+  });
+  const slots = document.querySelector<HTMLElement>('[data-destination-slots]');
+  if (slots) {
+    const confirmation = document.querySelector<HTMLButtonElement>('[data-destination-confirm]')!;
+    const output = document.querySelector<HTMLElement>('[data-destination-message]')!;
+    let selected = '';
+    const today = new Date();
+    let count = 0;
+    for (let offset = 1; count < 3; offset++) {
+      const date = new Date(today); date.setDate(today.getDate() + offset); date.setHours(12,0,0,0);
+      const weekday = new Intl.DateTimeFormat('de-DE', { timeZone:'Europe/Berlin', weekday:'short' }).format(date);
+      if (weekday.startsWith('Sa') || weekday.startsWith('So')) continue;
+      const label = new Intl.DateTimeFormat('de-DE', { timeZone:'Europe/Berlin', weekday:'long', day:'numeric', month:'long' }).format(date) + ' · 10:30 Uhr';
+      const button = document.createElement('button'); button.type = 'button'; button.textContent = label; button.setAttribute('aria-pressed','false');
+      button.addEventListener('click', () => { selected = label; confirmation.disabled = false; confirmation.textContent = 'Beispieltermin bestätigen ↗'; output.hidden = true; slots.querySelectorAll('button').forEach(other => other.setAttribute('aria-pressed',String(other===button))); });
+      slots.append(button); count++;
+    }
+    confirmation.addEventListener('click', () => { if (!selected) return; output.hidden = false; output.textContent = `Beispieltermin gewählt: ${selected} (Europe/Berlin). Der Demo-Ablauf ist abgeschlossen; es wurde kein echter Termin gebucht.`; confirmation.textContent = 'Beispiel abgeschlossen ✓'; });
+  }
+</script>

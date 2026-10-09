@@ -1,0 +1,11 @@
+---
+const steps = [
+  {title:'Post bekommen.',image:'/images/v3/mailer-kit.webp',alt:'Offener Briefumschlag mit bedruckten NFC-Karten',copy:'Eine Karte in Ihrem Design kommt an. Mit Kuvert oder als Mailing ohne Umschlag.'},
+  {title:'Handy dranhalten.',image:'/images/v4/tap-closeup.webp',alt:'Die Oberkante des Smartphones liegt nah am Tap-Punkt; auf dem Display erscheint der Hinweis Erlebnis öffnen',copy:'Empfänger halten ihr entsperrtes Smartphone nah an den Tap-Punkt und öffnen den Link-Hinweis.'},
+  {title:'Erleben. Weitergehen.',image:'/images/v4/experience-product.webp',alt:'Das Smartphone zeigt das digitale Produkt und einen Button zur Produktseite',copy:'Das Erlebnis macht Ihr Angebot greifbar. Der nächste Klick führt zum Shop, Angebot oder Buchungskalender.'},
+];
+---
+<section class="page-section journey-section" id="ablauf" aria-labelledby="journey-title"><div class="shell">
+  <div class="section-heading-v4"><p class="section-label">So funktioniert Impulse</p><h2 id="journey-title">Eine Karte. Ein Tap.<br />Ein neuer Kontakt.</h2><p>Vom Briefkasten in den Browser — in drei einfachen Schritten.</p></div>
+  <ol class="photo-steps">{steps.map((step,index)=><li><div class="step-photo"><img src={step.image} width="1536" height="1024" loading="lazy" alt={step.alt} /><span aria-hidden="true">{String(index+1).padStart(2,'0')}</span></div><h3>{step.title}</h3><p>{step.copy}</p></li>)}</ol>
+</div></section>

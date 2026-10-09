@@ -1,7 +1,6 @@
-// Der Prototyp bleibt zunächst im Kontaktstoff-Auftritt.
-// Ein eigenständiger Produktname ist weiterhin offen.
+// Namenskonzept für den eigenständigen NFC-Zweig; noch keine finale Markenfestlegung.
 export const brand = {
   name: 'Kontaktstoff',
-  product: 'NFC Direct Mail',
+  product: 'Impulse · NFC Mailings',
   sampleCompany: 'Beispielkampagne',
 };

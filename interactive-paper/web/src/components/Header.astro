@@ -5,13 +5,13 @@ const { compact = false } = Astro.props;
   <div class="shell navigation">
     <a class="brand" href="/" aria-label="Kontaktstoff NFC Direct Mail, Startseite">
       <img src="/images/kontaktstoff-logo.svg" width="180" height="35" alt="kontaktstoff." />
-      <span>NFC Direct Mail</span>
+      <span>Impulse</span>
     </a>
     {!compact && <>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-menu>Menü <span aria-hidden="true">＋</span></button>
       <nav id="site-nav" class="site-nav" aria-label="Hauptnavigation">
-        <a href="/#erlebnis">Erlebnis</a><a href="/#ablauf">So geht’s</a><a href="/#fragen">Fragen</a>
-        <button class="button button--small button--ink" type="button" data-enquiry>Projekt besprechen <span aria-hidden="true">↗</span></button>
+        <a href="/#ablauf">So funktioniert’s</a><a href="/#anwendungen">Möglichkeiten</a><a href="/#technik">Technologie</a>
+        <button class="button button--small button--lime" type="button" data-enquiry>Kampagne planen <span aria-hidden="true">↗</span></button>
       </nav>
     </>}
     {compact && <a class="text-link" href="/">Zur Angebotsseite <span aria-hidden="true">↗</span></a>}

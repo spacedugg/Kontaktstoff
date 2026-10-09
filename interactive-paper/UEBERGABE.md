@@ -1,6 +1,6 @@
 # Übergabedokument: Website für Direct Mail mit NFC-Karte
 
-Stand: 2026-10-09. Dieses Dokument ist selbsterklärend. Wer es liest, braucht keinen Zugriff auf den bisherigen Chat.
+Stand: 10.10.2026. Aktuell maßgeblich ist **Abschnitt 13: Impulse V4**. Die älteren Abschnitte dokumentieren die Entwicklung; abweichende V3-Entscheidungen sind durch die letzte Nutzerkorrektur ersetzt.
 
 ---
 
@@ -10,7 +10,7 @@ Es soll eine **moderne, schöne, interaktive, hochwertige, cleane Website** ents
 
 Es ist ein **eigener Prototyp**, unabhängig vom bestehenden Kontaktstoff-Projekt, zunächst im Unterordner `interactive-paper/`. Später kann daraus ein eigenes Repository werden.
 
-Das Vorbild für das Produkt ist **"Tap 2.0" von interactivepaper.com**. Es wird nur **funktional** nachgebaut, nicht optisch oder inhaltlich kopiert (siehe Abschnitt 6).
+Das Vorbild für das Produkt ist **"Tap 2.0" von interactivepaper.com**. V4 orientiert sich eng an der Produkt- und Bildführung der Referenz. Texte, Fotos, Code und Markengestaltung werden eigenständig umgesetzt.
 
 ---
 
@@ -200,3 +200,38 @@ Header verwendet vorerst Kontaktstoff. Der eigene Produktname ist weiterhin offe
 Neue Details und ehrliche Prüfgrenzen stehen in `web/README.md` und `replica/build-log.md`.
 NFC und AR/Kamera-Tracking sind weiterhin nicht implementiert. Es erfolgen keine echten Buchungen, Käufe, Datenübermittlungen oder Analysen.
 Die vorhandene Live-Seite, ihr Root-Build und `vercel.json` werden nicht geändert. Kein Merge in PR #23.
+
+
+## 12. Grundlegende Überarbeitung nach Nutzerfeedback · 10.10.2026
+
+Dieser Abschnitt beschreibt den aktuellen Stand und ergänzt die früheren Entwürfe. Der Nutzer hat den ersten hellen Entwurf als visuell und inhaltlich nicht überzeugend bewertet. Die Homepage und TAP-Seite von Interactive Paper sowie zehn vom Nutzer angehängte Bilder wurden erneut ausgewertet.
+
+Aktuelles Namenskonzept: **Kontaktstoff Impuls** mit **Feinstoff**, **Nahkontakt**, **Erlebnisraum** und **Direktweg**. Kontaktstoff-Colorway bleibt erhalten.
+
+Die Landingpage wurde ersetzt: großes eigenes Produktfoto; geführter Ablauf Ankommen → Antippen → Erleben → Weitergehen; drei konkrete Anwendungen für Produkt, Dienstleistung und Bundle; echte Navigation auf Beispiel-Zielseiten; Materialfoto und NFC-Schema; eigenes Mailing-/Kuvertmotiv; Funktionsvergleich mit klassischer Post; interaktiver Beispielrechner; klare Erklärung eines gemeinsamen Kampagnen-Erlebnisses für z. B. 500 Karten.
+
+Die Werte 78/65/24 % stammen aus der Dashboard-Darstellung der Referenz. Sie sind als veränderbare Beispielannahmen mit Quellenhinweis eingebaut, keine Kontaktstoff-Messwerte und keine Zusage. Keine Behauptung zu 2× NFC-Leistung, garantierter Reichweite oder billigerer Produktion. Hardwareeigenschaften müssen später belegt werden.
+
+Vier neue Originalmotive in `web/public/images/v3/`; die fremden Referenzbilder werden nicht ausgeliefert. Details: `replica/recon-v3.md`, `replica/design/components-v3.md`, `replica/asset-prompts-v3.md`, `replica/build-log.md`.
+
+Sechs Seiten bauen, 22 DOM-Interaktionsprüfungen und 14 Kontrastpaare bestehen. Browserlayout und echtes WebGL sind wegen fehlendem vorgeschriebenem Browser-Workflow weiterhin ungeprüft. Keine echte NFC-Erfassung, Kamera-AR, Bestellungen oder Buchungen.
+
+Separate private Vorschau weiterhin: https://kontaktstoff-nfc-colorway.temoa-3702.chatgpt.site
+Branch weiterhin `claude/interactive-paper-rebuild-owvx7s`; kein Merge und keine Änderung der Live-Dateien oder Root-Deployment-Konfiguration.
+
+
+## 13. Maßgeblicher Stand: Kontaktstoff Impulse V4 · 10.10.2026
+
+Der Nutzer wünscht ausdrücklich einen moderneren, weicheren, fotografischen Stil. Der Produktname lautet **Kontaktstoff Impulse** (Plural). Die selbst gebauten Smartphone-/3D-Animationen wurden aus den Seiten entfernt. Auch `/demo/` ist jetzt eine Bildgalerie mit drei passenden Zielseiten.
+
+Neue Leserichtung: Hero → frühe, klar illustrative Zahlen → drei bebilderte Empfängerschritte → Produkt/Dienstleistung/Bundle → Technik → Design und Vergleich → vertiefte Beispielrechnung → hypothetische Launch-Kampagne → offene Antworten → Anfrage. Keine aufklappbaren Erklärungen auf der Startseite.
+
+Fünf neue eigene Motive in `web/public/images/v4/`: Hero, Produkt, Dienstleistung, Bundle und NFC-Tap mit Link-Hinweis. Vollständige Prompts und Dateipfade: `replica/asset-prompts-v4.md`. Bestehende eigene V3-Motive ergänzen Material und Kuvert.
+
+Alle Texte sind lesbarer, meist 18–20 px; Hinweise mindestens 16 px. Weiße/helle Flächen, Graphit, Kontaktstoff-Neongelb, rundere Ecken und Buttons. Keine erfundenen Kundenlogos, Kampagnenergebnisse, Reichweiten- oder Preisversprechen. Die Zahlen 78/65/24 werden sichtbar als illustrative Annahmen eingeordnet.
+
+Build: sechs Seiten erfolgreich. 21 DOM-/Strukturprüfungen und 16 Kontrastpaare bestanden. Keine gerenderte Browserprüfung möglich, da der Sites-Workflow ohne `$control-browser` diese ausdrücklich überspringt. Keine Hardware-/AR-Prüfung.
+
+Privates Vorschauprojekt und URL bleiben identisch: https://kontaktstoff-nfc-colorway.temoa-3702.chatgpt.site
+
+GitHub-Ziel unverändert: `claude/interactive-paper-rebuild-owvx7s`. Live-Website und Root-Deployment nicht ändern, nicht nach `main` oder in den Live-Branch mergen.

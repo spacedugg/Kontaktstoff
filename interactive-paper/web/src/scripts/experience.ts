@@ -81,6 +81,9 @@ if (experience) {
     const selected = experience.querySelector<HTMLButtonElement>(`[data-mode="${button.dataset.selectDemo}"]`);
     selected?.click(); experience.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'center' }); selected?.focus({ preventScroll: true });
   }));
+  if (new URLSearchParams(window.location.search).get('modus') === 'video') {
+    experience.querySelector<HTMLButtonElement>('[data-mode="video"]')?.click();
+  }
   const dialog = document.querySelector<HTMLDialogElement>('[data-recipient-dialog]')!;
   const title = dialog.querySelector<HTMLElement>('[data-recipient-title]')!;
   const content = dialog.querySelector<HTMLElement>('[data-recipient-content]')!;
