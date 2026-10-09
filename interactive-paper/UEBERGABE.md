@@ -1,0 +1,189 @@
+# Übergabedokument: Website für Direct Mail mit NFC-Karte
+
+Stand: 2026-10-09. Dieses Dokument ist selbsterklärend. Wer es liest, braucht keinen Zugriff auf den bisherigen Chat.
+
+---
+
+## 1. Der Auftrag in drei Sätzen
+
+Es soll eine **moderne, schöne, interaktive, hochwertige, cleane Website** entstehen, die ein einziges Produkt verkauft: **Direct Mail (B2B oder B2C) mit NFC-Karte**. Der Empfänger hält das Handy an die Karte und bekommt ein immersives Erlebnis. Die Seite darf **nicht nach "AI-Slop" aussehen**.
+
+Es ist ein **eigener Prototyp**, unabhängig vom bestehenden Kontaktstoff-Projekt, zunächst im Unterordner `interactive-paper/`. Später kann daraus ein eigenes Repository werden.
+
+Das Vorbild für das Produkt ist **"Tap 2.0" von interactivepaper.com**. Es wird nur **funktional** nachgebaut, nicht optisch oder inhaltlich kopiert (siehe Abschnitt 6).
+
+---
+
+## 2. Das Produkt in den Worten des Auftraggebers
+
+> "Das Einzige, was ich anbieten möchte, heißt eigentlich Briefpost, also Direct Mail to B2B oder B2C mit NFC drin, sodass ich dann über das Handy quasi die Karte scanne und dann ein immersives Erlebnis habe: entweder ein Video, das mir dann auf der Karte angezeigt wird, oder auf der Karte steht dann ein 3D-Produkt, das man natürlich vorher vorbereitet haben muss."
+>
+> "Dementsprechend kann man direkt entweder das Produkt kaufen oder sieht die Dienstleistung, kann sich zur Dienstleistung vorklicken und einen Termin buchen oder irgendwie sowas."
+
+Wichtig: Das Produkt ist **kein einfaches Papier**, sondern ein **hochwertig bedruckter Flyer oder eine kleine Karte** mit eingebautem NFC-Chip.
+
+### Zwei Oberflächen
+
+1. **Angebots-Website** für die, die Mailings bestellen (Unternehmen, Agenturen). Sie erklärt und zeigt das Angebot, bietet eine Demo zum Ausprobieren, den Ablauf, Formate und eine Anfrage oder Terminbuchung.
+2. **Empfänger-Erlebnis**: die mobile Seite, die nach dem Antippen aufgeht. Sie zeigt ein Video auf der Karte oder ein 3D-Produkt auf der Karte. Danach drei Wege: **Produkt kaufen**, **Dienstleistung ansehen**, **Termin buchen**.
+
+Ein Demo-Dashboard (Auswertung der Antippungen) ist nachrangig und nur mit klar gekennzeichneten Beispieldaten gedacht.
+
+### Umfang laut Absprache
+
+"Stufe 1 und 2": Website plus Demo-Dashboard und Empfänger-Seite mit Beispieldaten. **Kein** echtes Portal mit Login, Datenbank und Analytics (das wäre Stufe 3).
+
+---
+
+## 3. Was bei der Referenz bekannt ist (interactivepaper.com)
+
+Das ist die Referenz, **nicht** die Vorlage zum Kopieren. Alle Zahlen und Aussagen sind **Behauptungen des Anbieters**, nicht unsere.
+
+**Anbieter:** Interactive Paper GmbH, Wien. Seite in EN, DE, FR.
+
+**Produktlinie**
+- **Touch:** Handy auf das Papier legen, drei gedruckte Tasten (Video, Quiz/Umfrage, Handlungsaufforderung).
+- **Tap (2.0 neu):** Handy an die Karte halten, Augmented-Reality-Erlebnis startet sofort: ein Video läuft direkt auf der Karte, danach ein 3D-Objekt, das in die Umgebung gestellt werden kann. Laut Anbieter dauert es etwa 3,2 Sekunden vom Öffnen bis zur Interaktion, halb so lang wie ein QR-Code. "Tap Lite" ist die günstigere Variante ohne AR.
+- **Scan:** QR-Code plus AR und Tracking, günstigste Variante, niedrigere Antwortquote.
+- Alles läuft im Browser, keine App nötig.
+
+**Tap 2.0 laut Anbieter:** doppelte NFC-Leistung, fast unsichtbare Technik (keine Wölbung durch den Chip), edleres Papier, haptisches Feedback, dünnerer Aufbau, bis zu 50 % günstiger bei großer Menge.
+
+**Konditionen laut FAQ:** Mindestbestellung 500 Stück, Produktion etwa 4 bis 5 Wochen. Plattform-Pläne: Starter, Professional, Enterprise, Executive (vom Kampagnen-Builder bis zu eigenem Entwickler und Datenspezialist). Inhaltstypen: Video, Quiz/Umfrage, Bildergalerie, Produktmenü, Lead-Formular, AR mit 3D-Objekten, Weiterleitung, PDF. CRM-Anbindungen (Salesforce, HubSpot, SAP, Veeva, Pipedrive, Zoho). Optional personalisiertes Tracking einzelner Empfänger.
+
+**Ablauf der Zusammenarbeit (5 Schritte):** Ziel definieren, Papier gestalten, Web-Tools erstellen, an Kunden bringen, Nutzungsdaten auswerten.
+
+**Aufbau der Referenzseite:** Navigation (Product, New, Success stories, Collaboration, Q&A, About us, Sprache, "Get started"). Startseite: großer Hero mit Video-Hintergrund ("Marketing made interactive", Button "Book a meeting"), Teaser zu Tap 2.0, Produkt-Trio Touch/Tap/Scan mit Vergleich, Referenzen, Anwendungsfälle, Nachhaltigkeit, Datenauswertung, Kontakt. Unterseiten `/tap`, `/collaboration`, `/success-stories` (17 Fallstudien), `/faq` (69 Fragen), `/blog`.
+
+**Optik der Referenz (zur Abgrenzung, nicht zum Kopieren):** dunkles Hero-Video, geometrische Grotesk, Schwarz mit Korall-Rosa-Verlauf auf den Buttons, eine grüne Tap-Karte, große helle "Tap 2.0"-Schrift mit Händen und Handys.
+
+**Lücken der Recherche (ehrlich):**
+- **Produktfotos und Bilder wurden nie gesehen.** Der Bild-Server der Seite war in der Arbeitsumgebung gesperrt. Bekannt sind nur Texte und Layout.
+- Das Kundenportal ("Creation Portal") und der "Data Report" sind nur aus Texten und einem Mockup bekannt.
+- Fallstudien-Detailseiten, `/de`, `/fr`, `/blog`-Artikel wurden nicht gelesen.
+
+---
+
+## 4. Namensfindung
+
+**Anforderung:** Eigenname, auf Englisch, soll andeuten, worum es geht (Post, die lebendig wird). Er soll auch dann noch passen, wenn sich das Produkt später verändert. Nicht verwechselbar mit "Interactive Paper", "Touch/Tap/Scan" oder "Let's interact".
+
+**Verworfen**
+- *Faser, Hapt, Ply, Greifbar, Tangent:* zu schwach, nicht aus dem Produkt gedacht.
+- *Popcard:* gefällt dem Auftraggeber, ist aber **im selben Feld belegt**. Popcards LLC betreibt AR-Grußkarten per App und hält ein US-Patent darauf (US 9171404). Spire verkauft unter "POPcard" Kunststoff-Postkarten für Direct Mail seit 2005.
+
+**Aktuelle Kandidaten (alle ungeprüft)**
+- **Mailstage** (Arbeitstitel im Prototyp): die Karte ist die Bühne. Web-Suche ohne Treffer.
+- **Hovermail:** das 3D-Produkt schwebt über der Karte. Risiko: "Hover" ist ein Domain-Anbieter mit E-Mail-Produkt und eingetragener Marke.
+- **Wakecard:** der NFC-Chip weckt die Karte. Web-Suche ohne Treffer.
+- **Overprint, Layermail, Inkcast, Mailglow:** produktunabhängig. Die Suche war zu breit, um aussagekräftig zu sein. "Overprint" ist ein echter Druckbegriff (digitale Ebene über dem Druck), aber als Wort schwer zu schützen.
+- *Livepost, Cardcast:* noch nicht geprüft.
+
+**Noch zu tun:** Marken-Check (DE/EU/US/WIPO), .com-Domain, Social-Handles, App-Stores. Das war in der Arbeitsumgebung nicht möglich (Domain-Abfragedienste gesperrt). Ein Markenanwalt sollte vor einem echten Start prüfen.
+
+---
+
+## 5. Design: Anforderungen und bisheriger Stand
+
+### Was der Auftraggeber will
+Modern, schön, interaktiv, hochwertig, clean, **ohne AI-Slop-Look**.
+
+### Was als AI-Slop gilt (soll vermieden werden)
+Lila-blaue Verläufe und Leuchtflecken, Glas-Karten in Dreierreihen mit Icon im Kreis, Inter-Schrift überall, zentrierter Hero mit Verlaufs-Überschrift, überall dasselbe Einblenden, Stock-Bilder, erfundene Zahlen, Logos und Kundenstimmen. Der Auftraggeber nennt außerdem ausdrücklich **Papier, Creme und Serifen** als Slop (so wurde ein erster Vorschlag "Atelier" verworfen).
+
+### Bisheriger Versuch (vom Auftraggeber als "visuell völlig fail" bewertet)
+Ein Hero mit Karte und Handy, gebaut in Astro mit CSS. Screenshots liegen in `uebergabe/`:
+- `hero-entwurf-desktop-video.png`
+- `hero-entwurf-desktop-3d.png`
+- `hero-entwurf-mobil.png`
+
+Beschreibung: hellgraue Fläche, links Überschrift "Direct Mail, die auf dem Handy weiterspielt." mit Text und zwei Buttons, rechts eine schwarze Karte neben einem Handy. Nach einem automatischen "Tippen" zeigt das Handy eine Kamera-Ansicht mit Video oder 3D-Würfel auf der Karte, dann drei Buttons (Kaufen, Leistung, Termin). Druckermarken (Schnittmarken, Passerkreuze, Farbkeil) als Zierde, ein Kobaltblau als einzige Signalfarbe, Bricolage Grotesque und IBM Plex Mono als Schriften.
+
+### Warum es vermutlich scheiterte (Annahmen, vom Auftraggeber nicht bestätigt)
+1. **Alles ist mit CSS gezeichnet.** Karte, Handy, "Video" und 3D-Box sind Illustrationen aus Rechtecken. Das reicht nie an hochwertige Produktbilder oder echte 3D-Renderings heran. Premium wirkt durch **Materialität und Licht**, nicht durch Flächen mit Schatten.
+2. **Standard-Aufbau:** Text links, Geräte-Mockup rechts, graue Fläche. Das ist die häufigste Schablone überhaupt.
+3. **Kein Bezug zu echten Referenzen.** Es gab keine Vorbilder, die der Auftraggeber schön findet. Entscheidungen beruhten auf Adjektiven, nicht auf Beispielen.
+4. **Die Produktbilder des Originals wurden nie gesehen.** Es gab keine Vorstellung davon, wie Karte, Handy und AR in der Realität aussehen.
+5. **Zu kleine Details, zu wenig Mut:** nichts am Entwurf ist wirklich überraschend oder wiedererkennbar.
+
+### Empfehlung für das weitere Vorgehen
+- **Zuerst Referenzen sammeln, dann gestalten:** 5 bis 8 Websites, die der Auftraggeber wirklich schön findet (Produkt-Landingpages mit starker 3D- oder Bildsprache, Award-Seiten). Dazu 3 Beispiele, die er **hasst**. Erst daraus Designrichtungen ableiten.
+- **Statische Entwürfe vor Code:** 2 bis 3 deutlich verschiedene Richtungen als Bild (Figma, Bildgenerator oder Skizze), der Auftraggeber wählt. Erst dann bauen.
+- **Echte Produktdarstellung:** fotorealistische Renderings oder ein 3D-Modell von Karte und Handy (z. B. Three.js mit GLB-Modellen, Blender-Renderings oder generierte Produktbilder), statt CSS-Illustrationen.
+- **Interaktion, die das Produkt erklärt:** Antippen, Video auf der Karte, 3D-Produkt, danach Kaufen/Leistung/Termin. Das war die richtige Grundidee. Die Umsetzung braucht höhere Qualität.
+
+---
+
+## 6. Rechtliche Leitplanken (Clean-Room)
+
+- Nachgebaut werden nur **Funktionen und Abläufe**, nicht Code, Texte, Bilder, Logos, Schriften, Videos, Fallstudien, Kundennamen oder Markennamen von Interactive Paper.
+- Nicht übernehmen: Produktnamen "Touch/Tap/Scan", die Plattform "Let's interact", Claims wie "Marketing made interactive", Zahlen wie "93 % weniger Papier".
+- Alle Demo-Inhalte klar als **Beispiel** kennzeichnen. Keine erfundenen Kunden, Logos, Bewertungen oder Statistiken.
+- Das physische NFC-Papier, die Produktion und die Logistik gehören nicht zum Nachbau (Lieferanten oder Partner nötig).
+- Die Referenzseite verbietet in `robots.txt` den Zugriff auf `/api/`. Daran wurde sich gehalten.
+
+---
+
+## 7. Technischer Stand im Repository
+
+- **Repository:** `spacedugg/Kontaktstoff`, Branch `claude/interactive-paper-rebuild-owvx7s`, Draft-Pull-Request Nr. 23.
+- **Der bestehende Teil des Repos** (Kontaktstoff-Website, statisch, Weiß/Graphit/Neongelb) ist **nicht** Teil dieses Projekts und bleibt unberührt.
+- **Neue Dateien**
+  - `.claude/skills/replica-*`: elf Claude-Skills (Replica-Paket, MIT), nur für Claude Code relevant.
+  - `interactive-paper/replica/recon.md`, `features.csv`, `brief.md`: Recherche, Feature-Liste, Auftragsbeschreibung.
+  - `interactive-paper/web/`: Astro-Prototyp (siehe unten).
+  - `interactive-paper/uebergabe/`: Screenshots des bisherigen Entwurfs.
+  - `interactive-paper/UEBERGABE.md`: dieses Dokument.
+- **Astro-Prototyp:** Astro mit eigenem CSS und wenig TypeScript. Der Name steht nur in `web/src/brand.ts`. Video und 3D-Produkt sind Platzhalter, keine echte AR. Echte Karten-Erkennung im Browser wäre später z. B. mit MindAR oder Zappar möglich (auf dem iPhone-Browser gibt es kein eingebautes Bild-Tracking).
+
+### Starten (für Einsteiger)
+```bash
+cd interactive-paper/web
+npm install
+npm run dev        # öffnet http://localhost:4321
+```
+Voraussetzung: Node.js ab Version 20.
+
+### Bekannte Einschränkungen der Arbeitsumgebung
+Ein Teil der Recherche war gesperrt (Bild-Server der Referenz, Domain-Abfragen, Firecrawl). Wer außerhalb dieser Umgebung arbeitet, kann das nachholen.
+
+---
+
+## 8. Offene Entscheidungen
+
+1. Designrichtung (neu, auf Basis von Referenzen).
+2. Name (Marken- und Domain-Prüfung steht aus).
+3. Wie die Produktdarstellung entsteht: 3D im Browser, Renderings, oder generierte Bilder.
+4. Wie der echte Karten-Scan später technisch gelöst wird.
+5. Sprache: Deutsch zuerst, Englisch später (so vereinbart).
+6. Ob später ein eigenes Repository und ein eigenes Vercel-Projekt angelegt werden.
+
+---
+
+## 9. Zusammenarbeit mit dem Auftraggeber
+
+- Spricht Deutsch, ist **Programmieranfänger**. Er möchte **Erklärungen** und **aktive Vorschläge**, kein bloßes Nachfragen.
+- Direkt und kritisch. Er wertet generische Ergebnisse sofort ab. Deshalb früh **konkrete visuelle Entwürfe** zeigen, nicht nur beschreiben.
+- Er mag Namen, die kurz, englisch und aussagekräftig sind.
+- Ehrlich berichten, was nicht geprüft ist (Marke, Domain, echte Geräte).
+
+---
+
+## 10. Fertiger Prompt für ChatGPT (zum Einfügen)
+
+Dokument und die drei Screenshots aus `uebergabe/` anhängen, dann diesen Text senden:
+
+```
+Du bist Senior-Webdesigner und Creative Developer. Ich gebe dir ein Übergabedokument und drei Screenshots eines gescheiterten Entwurfs. Lies alles genau.
+
+Ziel: Eine hochwertige, interaktive, cleane Website für ein einziges Produkt: Direct Mail mit NFC-Karte, die beim Antippen ein immersives Erlebnis auf dem Handy startet (Video auf der Karte oder 3D-Produkt auf der Karte, danach Kaufen / Leistung ansehen / Termin buchen). Sie darf nicht nach AI-Slop aussehen.
+
+Gehe so vor:
+1. Stelle mir höchstens fünf kurze Fragen, vor allem nach Referenz-Websites, die ich schön finde, und solchen, die ich hasse.
+2. Erkläre in wenigen Sätzen, warum der Entwurf in den Screenshots nicht überzeugt, und was du anders machen würdest.
+3. Schlage mir drei deutlich verschiedene Designrichtungen vor. Je Richtung: Grundidee, Farben (mit Hex-Werten), Schriften (frei lizenziert), Layout des Hero, ein besonderes interaktives Element und eine Beschreibung, wie die Karte und das Handy dargestellt werden (Renderings, 3D im Browser oder Fotos, keine reinen CSS-Zeichnungen).
+4. Empfiehl eine Richtung und begründe sie.
+5. Erst nach meiner Wahl: liefere den Code (Astro, eigenes CSS, kein Framework-Overkill) in kleinen, lauffähigen Schritten und erkläre jeden Schritt für einen Programmieranfänger.
+
+Regeln: Kein Kopieren von Texten, Bildern, Logos oder Namen der Referenzseite interactivepaper.com. Keine erfundenen Kunden, Zahlen oder Bewertungen. Alle Demo-Inhalte als Beispiel kennzeichnen. Schreibe auf Deutsch.
+```
