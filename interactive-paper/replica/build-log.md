@@ -78,3 +78,8 @@ Logo: schwarzes Quadrat und zwei proportional abgestufte quadratische Flächen, 
 ## V11 – True-Nature-Freisteller
 
 Fleckige Alpha-Ränder im gemeinsamen Motiv für Vergleich und Galerie bereinigt. CTA erhalten; feste NFC-Vorlage wieder angewendet. Transparenz auf Weiß/Grau/Gelbgrün geprüft. Neue Bild-URL verhindert alte Bildcache-Treffer. Keine weiteren Layout- oder Kartenänderungen.
+
+
+## V12 – vollständige Logo-Referenz
+
+Quadratgrößen48/90/134aus neuer Nutzerreferenz übernommen, deutlich blassere Außenflächen, Position relativ zur Textgrundlinie und Abstand angepasst. Header, Footer, Portal und Favicon einheitlich. Sauberes True-Nature-Motiv unverändert unter neuer V12-Bildadresse an beiden Stellen eingebunden.

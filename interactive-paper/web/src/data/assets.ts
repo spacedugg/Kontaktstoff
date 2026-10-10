@@ -10,7 +10,7 @@ const images: Record<string,string> = {
   "prepmymeal": "/images/v10/prepmymeal.webp",
   "revolut": "/images/v10/revolut.webp",
   "temoa": "/images/v10/temoa.webp",
-  "truenature": "/images/v11/truenature.webp",
+  "truenature": "/images/v12/truenature.webp",
   "aoste": "/images/v10/aoste.webp",
   "116media": "/images/v10/116media.webp"
 };

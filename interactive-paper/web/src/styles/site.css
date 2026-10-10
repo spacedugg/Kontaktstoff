@@ -12,8 +12,8 @@
 
 /* V8: tap mark, quieter proof, floating product and branded pages. */
 .impulse-wordmark>strong{display:flex;align-items:baseline;gap:.065em;padding-right:.15em}
-.impulse-wordmark .impulse-dot,.portal-wordmark .impulse-dot{display:inline-block;position:relative;width:.145em;height:.145em;border-radius:8%;background:#000;margin-left:.16em;flex:none}
-.impulse-dot::before,.impulse-dot::after{content:"";position:absolute;background:#000;border:0;border-radius:8%;pointer-events:none}.impulse-dot::before{inset:-33.333%;opacity:.17}.impulse-dot::after{inset:-16.667%;opacity:.23}
+.impulse-wordmark .impulse-dot,.portal-wordmark .impulse-dot{display:inline-block;position:relative;width:.14em;height:.14em;border-radius:15%;background:#181b21;margin-left:.14em;transform:translateY(-.015em);flex:none}
+.impulse-dot::before,.impulse-dot::after{content:"";position:absolute;background:#181b21;border:0;border-radius:15%;pointer-events:none}.impulse-dot::before{inset:-89.583333%;opacity:.055}.impulse-dot::after{inset:-43.75%;opacity:.12}
 .launch-heading{text-align:center;margin-inline:auto}.launch-heading h2,.launch-heading>p{margin-inline:auto}.launch-heading>p:not(.launch-label){max-width:48rem}.launch-heading em{font-style:italic}
 .proof-footnote{text-align:center;font-size:.9rem;line-height:1.5;padding-top:1.6rem;color:#465311}
 .launch-v8 .comparison-experience{background:transparent;border-radius:0;box-shadow:none;filter:drop-shadow(0 .7rem .65rem #1c2b2426);width:48%;right:-1rem;top:-.4rem;pointer-events:none}
