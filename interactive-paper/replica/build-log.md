@@ -55,3 +55,14 @@ FAQ sind native, tastaturbedienbare Details/Summary-Elemente mit vollständig im
 Der Kennzahlen-Dialog entfällt. Die kleine Fußnote bezeichnet die 77/64/23 weiterhin als Beispielwerte; es liegt kein Nachweis vor, dass diese zuvor frei gewählten Zahlen aus eigenen Kundentests stammen. Keine erfundene Kundenattribution. Rechtsseiten bleiben Entwürfe.
 
 Prüfung: 30 statische Routen; Links, Assets, IDs/ARIA, native FAQ-Interaktion, entfernte Screenshot-Texte, Branding, Dashboard, Cookies und Journalfilter. Gerenderte Browserprüfung weiterhin nicht möglich: vorgeschriebenes control-browser-Werkzeug fehlt.
+
+
+## V9 – Einheitliche Karten und Vergleich · 10.10.2026
+
+Alle aktiv verwendeten Kartenmotive gegen die HOLY-Karte im Hero geprüft. Visuelle Vorlage: Hochformat 3:5, Tap-Mitte bei 50 % der Breite und 78 % der Höhe, äußere Tap-Fläche 44 % der Kartenbreite. Das ist eine gemeinsame Illustrationsvorgabe, keine bestätigte Fertigungszeichnung. Perspektive und KI-Darstellung können geringfügig abweichen. Bereits passende Motive bleiben erhalten; abweichende Bilder werden gezielt angepasst. `src/data/assets.ts` ordnet freigegebene Bilder zentral zu, auch in Journal, Unterseiten und Portal.
+
+Schwarzer abgerundeter Logo-Punkt mit schwarzer Kontur (etwa 20 % größer, 32 % Deckkraft) in Header, Footer, Portal und Favicon. QR/NFC-Vergleich mit echtem QR-Code zur Produktseite und größerem transparentem True-Nature-Erlebnis. Schritte bleiben in kleinerer Typografie erhalten. Überschrift `Gestochen / scharf.` zweizeilig.
+
+Interactive-Paper-Vergleich aus Daten, Seitenbuild, Übersicht und Footer entfernt. Die zwei methodischen Vergleiche bleiben erhalten. Der lange Kennzahlen-Fußnotentext entfällt; `Beispielwerte` bleibt als knappe Einordnung, da keine eigenen Kundenergebnisse für 77/64/23 belegt sind.
+
+29 statische Seiten. Build-/DOM-Prüfungen umfassen Links, entfernte Route, zentrale Bildverweise, Logo, FAQ, Dashboard, Cookies und Journal. Keine gerenderte Browserprüfung: vorgeschriebenes control-browser fehlt. Private Vorschau und Side-Project-Branch unverändert; kein Merge, keine Live-Änderung.

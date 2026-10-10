@@ -45,3 +45,6 @@ Unternehmens- und Rechtsseiten,content,must,yes,partial,Unternehmensseiten umges
 FAQ als Pill-Akkordeons V8,content,must,yes,yes,Native details/summary; vollständige Antworten im HTML
 Branded Unterseiten V8,marketing site,must,yes,yes,Zentrierte Marken-Heros und Inhaltskacheln ohne linke Navigation
 Transparentes Vergleichsmotiv V8,visual,must,yes,yes,Freigestelltes Produkt mit echtem Alpha und Schatten
+Einheitliche Karten V9,visual,must,yes,yes,14 aktive Grundmotive geprüft; zentrale Assetzuordnung
+QR NFC Vergleich V9,marketing site,must,yes,yes,Echter QR-Code und größerer transparenter True-Nature-Freisteller
+Anbietervergleich entfernt V9,content,must,yes,yes,Interactive-Paper-Route und interne Links entfernt; 2 Methodenvergleiche bleiben

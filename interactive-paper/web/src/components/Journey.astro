@@ -1,8 +1,9 @@
 ---
+import {assetUrl} from '../data/assets';
 const steps=[
  {name:'Ankommen.',image:'arrival',alt:'Eine einzelne HOLY-Kampagnenkarte kommt beim Empfänger an',text:'Eine gedruckte Karte in Ihrem Design. Per Post direkt in die Hände Ihrer Zielgruppe.'},
  {name:'Handy daranhalten.',image:'connect',alt:'Die Oberkante eines iPhones nähert sich dem kleinen Tap-Feld; illustrierte Funkwellen zeigen die NFC-Verbindung und eine kleine Anzeige lädt zum Öffnen ein',text:'Entsperrtes Handy nah ans NFC-Feld halten. Die angezeigte Einladung antippen.'},
  {name:'Erleben.',image:'experience',alt:'Hydrationpulver und Früchte werden als räumliches Produkterlebnis auf dem Smartphone inszeniert',text:'Das Erlebnis öffnet sich. Ihr Angebot wird greifbar — der nächste Klick führt zum Kauf oder Gespräch.'},
 ];
 ---
-<section class="launch-process" id="ablauf" aria-labelledby="process-title"><div class="launch-shell"><div class="launch-heading"><h2 id="process-title">Von der Briefkarte<br />direkt ins Erlebnis.</h2></div><ol class="launch-steps">{steps.map((step,i)=><li><div class="step-image"><img src={'/images/v7/'+step.image+'.webp'} width="1536" height="1024" loading="lazy" alt={step.alt} /><span aria-hidden="true">{i+1}</span></div><h3>{step.name}</h3><p>{step.text}</p></li>)}</ol></div></section>
+<section class="launch-process" id="ablauf" aria-labelledby="process-title"><div class="launch-shell"><div class="launch-heading"><h2 id="process-title">Von der Briefkarte<br />direkt ins Erlebnis.</h2></div><ol class="launch-steps">{steps.map((step,i)=><li><div class="step-image"><img src={assetUrl(step.image)} width="1536" height="1024" loading="lazy" alt={step.alt} /><span aria-hidden="true">{i+1}</span></div><h3>{step.name}</h3><p>{step.text}</p></li>)}</ol></div></section>
