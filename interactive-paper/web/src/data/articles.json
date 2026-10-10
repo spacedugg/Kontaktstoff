@@ -35,8 +35,9 @@
         "url": "https://www.qrcode.com/en/howto/code.html"
       }
     ],
-    "image": "connect",
-    "minutes": 2
+    "image": "blog-nfc-oder-qr",
+    "minutes": 2,
+    "imageAlt": "Skizze zweier Mailingkarten: QR-Code und NFC-Tap als Wege zum Smartphone."
   },
   {
     "slug": "erste-nfc-kampagne",
@@ -74,8 +75,9 @@
         "url": "https://developer.apple.com/design/human-interface-guidelines/nfc"
       }
     ],
-    "image": "arrival",
-    "minutes": 2
+    "image": "blog-erste-nfc-kampagne",
+    "minutes": 2,
+    "imageAlt": "Skizze eines Kampagnenplans mit Checkliste, Briefumschlag und Mailingkarte."
   },
   {
     "slug": "landingpage-die-weiterfuehrt",
@@ -109,8 +111,9 @@
         "url": "https://developer.apple.com/quick-look-gallery/"
       }
     ],
-    "image": "experience",
-    "minutes": 2
+    "image": "blog-landingpage-die-weiterfuehrt",
+    "minutes": 2,
+    "imageAlt": "Skizze einer Mailingkarte, deren Weg zu einer mobilen Landingpage mit hervorgehobenem Button führt."
   },
   {
     "slug": "b2b-outreach",
@@ -144,8 +147,9 @@
         "url": "https://www.116media.de/"
       }
     ],
-    "image": "116media",
-    "minutes": 2
+    "image": "blog-b2b-outreach",
+    "minutes": 2,
+    "imageAlt": "Skizze einer persönlichen Briefübergabe mit zwei Sprechblasen als Gesprächseinladung."
   },
   {
     "slug": "produktlaunch-mit-ar",
@@ -183,8 +187,9 @@
         "url": "https://developer.apple.com/documentation/arkit/previewing-a-model-with-ar-quick-look"
       }
     ],
-    "image": "holy",
-    "minutes": 2
+    "image": "blog-produktlaunch-mit-ar",
+    "minutes": 2,
+    "imageAlt": "Skizze eines Flakons, der als räumliches Produkterlebnis über einem Smartphone erscheint."
   },
   {
     "slug": "taps-richtig-messen",
@@ -222,8 +227,9 @@
         "url": "https://www.bfdi.bund.de/DE/Buerger/Inhalte/Telemedien/Cookies.html"
       }
     ],
-    "image": "hero",
-    "minutes": 2
+    "image": "blog-taps-richtig-messen",
+    "minutes": 2,
+    "imageAlt": "Skizze einer Lupe über einer abstrakten Kampagnenauswertung neben Smartphone und Mailingkarte."
   },
   {
     "slug": "nfc-karte-gestalten",
@@ -262,8 +268,9 @@
         "url": "https://www.qrcode.com/en/howto/code.html"
       }
     ],
-    "image": "temoa",
-    "minutes": 2
+    "image": "blog-nfc-karte-gestalten",
+    "minutes": 2,
+    "imageAlt": "Skizze eines Kartenentwurfs mit Tap-Feld, Bleistift und Farbmuster."
   },
   {
     "slug": "papier-druck-haptik",
@@ -301,7 +308,8 @@
         "url": "https://developer.apple.com/design/human-interface-guidelines/nfc"
       }
     ],
-    "image": "finish",
-    "minutes": 2
+    "image": "blog-papier-druck-haptik",
+    "minutes": 2,
+    "imageAlt": "Skizze dünner Papiermuster mit farbiger Druckfläche und einer Drucklupe."
   }
 ]

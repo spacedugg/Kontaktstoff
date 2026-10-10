@@ -38,3 +38,6 @@
 @media(max-width:700px){.launch-v9 .comparison-grid{margin-top:5rem;gap:1.5rem}.launch-v9 .compare-nfc{margin-top:7.5rem}.launch-v9 .comparison-experience{width:65%;right:-.4rem;transform:translateY(-72%)}.comparison-directory{grid-template-columns:1fr}.launch-v9 .comparison-grid ol{font-size:.95rem}}
 
 .portal-top>strong>.portal-wordmark{display:inline-flex;align-items:baseline;gap:.065em;font-size:1.7rem;font-weight:700;letter-spacing:-.065em;color:var(--ink);padding-right:.15em}
+
+/* Sticky navigation stays usable in short mobile viewports. */
+.site-header .site-nav{max-height:calc(100dvh - 6.25rem);overflow-y:auto;overscroll-behavior:contain}

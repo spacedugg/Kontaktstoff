@@ -1,4 +1,12 @@
 const images: Record<string,string> = {
+  "blog-nfc-oder-qr": "/images/blog-v13/nfc-oder-qr.webp",
+  "blog-erste-nfc-kampagne": "/images/blog-v13/erste-nfc-kampagne.webp",
+  "blog-landingpage-die-weiterfuehrt": "/images/blog-v13/landingpage-die-weiterfuehrt.webp",
+  "blog-b2b-outreach": "/images/blog-v13/b2b-outreach.webp",
+  "blog-produktlaunch-mit-ar": "/images/blog-v13/produktlaunch-mit-ar.webp",
+  "blog-taps-richtig-messen": "/images/blog-v13/taps-richtig-messen.webp",
+  "blog-nfc-karte-gestalten": "/images/blog-v13/nfc-karte-gestalten.webp",
+  "blog-papier-druck-haptik": "/images/blog-v13/papier-druck-haptik.webp",
   "hero": "/images/v10/hero.webp",
   "arrival": "/images/v10/arrival.webp",
   "connect": "/images/v10/connect.webp",
