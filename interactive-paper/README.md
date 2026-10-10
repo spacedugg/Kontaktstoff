@@ -1,4 +1,6 @@
-# Kontaktstoff Impulse – V9
+# Kontaktstoff Impulse – V10
+
+V10: feste perspektivische NFC-Vorlage, zweistufiges schwarzes Puls-Logo und ursprüngliches HOLY-Druckmotiv. Quellen und Projektion unter replica/v10/.
 
 Eigenständiger Prototyp im Branch `claude/interactive-paper-rebuild-owvx7s`. Die Live-Website und ihre Deployment-Konfiguration bleiben unverändert.
 

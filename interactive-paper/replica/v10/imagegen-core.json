@@ -1,0 +1,216 @@
+{
+  "mode": "builtin image_gen",
+  "operation": "precise-object-edit; remove physical-card tap target only",
+  "encoding": "Pillow PNG-to-WebP format encoding only, quality95 method6; no pixel edits",
+  "geometryNote": "1536x1024. Corners manually read from final images, ordered TL TR BR BL. Hidden corners estimated, not exact manufacturing measurements. Canonical field x28..72% y64.8..91.2% is unobscured by phones/hands in all these images.",
+  "assets": [
+    {
+      "name": "hero",
+      "source": "/workspace/scratch/314596fa5f8b/generated_images/exec-3ae41040-1ae1-42ee-8d3d-6d39c681abc7.png",
+      "output": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v10/clean/hero.webp",
+      "prompt": "Use case: precise-object-edit. Remove ONLY the physical printed-card tap/NFC target: its entire rounded square rings, hand-phone glyph, radiowave icon and instruction 'Handy hier halten'. Restore underlying uninterrupted printed artwork matching the surrounding colors and texture. Do not add any replacement target or any blank panel. Preserve all exact card edges, corners, dimensions, camera perspective, object placement, brand logos, headline lettering, fruit/leaves/water artwork, lighting, shadows, and photographic quality. Output same 1536x1024 composition. This edit target shows THREE cards: blue NordVPN at left, yellow HOLY in middle and coral PrepMyMeal at right. Remove the tap targets from ALL THREE cards. Keep all three card planes and their positions identically unchanged.",
+      "input": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v9/hero.webp",
+      "size": [
+        1536,
+        1024
+      ],
+      "attempts": 1,
+      "status": "accepted; no residual printed target; camera and corners preserved",
+      "cards": [
+        {
+          "brand": "NordVPN",
+          "corners": [
+            [
+              68,
+              134
+            ],
+            [
+              507,
+              85
+            ],
+            [
+              582,
+              827
+            ],
+            [
+              146,
+              889
+            ]
+          ],
+          "inferredCorners": [
+            "BR"
+          ],
+          "occlusion": "Rightmost strip behind central HOLY card; factory field clear."
+        },
+        {
+          "brand": "HOLY",
+          "corners": [
+            [
+              521,
+              102
+            ],
+            [
+              989,
+              97
+            ],
+            [
+              1019,
+              881
+            ],
+            [
+              538,
+              895
+            ]
+          ],
+          "inferredCorners": [],
+          "occlusion": "None."
+        },
+        {
+          "brand": "PrepMyMeal",
+          "corners": [
+            [
+              1025,
+              83
+            ],
+            [
+              1476,
+              129
+            ],
+            [
+              1392,
+              903
+            ],
+            [
+              945,
+              854
+            ]
+          ],
+          "inferredCorners": [
+            "BL"
+          ],
+          "occlusion": "Leftmost strip behind central HOLY card; factory field clear."
+        }
+      ],
+      "foreground": "No phones/hands; all three canonical target regions visible."
+    },
+    {
+      "name": "arrival",
+      "source": "/workspace/scratch/314596fa5f8b/generated_images/exec-aea19551-57fa-4a9a-a354-fd4c8d85d7e8.png",
+      "output": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v10/clean/arrival.webp",
+      "prompt": "Use case: precise-object-edit. Remove ONLY the physical printed-card tap/NFC target: its entire rounded square rings, hand-phone glyph, radiowave icon and instruction 'Handy hier halten'. Restore underlying uninterrupted printed artwork matching the surrounding colors and texture. Do not add any replacement target or any blank panel. Preserve all exact card edges, corners, dimensions, camera perspective, object placement, brand logos, headline lettering, fruit/leaves/water artwork, lighting, shadows, and photographic quality. Output same 1536x1024 composition. Single yellow HOLY card held at lower left in a human hand, above an open envelope. Preserve hand/fingers/envelope exactly, remove only target from card.",
+      "input": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v7/arrival.webp",
+      "size": [
+        1536,
+        1024
+      ],
+      "attempts": 1,
+      "status": "accepted; no residual printed target; camera and corners preserved",
+      "cards": [
+        {
+          "brand": "HOLY",
+          "corners": [
+            [
+              542,
+              34
+            ],
+            [
+              1037,
+              97
+            ],
+            [
+              941,
+              913
+            ],
+            [
+              444,
+              850
+            ]
+          ],
+          "inferredCorners": [
+            "BL"
+          ],
+          "occlusion": "Hand covers only lower-left outer card corner, outside field."
+        }
+      ],
+      "foreground": "No field occlusion. Hand ends near x488, while target starts around x580."
+    },
+    {
+      "name": "connect",
+      "source": "/workspace/scratch/314596fa5f8b/generated_images/exec-0e6a53f9-f4cd-4094-b985-a07d0e4963ad.png",
+      "output": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v10/clean/connect.webp",
+      "prompt": "Use case: precise-object-edit. Remove ONLY the physical printed-card tap/NFC target: its entire rounded square rings, hand-phone glyph, radiowave icon and instruction 'Handy hier halten'. Restore underlying uninterrupted printed artwork matching the surrounding colors and texture. Do not add any replacement target or any blank panel. Preserve all exact card edges, corners, dimensions, camera perspective, object placement, brand logos, headline lettering, fruit/leaves/water artwork, lighting, shadows, and photographic quality. Output same 1536x1024 composition. Single yellow HOLY card behind an iPhone held in a hand. Preserve phone, hand, screen notification and blue glowing floating NFC arcs EXACTLY. Remove only target printed on large physical card, not the floating blue arcs. Also clean target from miniature card thumbnail within screen notification if visible, while retaining thumbnail artwork.",
+      "input": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v7/connect.webp",
+      "size": [
+        1536,
+        1024
+      ],
+      "attempts": 1,
+      "status": "accepted; no residual printed target; camera and corners preserved",
+      "cards": [
+        {
+          "brand": "HOLY",
+          "corners": [
+            [
+              76,
+              159
+            ],
+            [
+              591,
+              29
+            ],
+            [
+              943,
+              732
+            ],
+            [
+              369,
+              909
+            ]
+          ],
+          "inferredCorners": [],
+          "occlusion": "Phone covers right outer card area but canonical target is left of phone; no phone/hand field overlap."
+        }
+      ],
+      "foreground": "Floating cyan NFC arcs retained. Lowest arcs may intersect upper-right of projected field; if overlay covers glow locally this is a separate foreground issue. Phone miniature card now clean too; it can receive an optional tiny target if desired. Miniature corners approximately [[1080,776],[1163,727],[1237,865],[1152,900]]."
+    },
+    {
+      "name": "experience",
+      "source": "/workspace/scratch/314596fa5f8b/generated_images/exec-09a6037d-02cd-4fc0-ac34-50e632db771b.png",
+      "output": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v10/clean/experience.webp",
+      "prompt": "Use case: precise-object-edit. Remove ONLY the physical printed-card tap/NFC target: its entire rounded square rings, hand-phone glyph, radiowave icon and instruction 'Handy hier halten'. Restore underlying uninterrupted printed artwork matching the surrounding colors and texture. Do not add any replacement target or any blank panel. Preserve all exact card edges, corners, dimensions, camera perspective, object placement, brand logos, headline lettering, fruit/leaves/water artwork, lighting, shadows, and photographic quality. Output same 1536x1024 composition. Single yellow HOLY physical card at left beside an iPhone with a floating HOLY product and citrus splash. Preserve phone, product, fruit splash and all phone UI exactly. Remove only target printed on physical card at left.",
+      "input": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v7/experience.webp",
+      "size": [
+        1536,
+        1024
+      ],
+      "attempts": 1,
+      "status": "accepted; no residual printed target; camera and corners preserved",
+      "cards": [
+        {
+          "brand": "HOLY",
+          "corners": [
+            [
+              170,
+              106
+            ],
+            [
+              648,
+              53
+            ],
+            [
+              781,
+              854
+            ],
+            [
+              271,
+              910
+            ]
+          ],
+          "inferredCorners": [],
+          "occlusion": "None; phone and fruit experience are entirely to right of target."
+        }
+      ],
+      "foreground": "No phone/hand occlusion of target."
+    }
+  ]
+}

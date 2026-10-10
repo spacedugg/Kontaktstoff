@@ -1,0 +1,411 @@
+[
+  {
+    "source": "clean/holy.webp",
+    "output": "/images/v10/holy.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            180,
+            103
+          ],
+          [
+            675,
+            48
+          ],
+          [
+            814,
+            864
+          ],
+          [
+            287,
+            943
+          ]
+        ],
+        "ink": "#10170b",
+        "ring": "#fffce1",
+        "panel": "#eceb19"
+      }
+    ]
+  },
+  {
+    "source": "clean/nordvpn.webp",
+    "output": "/images/v10/nordvpn.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            219,
+            42
+          ],
+          [
+            777,
+            86
+          ],
+          [
+            837,
+            915
+          ],
+          [
+            264,
+            954
+          ]
+        ],
+        "ink": "#ffffff",
+        "panel": "#164dbe"
+      }
+    ]
+  },
+  {
+    "source": "clean/prepmymeal.webp",
+    "output": "/images/v10/prepmymeal.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            156,
+            80
+          ],
+          [
+            652,
+            29
+          ],
+          [
+            750,
+            922
+          ],
+          [
+            236,
+            968
+          ]
+        ],
+        "ink": "#ffffff",
+        "panel": "#e45d43"
+      }
+    ]
+  },
+  {
+    "source": "clean/revolut.webp",
+    "output": "/images/v10/revolut.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            220,
+            41
+          ],
+          [
+            711,
+            72
+          ],
+          [
+            710,
+            896
+          ],
+          [
+            221,
+            936
+          ]
+        ],
+        "ink": "#645788",
+        "panel": "#f0ebf8"
+      }
+    ]
+  },
+  {
+    "source": "clean/temoa.webp",
+    "output": "/images/v10/temoa.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            254,
+            18
+          ],
+          [
+            809,
+            44
+          ],
+          [
+            824,
+            931
+          ],
+          [
+            246,
+            968
+          ]
+        ],
+        "ink": "#172519",
+        "panel": "#deed65"
+      }
+    ]
+  },
+  {
+    "source": "clean/aoste.webp",
+    "output": "/images/v10/aoste.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            185,
+            101
+          ],
+          [
+            672,
+            43
+          ],
+          [
+            784,
+            889
+          ],
+          [
+            290,
+            947
+          ]
+        ],
+        "ink": "#273511",
+        "ring": "#fff9d9",
+        "panel": "#efc929"
+      }
+    ]
+  },
+  {
+    "source": "clean/116media.webp",
+    "output": "/images/v10/116media.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            376,
+            19
+          ],
+          [
+            894,
+            71
+          ],
+          [
+            821,
+            906
+          ],
+          [
+            273,
+            848
+          ]
+        ],
+        "ink": "#ffffff",
+        "panel": "#c91b20"
+      }
+    ]
+  },
+  {
+    "source": "clean/truenature.webp",
+    "output": "/images/v10/truenature.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            230,
+            64
+          ],
+          [
+            750,
+            31
+          ],
+          [
+            815,
+            898
+          ],
+          [
+            271,
+            934
+          ]
+        ],
+        "ink": "#174d34",
+        "panel": "#f2f0d5"
+      }
+    ]
+  },
+  {
+    "source": "clean/hero.webp",
+    "output": "/images/v10/hero.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            68,
+            134
+          ],
+          [
+            507,
+            85
+          ],
+          [
+            582,
+            827
+          ],
+          [
+            146,
+            889
+          ]
+        ],
+        "ink": "#ffffff",
+        "panel": "#164dbe"
+      },
+      {
+        "corners": [
+          [
+            521,
+            102
+          ],
+          [
+            989,
+            97
+          ],
+          [
+            1019,
+            881
+          ],
+          [
+            538,
+            895
+          ]
+        ],
+        "ink": "#10170b",
+        "ring": "#fffce1",
+        "panel": "#eceb19"
+      },
+      {
+        "corners": [
+          [
+            1025,
+            83
+          ],
+          [
+            1476,
+            129
+          ],
+          [
+            1392,
+            903
+          ],
+          [
+            945,
+            854
+          ]
+        ],
+        "ink": "#ffffff",
+        "panel": "#e45d43"
+      }
+    ]
+  },
+  {
+    "source": "clean/arrival.webp",
+    "output": "/images/v10/arrival.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            542,
+            34
+          ],
+          [
+            1037,
+            97
+          ],
+          [
+            941,
+            913
+          ],
+          [
+            444,
+            850
+          ]
+        ],
+        "ink": "#10170b",
+        "ring": "#fffce1",
+        "panel": "#eceb19"
+      }
+    ]
+  },
+  {
+    "source": "clean/connect.webp",
+    "output": "/images/v10/connect.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            76,
+            159
+          ],
+          [
+            591,
+            29
+          ],
+          [
+            943,
+            732
+          ],
+          [
+            369,
+            909
+          ]
+        ],
+        "ink": "#10170b",
+        "ring": "#fffce1",
+        "panel": "#eceb19"
+      },
+      {
+        "corners": [
+          [
+            1080,
+            776
+          ],
+          [
+            1163,
+            727
+          ],
+          [
+            1237,
+            865
+          ],
+          [
+            1152,
+            900
+          ]
+        ],
+        "ink": "#10170b",
+        "ring": "#fffce1",
+        "panel": "#eceb19"
+      }
+    ]
+  },
+  {
+    "source": "clean/experience.webp",
+    "output": "/images/v10/experience.webp",
+    "cards": [
+      {
+        "corners": [
+          [
+            170,
+            106
+          ],
+          [
+            648,
+            53
+          ],
+          [
+            781,
+            854
+          ],
+          [
+            271,
+            910
+          ]
+        ],
+        "ink": "#10170b",
+        "ring": "#fffce1",
+        "panel": "#eceb19"
+      }
+    ]
+  }
+]

@@ -306,3 +306,10 @@ Schwarzer abgerundeter Logo-Punkt mit schwarzer Kontur (etwa 20 % größer, 32 %
 Interactive-Paper-Vergleich aus Daten, Seitenbuild, Übersicht und Footer entfernt. Die zwei methodischen Vergleiche bleiben erhalten. Der lange Kennzahlen-Fußnotentext entfällt; `Beispielwerte` bleibt als knappe Einordnung, da keine eigenen Kundenergebnisse für 77/64/23 belegt sind.
 
 29 statische Seiten. Build-/DOM-Prüfungen umfassen Links, entfernte Route, zentrale Bildverweise, Logo, FAQ, Dashboard, Cookies und Journal. Keine gerenderte Browserprüfung: vorgeschriebenes control-browser fehlt. Private Vorschau und Side-Project-Branch unverändert; kein Merge, keine Live-Änderung.
+
+
+## V10 – gemeinsame NFC-Vorlage und Logo-Referenz
+
+Alle sichtbaren Tap-Felder stammen aus einer Vektorvorlage, perspektivisch an vier Kartenecken ausgerichtet: Mittelpunkt50/78%, Breite44%.12 neue Motive,15 Kartenflächen einschließlich Smartphone-Miniatur. Imagegen entfernte die alten Felder; die anschließende Projektion ist deterministisch. Quellen, Prompts, Eckpunkte und Skripte: replica/v10/. Zentral auf allen Seiten und im Portal eingebunden. Keine Produktionsmaß-Freigabe.
+
+Logo: schwarzes Quadrat und zwei proportional abgestufte quadratische Flächen, mehr Abstand. Originales HOLY-Makro V7 für Gestochen scharf wiederhergestellt.29 Seiten geprüft, Browser-Layoutprüfung nicht verfügbar. Sites-Zugriffsregel war beim Öffnen bereits public; unverändert beibehalten. Kontaktstoff-Live und main bleiben unverändert.
