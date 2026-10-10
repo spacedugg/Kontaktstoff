@@ -240,3 +240,8 @@ GitHub-Ziel unverändert: `claude/interactive-paper-rebuild-owvx7s`. Live-Websit
 ## V5 – 10.10.2026: Produkt und Marketing im Fokus
 
 V5 ersetzt die V4-Richtung: zentrale Briefkarte mit Handy-Feld, kurze Marketing-Copy, fünf neue Originalmotive, mehr Lime/Kobalt/Koralle, sichtbares Dashboard. Rechner und Quotenregler entfernt. Referenzzahlen bleiben ausdrücklich illustrative Fremdwerte. Keine Live-Änderungen. Details siehe README und replica/asset-prompts-v5.md.
+
+
+## V6 – Hero beruhigen, freie Kampagnen, Portal
+
+Aktuelle Richtung ersetzt V5: drei Hero-Elemente, neun neue Bilder mit kleinen NFC-Feldern, weiße Markengalerie, NFC-Papiersektion, QR/NFC-Vergleich und interaktives Portal mit sechs Ansichten. Keine mehrfachen Beispiel-Fußzeilen; einmalige Demo-/Konzeptkennzeichnung bleibt. 77/64/23 sind frei gewählte Beispielquoten, 4,5/35 ein vorgegebenes Vergleichsszenario. Keine eigenen Erfolgsbehauptungen. Details in README.

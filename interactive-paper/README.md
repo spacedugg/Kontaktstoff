@@ -1,19 +1,26 @@
-# Kontaktstoff Impulse – V5
+# Kontaktstoff Impulse – V6
 
-Eigenständiger NFC-Direct-Mail-Prototyp im Branch `claude/interactive-paper-rebuild-owvx7s`. Keine Änderung der Live-Website.
+Eigenständiger Prototyp im Branch `claude/interactive-paper-rebuild-owvx7s`. Live-Website unverändert.
 
-## Aktueller Aufbau
+## Aufbau
 
-Produkt-Hero mit groß dargestellter Briefkarte und zentraler Tap-Anweisung; frühe feste Referenzzahlen; drei bebilderte Schritte; digitales Erlebnis; sichtbares Kampagnen-Dashboard; drei Anwendungsszenarien; Kampagnenanfrage.
+Ruhiger Hero: einfarbige Überschrift, ein Absatz, ein CTA. Drei individuell gestaltete Kampagnenkarten mit kleinen NFC-Feldern. Neun neue Originalbilder; NFC-Nahkontakt, Link-Einladung, emotionale 3D-Erlebnisse und dünne Papierkante.
 
-Marketing und konkrete Aktionen stehen im Mittelpunkt. Lime, Kobalt und Koralle, große Schrift, originale generierte Produktbilder. Keine selbst gebauten Produktanimationen. Der 500-Karten-Rechner und die Quotenregler sind entfernt.
+Frühe Zahlenleiste: 77/64/23 % als klar bezeichnete Beispielquoten, keine Erfolgsdaten. Der Vergleich 4,5 % QR / 35 % NFC ist ein vom Nutzer vorgegebenes Vergleichsszenario, keine bestätigte Studie. Kurze Einordnung über Info-Dialoge statt langer Referenz-Fußzeilen.
+
+Das Portal ist eine lokale Demo mit sechs funktionierenden Tabs: Kampagne, Kontakte, Kartendesign, Versand, Erlebnis und Tracking. Designrichtungen lassen sich wechseln; Tastaturnavigation ist möglich. Keine Backend-Datenerfassung oder echte Sendungen.
+
+Kampagnenideen auf weißem Grund: HOLY, NordVPN, PrepMyMeal, Revolut und temoa. Eine gemeinsame Kennzeichnung stellt klar, dass dies keine Kundenreferenzen sind.
 
 ## Entwicklung
 
-Im Verzeichnis `web`: `npm install`, `npm run dev`, `npm run build`.
+In `web`: `npm install`, `npm run dev`, `npm run build`.
 
-## Grenzen
+## Quellen und Prüfung
 
-Die Dashboardwerte 78/65/24 % stammen aus der illustrativen Darstellung auf https://interactivepaper.com/tap. Keine Kontaktstoff-Ergebnisse. Der Wochenverlauf ist ein Beispiel. Keine echte Datenerfassung oder Kundenkonten; Conversions benötigen eine Messung auf der Zielseite. Anfrageformular und Beispiel-Zielseiten lösen keine echten Sendungen, Käufe oder Termine aus.
-
-Bildgenerierung und exakte Prompts: [replica/asset-prompts-v5.md](replica/asset-prompts-v5.md).
+- Referenz: https://interactivepaper.com/tap
+- Anbieterangaben 2–3 % QR / 35–65 % NFC: https://interactivepaper.com/touch-for-print-advertising
+- Agentur-Referenz: https://www.temoa.de/design-beispiele
+- Instagram-Beitragsseite erreichbar, Video nicht inhaltlich verifiziert.
+- Browser-QA entfällt, da das für Sites vorgeschriebene control-browser-Werkzeug fehlt.
+- Exakte Generierungsprompts und Assetpfade: `replica/asset-prompts-v6.md`.

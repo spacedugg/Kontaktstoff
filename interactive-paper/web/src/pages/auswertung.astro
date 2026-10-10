@@ -2,10 +2,4 @@
 import Layout from '../layouts/Layout.astro';
 import CampaignDashboard from '../components/CampaignDashboard.astro';
 ---
-<Layout title="Impulse Kampagnen-Dashboard" compact pageClass="dashboard-v5"><main id="main" class="launch-shell dashboard-page"><p class="launch-label">Kontaktstoff Impulse · Analytics</p><h1>Jede Interaktion<br />im Blick.</h1><p class="dashboard-page-intro">Erlebnis-Aufrufe, Website-Besuche und Conversions: Das Dashboard zeigt die Wirkung Ihrer Kampagne an einem Ort.</p><CampaignDashboard /><div class="dashboard-context"><div><h2>Was wird gemessen?</h2><p>Der geöffnete Kampagnen-Link zählt als Tap. Website-Besuche sind Weiterklicks zum Angebot. Conversions wie Käufe oder Buchungen benötigen eine angebundene Messung auf der Zielseite.</p></div><div><h2>Was zeigt dieser Prototyp?</h2><p>Eine Dashboard-Vorschau mit Beispieldaten. Eine echte Datenerfassung oder ein Kundenkonto ist hier noch nicht angebunden.</p><button class="launch-link" type="button" data-download-report>Beispielreport herunterladen <span aria-hidden="true">↓</span></button></div></div></main></Layout>
-<script>
- document.querySelector('[data-download-report]')?.addEventListener('click',()=>{
-  const csv='\uFEFFKennzahl;Beispielwert;Einordnung\nInteraktion;78%;Illustrativ - keine Kontaktstoff-Ergebnisse\nWebsite-Besuche;65%;Illustrativ - keine Kontaktstoff-Ergebnisse\nConversion;24%;Illustrativ - keine Kontaktstoff-Ergebnisse\nQuelle;https://interactivepaper.com/tap;Dashboard-Darstellung\n';
-  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='impulse-dashboard-beispiel.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
- });
-</script>
+<Layout title="Impulse Portal" compact pageClass="launch-v6"><main id="main" class="launch-shell dashboard-page"><h1>Ihr Impulse Portal.</h1><p class="dashboard-page-intro">Kampagne, Kontakte, Gestaltung, Versand und Tracking an einem Ort.</p><CampaignDashboard instance="standalone" /></main></Layout>
