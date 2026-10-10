@@ -198,8 +198,8 @@
     ]
   },
   {
-    "source": "clean/truenature.webp",
-    "output": "/images/v10/truenature.webp",
+    "source": "../v11/truenature-clean.webp",
+    "output": "/images/v11/truenature.webp",
     "cards": [
       {
         "corners": [

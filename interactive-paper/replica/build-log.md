@@ -73,3 +73,8 @@ Interactive-Paper-Vergleich aus Daten, Seitenbuild, Übersicht und Footer entfer
 Alle sichtbaren Tap-Felder stammen aus einer Vektorvorlage, perspektivisch an vier Kartenecken ausgerichtet: Mittelpunkt50/78%, Breite44%.12 neue Motive,15 Kartenflächen einschließlich Smartphone-Miniatur. Imagegen entfernte die alten Felder; die anschließende Projektion ist deterministisch. Quellen, Prompts, Eckpunkte und Skripte: replica/v10/. Zentral auf allen Seiten und im Portal eingebunden. Keine Produktionsmaß-Freigabe.
 
 Logo: schwarzes Quadrat und zwei proportional abgestufte quadratische Flächen, mehr Abstand. Originales HOLY-Makro V7 für Gestochen scharf wiederhergestellt.29 Seiten geprüft, Browser-Layoutprüfung nicht verfügbar. Sites-Zugriffsregel war beim Öffnen bereits public; unverändert beibehalten. Kontaktstoff-Live und main bleiben unverändert.
+
+
+## V11 – True-Nature-Freisteller
+
+Fleckige Alpha-Ränder im gemeinsamen Motiv für Vergleich und Galerie bereinigt. CTA erhalten; feste NFC-Vorlage wieder angewendet. Transparenz auf Weiß/Grau/Gelbgrün geprüft. Neue Bild-URL verhindert alte Bildcache-Treffer. Keine weiteren Layout- oder Kartenänderungen.
