@@ -1,0 +1,27 @@
+<div class="experience" data-experience data-phase="ready" data-mode="product">
+  <div class="experience-top"><span class="eyebrow">Empfänger-Demo</span><span class="demo-label">Beispielkampagne</span></div>
+  <div class="experience-modes" role="group" aria-label="Beispiel-Erlebnis auswählen">
+    <button type="button" data-mode="product" aria-pressed="true">3D-Produkt <span aria-hidden="true">↻</span></button>
+    <button type="button" data-mode="video" aria-pressed="false">Video-Story <span aria-hidden="true">▷</span></button>
+  </div>
+  <div class="experience-stage">
+    <div class="experience-ready" data-ready>
+      <img src="/images/nfc-mailing-hero.webp" width="1600" height="1000" loading="lazy" alt="Neongelbe NFC-Karte und ein Handy mit einem Kopfhörer als Beispiel-Erlebnis" />
+      <button class="button button--ink" type="button" data-tap>Antippen simulieren <span aria-hidden="true">↗</span></button>
+    </div>
+    <div class="product-view" data-product-view hidden>
+      <div class="model-canvas" data-model tabindex="0" role="img" aria-label="Interaktiver 3D-Beispielkopfhörer auf einer NFC-Karte. Mit den Pfeiltasten drehen oder die Ansichtstasten verwenden.">
+        <img class="model-fallback" src="/images/headphones-example.webp" width="1600" height="900" loading="lazy" alt="Beispielkopfhörer in Silber" data-model-fallback />
+      </div>
+      <div class="model-controls" role="group" aria-label="3D-Ansicht steuern"><button type="button" data-rotate="-1" aria-label="Produkt nach links drehen">←</button><span data-model-hint>Ziehen zum Drehen</span><button type="button" data-rotate="1" aria-label="Produkt nach rechts drehen">→</button><button type="button" data-reset-view aria-label="3D-Ansicht zurücksetzen">↺</button></div>
+    </div>
+    <div class="video-view" data-video-view hidden>
+      <video controls playsinline muted preload="none" poster="/images/headphones-example.webp" aria-label="Stumme Beispiel-Produktstory: ein Kopfhörer im Detail"><source src="/media/product-story.mp4" type="video/mp4" /><track kind="captions" src="/media/product-story.vtt" srclang="de" label="Deutsch" default />Ihr Browser unterstützt diese Video-Story nicht.</video>
+      <p class="video-caption">Eine kurze Produktstory – hier mit einem frei gestalteten Beispielprodukt.</p>
+    </div>
+  </div>
+  <div class="experience-status" role="status"><span class="status-dot" aria-hidden="true"></span><span data-demo-status>Karte bereit. Sie starten das Erlebnis.</span><button type="button" class="text-link" data-demo-reset hidden>Noch einmal ↺</button></div>
+  <div class="experience-actions" data-demo-actions hidden><p>Und jetzt? Der nächste Schritt ist direkt erreichbar.</p><div class="recipient-actions"><button class="button button--lime" type="button" data-recipient-action="product">Produkt kaufen <span aria-hidden="true">↗</span></button><button class="button button--outline" type="button" data-recipient-action="service">Leistung ansehen <span aria-hidden="true">↗</span></button><button class="button button--outline" type="button" data-recipient-action="booking">Termin buchen <span aria-hidden="true">↗</span></button></div></div>
+</div>
+<dialog class="recipient-dialog" data-recipient-dialog aria-labelledby="recipient-title"><button class="dialog-close" type="button" data-close-dialog aria-label="Beispiel schließen">×</button><p class="eyebrow">Beispiel – keine echte Bestellung oder Buchung</p><h2 id="recipient-title" data-recipient-title></h2><div data-recipient-content></div></dialog>
+<script>import '../scripts/experience';</script>

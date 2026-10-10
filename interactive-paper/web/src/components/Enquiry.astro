@@ -1,0 +1,25 @@
+<dialog class="enquiry-dialog" id="enquiry" aria-labelledby="enquiry-title">
+  <button class="dialog-close" type="button" data-close-dialog aria-label="Anfrage schließen">×</button>
+  <p class="eyebrow">Ihre nächste Kampagne</p>
+  <h2 id="enquiry-title">Was soll Ihre<br />Post auslösen?</h2>
+  <p class="dialog-intro">Stellen Sie eine erste Anfrage zusammen. Im Prototyp wird sie nur als Entwurf vorbereitet.</p>
+  <form data-enquiry-form>
+    <div class="form-grid">
+      <label>Ihr Name<input name="name" autocomplete="name" required maxlength="100" /></label>
+      <label>Unternehmen<input name="company" autocomplete="organization" maxlength="120" /></label>
+      <label class="form-wide">E-Mail<input name="email" type="email" autocomplete="email" required maxlength="180" /></label>
+      <label>Ihr Ziel<select name="goal"><option>Ein Produkt zeigen</option><option>Eine Dienstleistung erklären</option><option>Ein Angebot oder Bundle erklären</option><option>Termine gewinnen</option><option>Gemeinsam eine Idee entwickeln</option></select></label>
+      <label>Geplante Menge<select name="quantity"><option>Noch offen</option><option>Bis 500 Karten</option><option>500–2.000 Karten</option><option>Mehr als 2.000 Karten</option></select></label>
+      <label class="form-wide">Gestaltung<select name="design"><option>Gemeinsam mit Kontaktstoff entwickeln</option><option>Eigene Gestaltungsdateien vorhanden</option><option>Noch offen</option></select></label>
+      <label class="form-wide">Gewünschte Zielseite <span class="muted">(optional)</span><input name="target" type="url" maxlength="500" placeholder="https://ihre-marke.de/angebot" /></label>
+      <label class="form-wide">Ihre Idee <span class="muted">(optional)</span><textarea name="idea" rows="3" maxlength="2000" placeholder="Wen möchten Sie erreichen – und womit?" /></label>
+    </div>
+    <button class="button button--lime" type="submit">Anfrage vorbereiten <span aria-hidden="true">↗</span></button>
+    <p class="fineprint">Es wird nichts versendet. Ihre Eingaben bleiben in diesem Browserfenster.</p>
+  </form>
+  <div class="enquiry-result" data-enquiry-result hidden aria-live="polite">
+    <h3>Ihr Anfrageentwurf ist bereit.</h3><pre data-enquiry-summary></pre>
+    <button class="button button--lime" type="button" data-download-enquiry>Entwurf herunterladen <span aria-hidden="true">↓</span></button>
+    <button class="text-link" type="button" data-edit-enquiry>Entwurf bearbeiten</button>
+  </div>
+</dialog>

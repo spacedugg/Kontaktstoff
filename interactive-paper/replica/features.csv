@@ -1,0 +1,50 @@
+feature,area,priority,original,clone,notes
+Startseite mit Hero und Produktübersicht,marketing site,must,yes,yes,Eigenständiger heller Kontaktstoff-Auftritt; ein NFC-Angebot
+Produktkarten mit Vergleich,marketing site,should,yes,no,S01 Compare-Funktion
+Kopfzeile mit Sprachwahl EN/DE/FR,marketing site,should,yes,no,
+Terminanfrage (Book a meeting),lead generation,must,yes,partial,Lokaler Anfrageentwurf und ausdrücklich simulierte Beispieltermine; keine Übermittlung
+Produktseite mit Feature-Kacheln,marketing site,should,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Animiertes Analytics-Dashboard als Demo,marketing site,should,yes,yes,V5: prominent auf Landingpage und /auswertung/; feste Beispieldaten und CSV; kein Live-Tracking
+Vorher/Nachher-Vergleichstabelle,marketing site,could,yes,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
+Zusammenarbeit in 5 Schritten,marketing site,should,yes,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
+Referenzen-Übersicht,marketing site,should,yes,no,S04 mit eigenen Beispielen
+Referenz-Detailseiten,marketing site,could,unknown,no,nicht gesehen
+FAQ mit Gruppen und Akkordeon,marketing site,should,yes,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
+Blog,marketing site,could,yes,no,nicht gelesen
+Rechtsseiten (Impressum Datenschutz AGB),legal,must,yes,no,mit eigenen Angaben
+Webtool-Katalog,portal,could,yes,no,nicht gesehen
+Kampagnen im Portal anlegen,portal,could,yes,no,nur aus Text
+Web-Tool-Inhalt ändern nach dem Druck,portal,could,yes,no,laut Seite möglich
+Zielseite nach dem Antippen (mobil),tap experience,could,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Interaktionen zählen und auswerten,analytics,could,yes,no,Data Report nur als Mockup gesehen
+Leads erfassen,analytics,could,unknown,no,nur FAQ-Frage
+CRM-Anbindung,integrations,could,unknown,no,nur FAQ-Frage
+Datenschutz-konform und EU-Hosting,compliance,should,yes,no,Aussage der Seite
+Augmented Reality Erlebnisse,tap experience,could,yes,skip,eigene Inhalte und Technik nötig
+NFC-Papier herstellen und versenden,hardware,could,yes,skip,Hardware und Logistik sind nicht nachbaubar
+Kundenlogos und Fallstudien,content,could,yes,skip,gehören Dritten
+Marke Name Logo und Claims,brand,could,yes,skip,gehören Interactive Paper
+Drehbares eigenes 3D-Beispielprodukt,tap experience,must,yes,skip,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Eigene Video-Story mit Bedienelementen,tap experience,must,yes,skip,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Kaufen / Leistung / Termin nach Erlebnis,tap experience,must,yes,yes,Drei klar gekennzeichnete Beispielansichten; keine echten Transaktionen
+Geführte Empfängerreise vom Brief bis zur Zielseite,tap experience,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Dünnes Papier und NFC-Verbindung visuell erklären,marketing site,must,yes,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
+"Produkt-, Dienstleistungs- und Bundle-Szenarien",tap experience,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Klassischen Brief mit NFC-Mailing vergleichen,marketing site,must,partial,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
+Kampagnenwirkung als transparente Beispielrechnung,analytics,must,partial,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
+Designfreiheit und gemeinsames Kampagnenziel erklären,marketing site,must,yes,yes,Eigenes Kuvert-/Kartenmotiv; ein gemeinsames Erlebnis pro Kampagne
+Frühe Zahlenleiste vor Prozess und Anwendungen,marketing site,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Weiche fotografische Gestaltung ohne Produktsimulation,design,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+
+Eigenständige Impulse-Site V7,marketing site,must,yes,yes,30 Routen und vollständiger Footer; bestehender Side-Project-Branch
+Journal und Suche,content,should,yes,yes,8 bebilderte Artikel mit Primärquellen und Kategorien
+Vergleichsseiten,content,should,yes,yes,3 Vergleiche ohne unbelegte Preis- oder Erfolgsbehauptungen
+FAQ offen lesbar,content,must,yes,yes,12 Fragen; 6 auf der Startseite
+Cookie-Einstellungen,privacy,must,yes,yes,Lokale Auswahl; keine Marketing- oder Analysedienste
+Unternehmens- und Rechtsseiten,content,must,yes,partial,Unternehmensseiten umgesetzt; Rechtstexte als Entwurf bis Betreiberangaben vorliegen
+FAQ als Pill-Akkordeons V8,content,must,yes,yes,Native details/summary; vollständige Antworten im HTML
+Branded Unterseiten V8,marketing site,must,yes,yes,Zentrierte Marken-Heros und Inhaltskacheln ohne linke Navigation
+Transparentes Vergleichsmotiv V8,visual,must,yes,yes,Freigestelltes Produkt mit echtem Alpha und Schatten
+Einheitliche Karten V9,visual,must,yes,yes,14 aktive Grundmotive geprüft; zentrale Assetzuordnung
+QR NFC Vergleich V9,marketing site,must,yes,yes,Echter QR-Code und größerer transparenter True-Nature-Freisteller
+Anbietervergleich entfernt V9,content,must,yes,yes,Interactive-Paper-Route und interne Links entfernt; 2 Methodenvergleiche bleiben

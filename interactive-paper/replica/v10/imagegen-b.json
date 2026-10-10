@@ -1,0 +1,157 @@
+{
+  "mode": "builtin image_gen precise-object-edit",
+  "purpose": "Remove generated tap graphics before deterministic shared vector projection",
+  "coordinates": "1536x1024 image pixels; front card plane clockwise TL TR BR BL",
+  "assets": [
+    {
+      "name": "temoa",
+      "editTarget": "public/images/v9/temoa.webp",
+      "generatedSource": "/workspace/scratch/314596fa5f8b/generated_images/exec-ffb110ae-efb8-43fa-9747-6db27c618985.png",
+      "output": "public/images/v10/clean/temoa.webp",
+      "prompt": "Use case: precise-object-edit. Edit target: the attached existing advertising image. Remove ONLY the printed NFC tap target from the lower half of the physical card on the LEFT: erase the entire rounded-square field, all concentric rings, hand/phone glyph, radiowaves and the words \"Handy hier halten\". Seamlessly reconstruct the existing brand print beneath the removed field, with no ghost outlines. Do not replace it with any other symbol, label or text. Keep the card exact same size, silhouette, position, plane corners, camera perspective and crop. Preserve all other logos, headlines, pictured products, the phone and phone-screen content, 3D objects, light, shadows and backdrop unchanged. Retain original 1536x1024 composition. This creates a blank area for a precise vector overlay added later, so it must contain NO tap instruction or NFC symbol. In this Temoa image, preserve the actual SKOTTI grill and orange bag print. Reconstruct the obscured lower grill/base and clean offwhite paper after erasing the lime tap field.",
+      "corners": [
+        [
+          254,
+          18
+        ],
+        [
+          809,
+          44
+        ],
+        [
+          824,
+          931
+        ],
+        [
+          246,
+          968
+        ]
+      ],
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "inspection": "Entire previous tap field removed cleanly; card silhouette and composition preserved. No retry required.",
+      "occlusionInPlannedField": "No physical foreground occlusion in card x28..72% y64.8..91.2%. Printed imagery beneath field is part of card artwork.",
+      "cornerNote": "All four front-plane corners visible.",
+      "preserveAlpha": false,
+      "encodedBytes": 138650,
+      "mode": "RGB"
+    },
+    {
+      "name": "aoste",
+      "editTarget": "public/images/v9/aoste.webp",
+      "generatedSource": "/workspace/scratch/314596fa5f8b/generated_images/exec-a8bd92d0-c567-4561-8aba-eea364bfb2c8.png",
+      "output": "public/images/v10/clean/aoste.webp",
+      "prompt": "Use case: precise-object-edit. Edit target: the attached existing advertising image. Remove ONLY the printed NFC tap target from the lower half of the physical card on the LEFT: erase the entire rounded-square field, all concentric rings, hand/phone glyph, radiowaves and the words \"Handy hier halten\". Seamlessly reconstruct the existing brand print beneath the removed field, with no ghost outlines. Do not replace it with any other symbol, label or text. Keep the card exact same size, silhouette, position, plane corners, camera perspective and crop. Preserve all other logos, headlines, pictured products, the phone and phone-screen content, 3D objects, light, shadows and backdrop unchanged. Retain original 1536x1024 composition. This creates a blank area for a precise vector overlay added later, so it must contain NO tap instruction or NFC symbol. Preserve yellow card print, herbs, peppercorns, salami and wood detail; leave seamless yellow pattern beneath the removed field.",
+      "corners": [
+        [
+          185,
+          101
+        ],
+        [
+          672,
+          43
+        ],
+        [
+          784,
+          889
+        ],
+        [
+          290,
+          947
+        ]
+      ],
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "inspection": "Entire previous tap field removed cleanly; card silhouette and composition preserved. No retry required.",
+      "occlusionInPlannedField": "No physical foreground occlusion in card x28..72% y64.8..91.2%. Printed imagery beneath field is part of card artwork.",
+      "cornerNote": "All four front-plane corners visible.",
+      "preserveAlpha": false,
+      "encodedBytes": 340830,
+      "mode": "RGB"
+    },
+    {
+      "name": "116media",
+      "editTarget": "public/images/v9/116media.webp",
+      "generatedSource": "/workspace/scratch/314596fa5f8b/generated_images/exec-59ebb630-b310-4534-a0da-46beda0b16a6.png",
+      "output": "public/images/v10/clean/116media.webp",
+      "prompt": "Use case: precise-object-edit. Edit target: the attached existing advertising image. Remove ONLY the printed NFC tap target from the lower half of the physical card on the LEFT: erase the entire rounded-square field, all concentric rings, hand/phone glyph, radiowaves and the words \"Handy hier halten\". Seamlessly reconstruct the existing brand print beneath the removed field, with no ghost outlines. Do not replace it with any other symbol, label or text. Keep the card exact same size, silhouette, position, plane corners, camera perspective and crop. Preserve all other logos, headlines, pictured products, the phone and phone-screen content, 3D objects, light, shadows and backdrop unchanged. Retain original 1536x1024 composition. This creates a blank area for a precise vector overlay added later, so it must contain NO tap instruction or NFC symbol. Preserve red printed gradient card and machinery. Preserve the hand holding lower-left corner and envelope. Leave a smooth red printed area after removing tap field.",
+      "corners": [
+        [
+          376,
+          19
+        ],
+        [
+          894,
+          71
+        ],
+        [
+          821,
+          906
+        ],
+        [
+          273,
+          848
+        ]
+      ],
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "inspection": "Entire previous tap field removed cleanly; card silhouette and composition preserved. No retry required.",
+      "occlusionInPlannedField": "No physical foreground occlusion in card x28..72% y64.8..91.2%. Printed imagery beneath field is part of card artwork.",
+      "cornerNote": "Lower-left card corner is partly obscured by holding hand, inferred by extending left and lower edges; hand does not overlap planned field.",
+      "preserveAlpha": false,
+      "encodedBytes": 244494,
+      "mode": "RGB"
+    },
+    {
+      "name": "truenature",
+      "editTarget": "public/images/v9/truenature.webp",
+      "generatedSource": "/workspace/scratch/314596fa5f8b/generated_images/exec-9fa061f6-d873-417a-87d5-fd581cd9e0cf.png",
+      "output": "public/images/v10/clean/truenature.webp",
+      "prompt": "Use case: precise-object-edit. Edit target: the attached existing advertising image. Remove ONLY the printed NFC tap target from the lower half of the physical card on the LEFT: erase the entire rounded-square field, all concentric rings, hand/phone glyph, radiowaves and the words \"Handy hier halten\". Seamlessly reconstruct the existing brand print beneath the removed field, with no ghost outlines. Do not replace it with any other symbol, label or text. Keep the card exact same size, silhouette, position, plane corners, camera perspective and crop. Preserve all other logos, headlines, pictured products, the phone and phone-screen content, 3D objects, light, shadows and backdrop unchanged. Retain original 1536x1024 composition. This creates a blank area for a precise vector overlay added later, so it must contain NO tap instruction or NFC symbol. Preserve real transparency of background and soft translucent edge glows/shadows; no opaque backdrop. Preserve green and cream geometric card print.",
+      "corners": [
+        [
+          230,
+          64
+        ],
+        [
+          750,
+          31
+        ],
+        [
+          815,
+          898
+        ],
+        [
+          271,
+          934
+        ]
+      ],
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "inspection": "Entire previous tap field removed cleanly; card silhouette and composition preserved. No retry required.",
+      "occlusionInPlannedField": "No physical foreground occlusion in card x28..72% y64.8..91.2%. Printed imagery beneath field is part of card artwork.",
+      "cornerNote": "All four front-plane corners visible.",
+      "preserveAlpha": true,
+      "encodedBytes": 428248,
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        254
+      ],
+      "alphaCorners": [
+        10,
+        1,
+        8,
+        11
+      ]
+    }
+  ]
+}

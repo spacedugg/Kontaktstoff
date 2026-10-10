@@ -1,0 +1,30 @@
+if(!process.env.PRINT_TEST_PROFILE)throw new Error('PRINT_TEST_PROFILE muss auf ein CMYK-Druckereiprofil zeigen.');
+import {chromium,expect} from '@playwright/test';
+import {writeFile,readFile,mkdir} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {createClientCampaign} from '../studio/src/client-campaigns.js';
+import {toSelfmailer} from '../studio/src/selfmailer.js';
+import {checks} from '../studio/src/core.js';
+await mkdir('test-results/print',{recursive:true});
+const campaign=toSelfmailer(createClientCampaign('bewertungspush'));
+campaign.recipients=campaign.recipients.slice(0,1);Object.assign(campaign.recipients[0],{street:'Musterstraße 12',postal_code:'10115',city:'Berlin',country:'Deutschland'});
+console.log(checks(campaign).filter(i=>i.level==='error'));
+await writeFile('test-results/print/example.json',JSON.stringify(campaign));
+const browser=await chromium.launch({channel:'chrome',headless:true}),page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')console.log('Console:',m.text());});
+try{
+ await page.goto((process.env.TEST_ORIGIN||'http://127.0.0.1:4183')+'/studio/');
+ await page.locator('#project-file').setInputFiles('test-results/print/example.json');
+ await expect(page.locator('#open-preview')).toBeVisible();await page.locator('#open-preview').click();
+ if(!await page.locator('#preview-extras').evaluate(e=>e.open))await page.locator('#preview-extras>summary').click();
+ await page.locator('#print-export').click();await expect(page.locator('#print-profile')).toBeVisible();
+ await expect(page.locator('[data-result=export]')).toBeDisabled();
+ await page.locator('#print-profile').setInputFiles(process.env.PRINT_TEST_PROFILE);
+ await page.locator('#print-confirm').check();await expect(page.locator('[data-result=export]')).toBeEnabled();
+ await page.locator('#modal').screenshot({path:'test-results/print/desktop.png'});
+ await page.setViewportSize({width:390,height:844});await page.locator('#modal').screenshot({path:'test-results/print/mobile.png'});
+ assert.ok(await page.locator('#modal').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
+ const downloadPromise=page.waitForEvent('download',{timeout:120000});await page.locator('[data-result=export]').click();
+ const download=await downloadPromise;await download.saveAs('test-results/print/bewertungspush-cmyk.pdf');
+ await expect(page.locator('#busy')).toBeHidden();assert.deepEqual(errors,[]);
+ console.log('Browser download passed');
+}catch(e){console.log('Errors',errors);console.log(await page.locator('#toast').textContent());await page.screenshot({path:'test-results/print/failure.png'});throw e;}finally{await browser.close();}

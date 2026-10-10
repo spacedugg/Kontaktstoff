@@ -1,0 +1,11 @@
+---
+const groups=[
+ {title:'Impulse',links:[['Die NFC-Briefkarte','/produkt/'],['Technologie & Material','/technologie/'],['So funktioniert’s','/#ablauf'],['Kampagnen-Portal','/auswertung/'],['Kampagnenbudget','/preise/']]},
+ {title:'Inspiration',links:[['Alle Kampagnenideen','/#anwendungen'],['Produkte & E-Commerce','/blog/produktlaunch-mit-ar/'],['Agenturen & B2B','/blog/b2b-outreach/']]},
+ {title:'Vergleichen',links:[['Alle Alternativen','/alternativen/'],['NFC oder QR-Code','/vergleich/nfc-vs-qr/'],['Interaktiv oder klassisch','/vergleich/nfc-vs-post/']]},
+ {title:'Wissen',links:[['Journal & Ratgeber','/blog/'],['Erste Kampagne planen','/blog/erste-nfc-kampagne/'],['Erfolg messen','/blog/taps-richtig-messen/'],['Häufige Fragen','/faq/']]},
+ {title:'Unternehmen',links:[['Über Impulse','/ueber-uns/'],['Karriere','/karriere/'],['Kontakt','/kontakt/']]},
+ {title:'Rechtliches',links:[['Datenschutz','/datenschutz/'],['AGB','/agb/'],['Impressum','/impressum/']]},
+];
+---
+<footer class="site-footer"><div class="launch-shell"><div class="footer-intro"><a class="impulse-wordmark" href="/" aria-label="Impulse Startseite"><strong>Impulse<span class="impulse-dot" aria-hidden="true"></span></strong><small>von kontaktstoff</small></a><a class="launch-link" href="/kontakt/">Lassen Sie uns sprechen ↗</a></div><div class="footer-directory">{groups.map(group=><nav aria-label={group.title}><h2>{group.title}</h2><ul>{group.links.map(([title,href])=><li><a href={href}>{title}</a></li>)}</ul>{group.title==='Rechtliches'&&<button type="button" data-cookie-settings>Cookie-Einstellungen</button>}</nav>)}</div><div class="footer-meta"><span>© {new Date().getFullYear()} Kontaktstoff Impulse</span><span>Privater Designprototyp</span><a href="#main">Nach oben ↑</a></div></div></footer>

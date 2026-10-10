@@ -1,0 +1,62 @@
+[
+  {
+    "question": "Was ist Impulse?",
+    "answer": "Eine individuell gestaltete Briefkarte mit integrierter NFC-Technologie. Ein Smartphone öffnet darüber den Einstieg in Ihre digitale Kampagne – zum Beispiel ein Produkt, ein Angebot oder eine Terminbuchung.",
+    "category": "Technologie"
+  },
+  {
+    "question": "Wie funktioniert der Tap?",
+    "answer": "Entsperrtes Smartphone nah an die markierte Stelle halten und den angezeigten Hinweis öffnen. Position und Anzeige unterscheiden sich je nach Gerät.",
+    "category": "Technologie"
+  },
+  {
+    "question": "Brauchen Empfänger eine App?",
+    "answer": "Für eine kompatible NFC-Verlinkung in den Browser ist keine eigene Impulse-App vorgesehen. Einzelne Inhalte oder Geräte können zusätzliche Voraussetzungen haben.",
+    "category": "Technologie"
+  },
+  {
+    "question": "Funktioniert Impulse mit jedem Smartphone?",
+    "answer": "Benötigt wird ein kompatibles, aktiviertes NFC-Lesegerät. Internetzugang ist für die verlinkten Inhalte nötig. Ein QR-Code auf der Rückseite kann einen zweiten Zugang bieten.",
+    "category": "Technologie"
+  },
+  {
+    "question": "Sind Farbe und Design frei wählbar?",
+    "answer": "Ja. Die gezeigten Farben sind Gestaltungsideen, keine festen Produktvarianten. Kampagnenmotiv, Bildwelt und Text richten sich nach Ihrer Marke. Sie können ein fertiges Design mitbringen oder uns die Gestaltung überlassen. Auf Wunsch entwickeln wir Motiv und Texte passend zu Ihrer Marke und stimmen den Entwurf mit Ihnen ab.",
+    "category": "Gestaltung & Erlebnis"
+  },
+  {
+    "question": "Was kann nach dem Tap erscheinen?",
+    "answer": "Eine mobile Kampagnenseite, ein Video oder eine passende 3D-Ansicht. Von dort führt eine klare Aktion zu Shop, Anfrage oder Kalender. AR setzt geeignete Inhalte und Geräte voraus.",
+    "category": "Gestaltung & Erlebnis"
+  },
+  {
+    "question": "Vibriert das Handy beim Tappen?",
+    "answer": "Das hängt vom Smartphone, Betriebssystem und den Einstellungen ab. Haptisches Feedback ist keine garantierte Eigenschaft jeder NFC-Interaktion.",
+    "category": "Gestaltung & Erlebnis"
+  },
+  {
+    "question": "Kann ich das Ziel später ändern?",
+    "answer": "Mit einer verwalteten Weiterleitungsadresse lässt sich das Ziel einer Kampagne ändern, ohne die Karten neu zu drucken. Laufzeit und Änderungsmöglichkeiten werden vorab vereinbart.",
+    "category": "Gestaltung & Erlebnis"
+  },
+  {
+    "question": "Was wird gemessen?",
+    "answer": "Messbar sind beispielsweise geöffnete Kampagnenlinks, weitere Seitenaufrufe und eingerichtete Zielaktionen. Ein physischer NFC-Lesevorgang ist nicht automatisch ein erfasster Website-Besuch.",
+    "category": "Messung"
+  },
+  {
+    "question": "Sehe ich, wer eine Karte benutzt hat?",
+    "answer": "Eine gemeinsame Kampagnenadresse identifiziert keine einzelne Person. Personenbezogene Zuordnung benötigt eine gesonderte, rechtlich geprüfte Umsetzung.",
+    "category": "Messung"
+  },
+  {
+    "question": "Was kostet eine Kampagne?",
+    "answer": "Das hängt von Auflage, Druck, Veredelung, digitalem Erlebnis, Versand und Betreuung ab. Der Prototyp enthält noch keine verbindliche Preisliste.",
+    "category": "Kampagne"
+  },
+  {
+    "question": "Sind die gezeigten Marken bereits Kunden?",
+    "answer": "Die Motive zeigen mögliche Anwendungen für bekannte Marken. Sie stellen keine beauftragten Kampagnen oder bestätigten Partnerschaften dar.",
+    "category": "Kampagne"
+  }
+]

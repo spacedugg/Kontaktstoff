@@ -1,0 +1,52 @@
+[
+  {
+    "path": "assets/clients/reha-sleep/logo.png",
+    "source": "https://reha-sleep.de/cdn/shop/files/SILVERPET_26.png?v=1756471094&width=600",
+    "alt": "RehaSleep"
+  },
+  {
+    "path": "assets/clients/reha-sleep/room.jpg",
+    "source": "https://reha-sleep.de/cdn/shop/files/Electronic-Base-Oxford-Bed-Frame-HiRes-compressed.jpg?v=1685434054&width=1600",
+    "alt": ""
+  },
+  {
+    "path": "assets/clients/reha-sleep/komfort.jpg",
+    "source": "https://reha-sleep.de/cdn/shop/files/GRATISE-BOOK_6_-compressed.jpg?v=1770037231&width=1800",
+    "alt": "RehaSleep™ Komfort"
+  },
+  {
+    "path": "assets/clients/reha-sleep/classic.jpg",
+    "source": "https://reha-sleep.de/cdn/shop/files/GRATISE-BOOK_4_-compressed.jpg?v=1752672392&width=900",
+    "alt": "Matratze Classic 20"
+  },
+  {
+    "path": "assets/clients/reha-sleep/deluxe.png",
+    "source": "https://reha-sleep.de/cdn/shop/files/Lattenrost_elektrisch.png?v=1773652990&width=900",
+    "alt": "Lattenrost elektrisch"
+  },
+  {
+    "path": "assets/clients/zyvo/logo.svg",
+    "source": "https://zyvo.de/cdn/shop/files/logowhite.svg?v=1745947904&width=230",
+    "alt": ""
+  },
+  {
+    "path": "assets/clients/zyvo/one.jpg",
+    "source": "https://zyvo.de/cdn/shop/files/zyvoone_titleimage.jpg?v=1752493661&width=1200",
+    "alt": "ZYVO® One"
+  },
+  {
+    "path": "assets/clients/zyvo/rest.jpg",
+    "source": "https://zyvo.de/cdn/shop/files/zyvorest_titleimagenew.jpg?v=1760007520&width=1200",
+    "alt": "ZYVO® Rest Pillow"
+  },
+  {
+    "path": "assets/clients/zyvo/base.jpg",
+    "source": "https://zyvo.de/cdn/shop/files/zyvobase_titleimage.jpg?v=1752472422&width=1200",
+    "alt": "ZYVO® Base Socks"
+  },
+  {
+    "path": "assets/clients/zyvo/lifestyle.jpg",
+    "source": "https://zyvo.de/cdn/shop/files/zyvolifestylesneaker.jpg?v=1751623221&width=1080",
+    "alt": ""
+  }
+]

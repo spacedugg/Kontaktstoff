@@ -1,0 +1,9 @@
+---
+import {assetUrl} from '../../data/assets';
+import Layout from '../../layouts/Layout.astro';
+import articles from '../../data/articles.json';
+export function getStaticPaths(){return articles.map(article=>({params:{slug:article.slug},props:{article}}));}
+const {article}=Astro.props;
+const related=articles.find(a=>a.slug===article.related)||articles.find(a=>a.slug!==article.slug);
+---
+<Layout title={article.title} description={article.lead} pageClass="launch-v6 editorial-site centered-editorial"><main id="main"><header class="article-hero launch-shell"><nav class="crumbs" aria-label="Brotkrumen"><a href="/">Impulse</a><span>/</span><a href="/blog/">Journal</a><span>/</span><span aria-current="page">{article.category}</span></nav><p class="launch-label">{article.category} · {article.minutes} Min. Lesezeit</p><h1>{article.title}</h1><p class="editorial-lead">{article.lead}</p><img src={assetUrl(article.image)} width="1536" height="1024" alt={article.imageAlt} /></header><div class="launch-shell article-body-centered"><article class="reading-column">{article.sections.map((s,i)=><section id={'kapitel-'+i}><h2>{s.heading}</h2>{s.paragraphs.map(p=><p>{p}</p>)}</section>)}<section class="article-sources" id="quellen"><h2>Quellen & Vertiefung</h2><ul>{article.sources.map(s=><li><a href={s.url} target="_blank" rel="noopener noreferrer">{s.title} ↗</a></li>)}</ul></section><div class="article-next"><p>Weiterlesen</p><h2>{related?.title}</h2><a class="launch-link" href={'/blog/'+related?.slug+'/'}>Zum nächsten Beitrag ↗</a></div></article></div><section class="compact-cta launch-shell"><h2>Aus einer guten Idee<br />eine Kampagne machen.</h2><a class="launch-button" href="/kontakt/">Kampagne besprechen ↗</a></section></main></Layout>

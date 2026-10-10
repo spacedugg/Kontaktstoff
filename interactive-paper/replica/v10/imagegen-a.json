@@ -1,0 +1,138 @@
+{
+  "mode": "builtin image_gen",
+  "purpose": "Localized NFC target removal for parent deterministic shared-vector overlay; no geometry edits",
+  "assets": [
+    {
+      "name": "holy",
+      "path": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v7/holy.webp",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied holy marketing product photograph. REMOVE ONLY the NFC tap target printed near lower middle of the LEFT physical paper card: erase the entire rounded square border/rings/glow, the phone-in-hand line glyph, radio arcs, and the small 'Handy hier halten' instruction. Naturally restore underlying printed artwork/color where these were. The cleared region must contain no residual target edges, no instruction, no glyph, no substitute mark. Preserve absolutely everything else including exact physical card four corners, aspect ratio, camera, all other branding/headline, artwork/fruit/food/ribbons, right-hand phone and screen, floating objects, lighting, white background, shadows, composition and pixel dimensions 1536x1024. This is a localized removal, not a redesign. Do not crop, warp, resize, shift objects or create a new tap target.",
+      "source": "/workspace/scratch/314596fa5f8b/generated_images/exec-63dd85ac-842f-4fb1-9f31-9c925b2ec478.png",
+      "corners": [
+        [
+          180,
+          103
+        ],
+        [
+          675,
+          48
+        ],
+        [
+          814,
+          864
+        ],
+        [
+          287,
+          943
+        ]
+      ],
+      "output": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v10/clean/holy.webp",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "cornerOrder": "TL TR BR BL, front plane",
+      "occlusion": "None over planned target x28..72%, y64.8..91.2%; all artwork within field is printed design",
+      "inspection": "Pass: NFC target, instruction and glyph fully cleared; composition, physical card corners and other text retained",
+      "retries": 0
+    },
+    {
+      "name": "nordvpn",
+      "path": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v9/nordvpn.webp",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied nordvpn marketing product photograph. REMOVE ONLY the NFC tap target printed near lower middle of the LEFT physical paper card: erase the entire rounded square border/rings/glow, the phone-in-hand line glyph, radio arcs, and the small 'Handy hier halten' instruction. Naturally restore underlying printed artwork/color where these were. The cleared region must contain no residual target edges, no instruction, no glyph, no substitute mark. Preserve absolutely everything else including exact physical card four corners, aspect ratio, camera, all other branding/headline, artwork/fruit/food/ribbons, right-hand phone and screen, floating objects, lighting, white background, shadows, composition and pixel dimensions 1536x1024. This is a localized removal, not a redesign. Do not crop, warp, resize, shift objects or create a new tap target.",
+      "source": "/workspace/scratch/314596fa5f8b/generated_images/exec-a1b7784f-6add-46d6-a086-39d6413fe3f8.png",
+      "corners": [
+        [
+          219,
+          42
+        ],
+        [
+          777,
+          86
+        ],
+        [
+          837,
+          915
+        ],
+        [
+          264,
+          954
+        ]
+      ],
+      "output": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v10/clean/nordvpn.webp",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "cornerOrder": "TL TR BR BL, front plane",
+      "occlusion": "None over planned target x28..72%, y64.8..91.2%; all artwork within field is printed design",
+      "inspection": "Pass: NFC target, instruction and glyph fully cleared; composition, physical card corners and other text retained",
+      "retries": 0
+    },
+    {
+      "name": "prepmymeal",
+      "path": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v9/prepmymeal.webp",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied prepmymeal marketing product photograph. REMOVE ONLY the NFC tap target printed near lower middle of the LEFT physical paper card: erase the entire rounded square border/rings/glow, the phone-in-hand line glyph, radio arcs, and the small 'Handy hier halten' instruction. Naturally restore underlying printed artwork/color where these were. The cleared region must contain no residual target edges, no instruction, no glyph, no substitute mark. Preserve absolutely everything else including exact physical card four corners, aspect ratio, camera, all other branding/headline, artwork/fruit/food/ribbons, right-hand phone and screen, floating objects, lighting, white background, shadows, composition and pixel dimensions 1536x1024. This is a localized removal, not a redesign. Do not crop, warp, resize, shift objects or create a new tap target.",
+      "source": "/workspace/scratch/314596fa5f8b/generated_images/exec-c664c04a-5307-4009-a9c9-5de1436b4696.png",
+      "corners": [
+        [
+          156,
+          80
+        ],
+        [
+          652,
+          29
+        ],
+        [
+          750,
+          922
+        ],
+        [
+          236,
+          968
+        ]
+      ],
+      "output": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v10/clean/prepmymeal.webp",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "cornerOrder": "TL TR BR BL, front plane",
+      "occlusion": "None over planned target x28..72%, y64.8..91.2%; all artwork within field is printed design",
+      "inspection": "Pass: NFC target, instruction and glyph fully cleared; composition, physical card corners and other text retained",
+      "retries": 0
+    },
+    {
+      "name": "revolut",
+      "path": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v9/revolut.webp",
+      "prompt": "Use case: precise-object-edit. Edit target: supplied revolut marketing product photograph. REMOVE ONLY the NFC tap target printed near lower middle of the LEFT physical paper card: erase the entire rounded square border/rings/glow, the phone-in-hand line glyph, radio arcs, and the small 'Handy hier halten' instruction. Naturally restore underlying printed artwork/color where these were. The cleared region must contain no residual target edges, no instruction, no glyph, no substitute mark. Preserve absolutely everything else including exact physical card four corners, aspect ratio, camera, all other branding/headline, artwork/fruit/food/ribbons, right-hand phone and screen, floating objects, lighting, white background, shadows, composition and pixel dimensions 1536x1024. This is a localized removal, not a redesign. Do not crop, warp, resize, shift objects or create a new tap target.",
+      "source": "/workspace/scratch/314596fa5f8b/generated_images/exec-753082a8-4153-4ca6-8302-9197fe291101.png",
+      "corners": [
+        [
+          220,
+          41
+        ],
+        [
+          711,
+          72
+        ],
+        [
+          710,
+          896
+        ],
+        [
+          221,
+          936
+        ]
+      ],
+      "output": "/workspace/scratch/314596fa5f8b/kontaktstoff-prototype/interactive-paper/web/public/images/v10/clean/revolut.webp",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "cornerOrder": "TL TR BR BL, front plane",
+      "occlusion": "None over planned target x28..72%, y64.8..91.2%; all artwork within field is printed design",
+      "inspection": "Pass: NFC target, instruction and glyph fully cleared; composition, physical card corners and other text retained",
+      "retries": 0
+    }
+  ]
+}

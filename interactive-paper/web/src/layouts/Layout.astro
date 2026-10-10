@@ -1,0 +1,18 @@
+---
+import '../styles/global.css';
+import '../styles/impuls.css';
+import '../styles/launch.css';
+import '../styles/refine.css';
+import '../styles/site.css';
+import Footer from '../components/Footer.astro';
+import CookiePreferences from '../components/CookiePreferences.astro';
+import Header from '../components/Header.astro';
+import Enquiry from '../components/Enquiry.astro';
+const { title, description = 'Kontaktstoff Impulse: Ihre Marke in der Hand. Ihr Angebot auf dem Display. Interaktive Mailings mit NFC verbinden Print, digitale Erlebnisse und Ihren nächsten Kunden.', compact = false, pageClass = '' } = Astro.props;
+---
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="theme-color" content="#e2ff54" /><meta name="robots" content="noindex, nofollow" /><meta name="description" content={description} /><title>{title} · Impulse</title><link rel="icon" href="/favicon.svg" type="image/svg+xml" /><link rel="preload" href="/fonts/Manrope-Bold.woff2" as="font" type="font/woff2" crossorigin /></head>
+<body class:list={['impulse-site', pageClass]}><a class="skip-link" href="#main">Zum Inhalt</a><Header compact={compact} /><slot />
+  <Footer /><CookiePreferences />
+  <Enquiry /><script>import '../scripts/ui';</script>
+</body></html>

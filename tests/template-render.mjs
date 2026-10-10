@@ -1,0 +1,5 @@
+import {chromium} from '@playwright/test';
+import {build} from 'esbuild';
+import assert from 'node:assert/strict';
+const bundle=await build({stdin:{resolveDir:process.cwd(),contents:`import {BRAND_TEMPLATES,createBrandTemplate,PREVIEW_PERSON} from './studio/src/brand-templates.js';import {renderCanvas} from './studio/src/render.js';window.auditLayouts=async()=>{const result=[];for(const t of BRAND_TEMPLATES){const p=createBrandTemplate(t.id);for(const side of ['front','back']){const canvas=document.createElement('canvas');const overflow=await renderCanvas(canvas,p,side,PREVIEW_PERSON,{scale:2});result.push({id:t.id,side,overflow});}}return result;};`},bundle:true,write:false,format:'iife'});
+const browser=await chromium.launch({channel:'chrome',headless:true});try{const page=await browser.newPage();await page.goto('http://127.0.0.1:4183/konto/');await page.addScriptTag({content:bundle.outputFiles[0].text});const results=await page.evaluate(()=>window.auditLayouts());assert.equal(results.length,20);assert.deepEqual(results.filter(r=>r.overflow.length),[]);console.log('All 20 template faces render without text overflow.');}finally{await browser.close();}

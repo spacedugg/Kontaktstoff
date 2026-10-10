@@ -1,0 +1,32 @@
+import {buildClientPages} from './client-pages.mjs';
+import { build } from 'esbuild';
+import { copyFile, mkdir, cp, rm } from 'node:fs/promises';
+await buildClientPages();
+await build({entryPoints:['mailings/main.js'],bundle:true,format:'esm',minify:true,outfile:'mailings/app.js',target:['es2022']});
+await build({entryPoints:['admin/main.js'],bundle:true,format:'esm',minify:true,outfile:'admin/app.js',target:['es2022']});
+await build({entryPoints:['freigabe/main.js'],bundle:true,format:'esm',minify:true,outfile:'freigabe/app.js',target:['es2022']});
+await build({entryPoints:['konto/src/app.js'],bundle:true,format:'esm',minify:true,outfile:'konto/app.js',target:['es2022']});
+await build({entryPoints:['clients/main.js'],bundle:true,format:'esm',minify:true,outfile:'clients/app.js',legalComments:'inline',target:['es2022']});
+await mkdir('studio/vendor', { recursive: true });
+await copyFile('node_modules/lcms-wasm/dist/lcms.js','studio/vendor/lcms.mjs');
+await copyFile('node_modules/lcms-wasm/dist/lcms.wasm','studio/vendor/lcms.wasm');
+await copyFile('node_modules/lcms-wasm/LICENSE.md','studio/vendor/lcms-LICENSE.txt');
+await build({ entryPoints: ['studio/src/app.js'], bundle: true, format: 'esm', minify: true, outfile: 'studio/app.js', legalComments: 'linked', target: ['es2022'] });
+// The public website owns its checked-in app.js. Do not overwrite it with the legacy homepage bundle.
+await copyFile('node_modules/pdfjs-dist/build/pdf.worker.min.mjs', 'studio/vendor/pdf.worker.min.mjs');
+for (const directory of ['cmaps','standard_fonts','wasm']) await cp(`node_modules/pdfjs-dist/${directory}`, `studio/vendor/${directory}`, {recursive:true});
+for (const [pkg, file] of [['pdfjs-dist','LICENSE'],['pdf-lib','LICENSE.md'],['qrcode','license'],['fflate','LICENSE']]) {
+  try { await copyFile(`node_modules/${pkg}/${file}`, `studio/vendor/${pkg}-LICENSE.txt`); } catch {}
+}
+await rm('dist', {recursive:true, force:true});
+await mkdir('dist/studio', {recursive:true});
+for (const file of ['index.html','app.js','style.css','case-studies.json','assets','logo-ideen','fuer','freigabe','admin','branchen','ratgeber','wissen','404.html','agb.html','datenschutz.html','impressum.html','kontakt.html','vergleich.html','widerruf.html','favicon.ico','favicon.svg','favicon-48.png','apple-touch-icon.png','site.webmanifest','robots.txt','sitemap.xml']) await cp(file, `dist/${file}`, {recursive:true});
+await mkdir('dist/mailings',{recursive:true});
+for(const file of ['index.html','style.css','app.js'])await copyFile(`mailings/${file}`,`dist/mailings/${file}`);
+await mkdir('dist/konto',{recursive:true});
+for(const file of ['index.html','style.css','workflow.css','app.js'])await copyFile(`konto/${file}`,`dist/konto/${file}`);
+await mkdir('dist/clients',{recursive:true});
+for(const file of ['app.js','style.css','base.css'])await copyFile(`clients/${file}`,`dist/clients/${file}`);
+for (const file of ['index.html','styles.css','workspace.css','app.js','app.js.LEGAL.txt','vendor']) await cp(`studio/${file}`, `dist/studio/${file}`, {recursive:true});
+await import('./check-deployment.mjs');
+console.log('Studio gebaut: /studio/ · Statische Veröffentlichung unter dist/.');
