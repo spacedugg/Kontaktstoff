@@ -1,19 +1,7 @@
----
-const { compact = false } = Astro.props;
----
 <header class="site-header">
-  <div class="shell navigation">
-    <a class="brand" href="/" aria-label="Kontaktstoff NFC Direct Mail, Startseite">
-      <img src="/images/kontaktstoff-logo.svg" width="180" height="35" alt="kontaktstoff." />
-      <span>Impulse</span>
-    </a>
-    {!compact && <>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-menu>Menü <span aria-hidden="true">＋</span></button>
-      <nav id="site-nav" class="site-nav" aria-label="Hauptnavigation">
-        <a href="/#produkt">Das Produkt</a><a href="/#ablauf">So funktioniert’s</a><a href="/#dashboard">Portal</a>
-        <button class="button button--small button--lime" type="button" data-enquiry>Kampagne planen <span aria-hidden="true">↗</span></button>
-      </nav>
-    </>}
-    {compact && <a class="text-link" href="/">Zur Angebotsseite <span aria-hidden="true">↗</span></a>}
-  </div>
+ <div class="shell navigation">
+  <a class="impulse-wordmark" href="/" aria-label="Impulse von Kontaktstoff, Startseite"><strong>Impulse<span>.</span></strong><small>von kontaktstoff</small></a>
+  <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-menu>Menü <span aria-hidden="true">＋</span></button>
+  <nav id="site-nav" class="site-nav" aria-label="Hauptnavigation"><a href="/produkt/">Produkt</a><a href="/#anwendungen">Inspiration</a><a href="/blog/">Journal</a><a href="/faq/">FAQ</a><button class="button button--small button--lime" type="button" data-enquiry>Kampagne starten <span aria-hidden="true">↗</span></button></nav>
+ </div>
 </header>

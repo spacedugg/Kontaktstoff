@@ -1,0 +1,181 @@
+[
+  {
+    "slug": "interactive-paper",
+    "label": "Impulse & Interactive Paper",
+    "title": "Welche Lösung passt zu Ihrer Kampagne?",
+    "lead": "Gestaltung, digitales Erlebnis, Auswertung und Betreuung entscheiden gemeinsam. So vergleichen Sie NFC-Mailings auf einer fairen Grundlage.",
+    "image": "hero",
+    "leftTitle": "Impulse · Angebotskonzept",
+    "rightTitle": "Interactive Paper · Anbieterangaben",
+    "rows": [
+      {
+        "topic": "Produktansatz",
+        "left": "Konzept für individuell gestaltete NFC-Briefkarten mit digitalem Kampagnenziel.",
+        "right": "Vermarktet Tap 2.0 als interaktives NFC-Printprodukt."
+      },
+      {
+        "topic": "Gestaltung",
+        "left": "Ein einheitliches Kartenformat, frei gestaltete Kampagnenmotive.",
+        "right": "Bewirbt individuelle Gestaltung."
+      },
+      {
+        "topic": "Digitales Erlebnis",
+        "left": "Produktansicht, Kampagnenseite und Termin- oder Kaufziel im Konzept vorgesehen.",
+        "right": "Zeigt AR-Erlebnisse und digitale Weiterleitungen."
+      },
+      {
+        "topic": "Auswertung",
+        "left": "Klickbarer Portalprototyp; produktive Messung noch einzurichten.",
+        "right": "Bewirbt Echtzeit-Analytics und EU-Hosting."
+      },
+      {
+        "topic": "Papier & NFC",
+        "left": "Geplanter flacher Aufbau; technische Spezifikation und Musterprüfung stehen aus.",
+        "right": "Bewirbt flache Technologie, veränderte Antenne und verfeinerte Papierqualität."
+      },
+      {
+        "topic": "Preis",
+        "left": "Noch kein verbindlicher öffentlicher Preis belegt.",
+        "right": "Auf der geprüften Produktseite kein vergleichbarer fester Stückpreis veröffentlicht."
+      }
+    ],
+    "sections": [
+      {
+        "heading": "Nicht nur den Kartenpreis vergleichen.",
+        "paragraphs": [
+          "Für einen belastbaren Vergleich brauchen Sie dieselbe Auflage, Veredelung, digitale Leistung und Versandabwicklung. Hostingdauer, Betreuung und Änderungen nach dem Druck können den Gesamtpreis beeinflussen.",
+          "Ein belegbarer Preisvorteil für Impulse liegt hier noch nicht vor. Angebote sollten nach ihrem vollständigen Umfang bewertet werden."
+        ]
+      },
+      {
+        "heading": "Was Impulse in den Mittelpunkt stellt.",
+        "paragraphs": [
+          "Ein gemeinsames Kartenformat, freie Markengestaltung und eine klar geführte Strecke vom Tap bis zur Zielaktion. Die Produktidee verbindet Konzeption, Print und digitales Erlebnis.",
+          "Diese Website zeigt den Entwicklungsstand als privaten Prototyp. Produktive Messung, technische Spezifikationen und verbindliche Konditionen benötigen noch ihre Freigabe."
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "Interactive Paper TAP – offizielle Produktseite",
+        "url": "https://interactivepaper.com/tap"
+      }
+    ]
+  },
+  {
+    "slug": "nfc-vs-qr",
+    "label": "NFC oder QR-Code",
+    "title": "Zwei Zugänge. Eine bewusste Entscheidung.",
+    "lead": "NFC lädt zum Antippen ein. QR macht den Weg über die Kamera sichtbar. Welche Variante passt zum Moment, in dem Ihre Zielgruppe die Karte in der Hand hält?",
+    "image": "connect",
+    "leftTitle": "NFC-Mailing",
+    "rightTitle": "Mailing mit QR-Code",
+    "rows": [
+      {
+        "topic": "Einstieg",
+        "left": "Smartphone nah an das Tap-Feld halten und Link öffnen.",
+        "right": "Kamera öffnen, Code erfassen und Link öffnen."
+      },
+      {
+        "topic": "Gestaltung",
+        "left": "Kleines, in das Motiv integriertes Feld.",
+        "right": "Lesbarer Code mit ausreichender Ruhezone."
+      },
+      {
+        "topic": "Technik",
+        "left": "NFC-fähiges Smartphone; Leseposition ist geräteabhängig.",
+        "right": "Kamera und geeignete QR-Erkennung."
+      },
+      {
+        "topic": "Erlebnis",
+        "left": "Kann eine Website, Produktansicht oder AR-Strecke öffnen.",
+        "right": "Kann dieselben digitalen Inhalte öffnen."
+      },
+      {
+        "topic": "Auswertung",
+        "left": "Erlebnis-Aufrufe und Zielaktionen mit passender Messung.",
+        "right": "Linkaufrufe und Zielaktionen mit passender Messung."
+      },
+      {
+        "topic": "Produktion",
+        "left": "NFC-Integration und Tests des Kartenaufbaus.",
+        "right": "Druck des Codes und Test der Lesbarkeit."
+      }
+    ],
+    "sections": [
+      {
+        "heading": "Zusammen oft die stärkere Lösung.",
+        "paragraphs": [
+          "Ein dezenter QR-Code auf der Rückseite kann als zweiter Einstieg dienen. Die Vorderseite bleibt der Marke und dem Tap gewidmet. So haben Empfänger eine Alternative, falls NFC gerade nicht verfügbar ist."
+        ]
+      },
+      {
+        "heading": "Erfolg unter gleichen Bedingungen messen.",
+        "paragraphs": [
+          "Eine Tap- oder Scanrate allein sagt wenig über den späteren Kauf aus. Vergleichen Sie ähnliche Zielgruppen, dasselbe Angebot und dieselbe Messdauer. Erfassen Sie auch, wie viele Menschen den nächsten Schritt auf der Zielseite gehen."
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "title": "NFC Forum – Technologie",
+        "url": "https://nfc-forum.org/learn/nfc-technology/"
+      },
+      {
+        "title": "DENSO WAVE – QR-Code und Ruhezone",
+        "url": "https://www.qrcode.com/en/howto/code.html"
+      }
+    ]
+  },
+  {
+    "slug": "nfc-vs-post",
+    "label": "Interaktiv oder klassisch",
+    "title": "Was passiert, nachdem die Post angekommen ist?",
+    "lead": "Klassische Post kann eine Botschaft vollständig auf Papier vermitteln. Interaktive Post erweitert diesen Moment um eine digitale Fortsetzung.",
+    "image": "arrival",
+    "leftTitle": "Interaktive NFC-Post",
+    "rightTitle": "Klassische Postwerbung",
+    "rows": [
+      {
+        "topic": "Botschaft",
+        "left": "Print plus bewegte, räumliche oder vertiefende digitale Inhalte.",
+        "right": "Text, Bilder und Gestaltung direkt auf dem Papier."
+      },
+      {
+        "topic": "Nächster Schritt",
+        "left": "Tap und klarer Button zum gewünschten Ziel.",
+        "right": "Zum Beispiel Anruf, Antwortkarte oder manuelle URL-Eingabe."
+      },
+      {
+        "topic": "Voraussetzungen",
+        "left": "Kompatibles Smartphone, Internet und eine mobile Zielseite.",
+        "right": "Die gedruckte Botschaft ist ohne Gerät lesbar."
+      },
+      {
+        "topic": "Messung",
+        "left": "Digitale Aufrufe und angebundene Zielaktionen.",
+        "right": "Zum Beispiel Rückantworten, Gutscheincodes oder zuordenbare Anfragen."
+      },
+      {
+        "topic": "Aufwand",
+        "left": "Karte, NFC und digitales Erlebnis müssen zusammen funktionieren.",
+        "right": "Konzeption, Druck, Versand und gegebenenfalls Antwortweg."
+      }
+    ],
+    "sections": [
+      {
+        "heading": "Mehr Möglichkeiten, wenn sie dem Ziel dienen.",
+        "paragraphs": [
+          "Ein Produkt in 3D, eine kurze Animation oder eine konkrete Auswahl können Informationen vermitteln, die auf der Karte keinen Platz haben. Dafür muss das Erlebnis schnell laden und einen verständlichen nächsten Schritt anbieten."
+        ]
+      },
+      {
+        "heading": "Das Papier muss auch für sich funktionieren.",
+        "paragraphs": [
+          "Nicht jeder Empfänger wird sein Smartphone nehmen. Die Karte braucht deshalb weiterhin eine klare Botschaft, einen erkennbaren Absender und einen nachvollziehbaren Nutzen. Die digitale Fortsetzung ergänzt den Print, sie ersetzt ihn nicht."
+        ]
+      }
+    ],
+    "sources": []
+  }
+]

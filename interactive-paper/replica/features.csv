@@ -35,3 +35,10 @@ Kampagnenwirkung als transparente Beispielrechnung,analytics,must,partial,skip,V
 Designfreiheit und gemeinsames Kampagnenziel erklären,marketing site,must,yes,yes,Eigenes Kuvert-/Kartenmotiv; ein gemeinsames Erlebnis pro Kampagne
 Frühe Zahlenleiste vor Prozess und Anwendungen,marketing site,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
 Weiche fotografische Gestaltung ohne Produktsimulation,design,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+
+Eigenständige Impulse-Site V7,marketing site,must,yes,yes,30 Routen und vollständiger Footer; bestehender Side-Project-Branch
+Journal und Suche,content,should,yes,yes,8 bebilderte Artikel mit Primärquellen und Kategorien
+Vergleichsseiten,content,should,yes,yes,3 Vergleiche ohne unbelegte Preis- oder Erfolgsbehauptungen
+FAQ offen lesbar,content,must,yes,yes,12 Fragen; 6 auf der Startseite
+Cookie-Einstellungen,privacy,must,yes,yes,Lokale Auswahl; keine Marketing- oder Analysedienste
+Unternehmens- und Rechtsseiten,content,must,yes,partial,Unternehmensseiten umgesetzt; Rechtstexte als Entwurf bis Betreiberangaben vorliegen
