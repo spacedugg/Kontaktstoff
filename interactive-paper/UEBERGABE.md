@@ -235,3 +235,8 @@ Build: sechs Seiten erfolgreich. 21 DOM-/Strukturprüfungen und 16 Kontrastpaare
 Privates Vorschauprojekt und URL bleiben identisch: https://kontaktstoff-nfc-colorway.temoa-3702.chatgpt.site
 
 GitHub-Ziel unverändert: `claude/interactive-paper-rebuild-owvx7s`. Live-Website und Root-Deployment nicht ändern, nicht nach `main` oder in den Live-Branch mergen.
+
+
+## V5 – 10.10.2026: Produkt und Marketing im Fokus
+
+V5 ersetzt die V4-Richtung: zentrale Briefkarte mit Handy-Feld, kurze Marketing-Copy, fünf neue Originalmotive, mehr Lime/Kobalt/Koralle, sichtbares Dashboard. Rechner und Quotenregler entfernt. Referenzzahlen bleiben ausdrücklich illustrative Fremdwerte. Keine Live-Änderungen. Details siehe README und replica/asset-prompts-v5.md.

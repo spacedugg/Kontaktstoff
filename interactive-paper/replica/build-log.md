@@ -1,18 +1,7 @@
-# Build-Log · Kontaktstoff Impulse V4 · 10.10.2026
+# V5 Build-Log — 10.10.2026
 
-Die letzte Nutzerkorrektur ersetzt V3: fotografische Produktinszenierung, weicher eigener Stil, früher sichtbare Zahlen, eindeutige Abfolge, größere Schrift, offene Erklärungen. Alle relevanten Änderungen liegen im isolierten Verzeichnis `interactive-paper/`.
+Referenz: Interactive Paper Homepage und TAP, einschließlich der originalen tap-1/tap-2-Kartenbilder. Übernommen wurde die Kommunikationsfolge Produkt → Handlung → Erlebnis → Messbarkeit, keine fremden Produktbilder oder Kundenreferenzen.
 
-| Seite | Stand | Verhalten |
-|---|---|---|
-| `/` | implementiert / Browserprüfung offen | Fünf neue Rastermotive; Zahlen → System → Anwendungen; Rechner und Anfrage |
-| `/demo/` | implementiert / Browserprüfung offen | Sichtbare Galerie statt WebGL-/Video-Simulation |
-| `/beispiel/produkt/` | implementiert / DOM geprüft | Demo-Warenkorb, keine Bestellung |
-| `/beispiel/beratung/` | implementiert / DOM geprüft | Drei Beispieltermine; keine Buchung |
-| `/beispiel/bundle/` | implementiert / DOM geprüft | Generiertes Motiv, ausdrückliche Demo-Auswahl |
-| `/auswertung/` | erhalten / Struktur geprüft | Vorhandene Beispielauswertung; größere Schrift |
+Umsetzung: sieben neue/überarbeitete Astro-Komponenten bzw. Seiten, eigenes responsives launch.css, fünf Originalbilder, Dashboard auf Startseite und /auswertung/, CSV-Beispielreport. Rechner/Quotenregler gelöscht. Keine Produktanimationen.
 
-Prüfungen: Astro-Build mit sechs Seiten erfolgreich; 21 DOM-/Strukturprüfungen bestanden; alle lokalen Links und Assets, ARIA-Referenzen, eindeutigen IDs sowie genau eine H1 pro Seite geprüft. 16/16 WCAG-AA-Kontrastpaare. Fünf neue Motive visuell geprüft; keine Fremdassets. Der ausgegebene JavaScript-Build enthält keinen WebGLRenderer.
-
-Grenzen: Keine gerenderte Browser-, Mobil-, physische NFC- oder tatsächliche AR-Prüfung. Sites schreibt bei fehlendem `$control-browser` das Überspringen der Browser-QA vor; deshalb kein improvisierter Browser oder eigener Preview-Server. Alle Bilder sind Konzeptvisualisierungen. Statistik und Fallbeispiel sind ausdrücklich illustrativ. Keine echten Transaktionen oder Nachrichtenübermittlung.
-
-Preview wird auf demselben owner-private Site-Projekt aktualisiert. Git-Ziel bleibt `claude/interactive-paper-rebuild-owvx7s`. Keine Änderungen an der Live-Website, ihrem Branch oder Root-Deployment.
+Prüfung: Astro-Build aller sechs Seiten; lokale Links, Bilder und IDs; keine Rechner/Range-Inputs oder Canvas auf Landingpage; Bilddateien vollständig dekodiert. Browser-Rendering nicht geprüft: Das für Sites vorgeschriebene control-browser-Werkzeug ist in dieser Umgebung nicht verfügbar.

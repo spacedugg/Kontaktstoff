@@ -3,19 +3,19 @@ Startseite mit Hero und Produktübersicht,marketing site,must,yes,yes,Eigenstän
 Produktkarten mit Vergleich,marketing site,should,yes,no,S01 Compare-Funktion
 Kopfzeile mit Sprachwahl EN/DE/FR,marketing site,should,yes,no,
 Terminanfrage (Book a meeting),lead generation,must,yes,partial,Lokaler Anfrageentwurf und ausdrücklich simulierte Beispieltermine; keine Übermittlung
-Produktseite mit Feature-Kacheln,marketing site,should,yes,yes,V4: Bebilderte Feinstoff-/Nahkontakt-Erklärung; Erlebnisraum und Direktweg
-Animiertes Analytics-Dashboard als Demo,marketing site,should,yes,yes,/auswertung/ mit Beispieldaten und Zeitraumwahl; V4 lesbarer; kein Tracking
-Vorher/Nachher-Vergleichstabelle,marketing site,could,yes,no,S02
-Zusammenarbeit in 5 Schritten,marketing site,should,yes,partial,V4: Eigener Kampagnenaufbau offen erklärt; keine Produktionszusagen
+Produktseite mit Feature-Kacheln,marketing site,should,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Animiertes Analytics-Dashboard als Demo,marketing site,should,yes,yes,V5: prominent auf Landingpage und /auswertung/; feste Beispieldaten und CSV; kein Live-Tracking
+Vorher/Nachher-Vergleichstabelle,marketing site,could,yes,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
+Zusammenarbeit in 5 Schritten,marketing site,should,yes,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
 Referenzen-Übersicht,marketing site,should,yes,no,S04 mit eigenen Beispielen
 Referenz-Detailseiten,marketing site,could,unknown,no,nicht gesehen
-FAQ mit Gruppen und Akkordeon,marketing site,should,yes,yes,V4: Alle vier Antworten offen lesbar; auf Wunsch keine Akkordeons
+FAQ mit Gruppen und Akkordeon,marketing site,should,yes,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
 Blog,marketing site,could,yes,no,nicht gelesen
 Rechtsseiten (Impressum Datenschutz AGB),legal,must,yes,no,mit eigenen Angaben
 Webtool-Katalog,portal,could,yes,no,nicht gesehen
 Kampagnen im Portal anlegen,portal,could,yes,no,nur aus Text
 Web-Tool-Inhalt ändern nach dem Druck,portal,could,yes,no,laut Seite möglich
-Zielseite nach dem Antippen (mobil),tap experience,could,yes,yes,V4: /demo/ als fotografische Galerie; drei funktionale Beispiel-Zielseiten
+Zielseite nach dem Antippen (mobil),tap experience,could,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
 Interaktionen zählen und auswerten,analytics,could,yes,no,Data Report nur als Mockup gesehen
 Leads erfassen,analytics,could,unknown,no,nur FAQ-Frage
 CRM-Anbindung,integrations,could,unknown,no,nur FAQ-Frage
@@ -24,14 +24,14 @@ Augmented Reality Erlebnisse,tap experience,could,yes,skip,eigene Inhalte und Te
 NFC-Papier herstellen und versenden,hardware,could,yes,skip,Hardware und Logistik sind nicht nachbaubar
 Kundenlogos und Fallstudien,content,could,yes,skip,gehören Dritten
 Marke Name Logo und Claims,brand,could,yes,skip,gehören Interactive Paper
-Drehbares eigenes 3D-Beispielprodukt,tap experience,must,yes,skip,V4: Auf ausdrücklichen Nutzerwunsch durch generierte Bilder ersetzt; kein 3D-Modul in veröffentlichten Seiten
-Eigene Video-Story mit Bedienelementen,tap experience,must,yes,skip,V4: Selbst gebaute Animationen aus Seiten entfernt; neue fotografische Bildserie
+Drehbares eigenes 3D-Beispielprodukt,tap experience,must,yes,skip,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Eigene Video-Story mit Bedienelementen,tap experience,must,yes,skip,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
 Kaufen / Leistung / Termin nach Erlebnis,tap experience,must,yes,yes,Drei klar gekennzeichnete Beispielansichten; keine echten Transaktionen
-Geführte Empfängerreise vom Brief bis zur Zielseite,tap experience,must,yes,yes,V4: Drei bebilderte Schritte offen sichtbar; eigener Tap-Closeup mit Link-Hinweis
-Dünnes Papier und NFC-Verbindung visuell erklären,marketing site,must,yes,yes,V4: Feinstoff-Makro und generiertes Nahkontakt-Fotomotiv; keine Leistungsversprechen
-"Produkt-, Dienstleistungs- und Bundle-Szenarien",tap experience,must,yes,yes,V4: Drei gleichzeitig sichtbare Bildkarten mit passenden Beispiel-Zielseiten
-Klassischen Brief mit NFC-Mailing vergleichen,marketing site,must,partial,yes,Funktionsvergleich ohne erfundene Öffnungsraten oder Preisvorteile
-Kampagnenwirkung als transparente Beispielrechnung,analytics,must,partial,yes,Veränderbare Versandmenge und Annahmen; keine eigenen Erfolgsdaten
+Geführte Empfängerreise vom Brief bis zur Zielseite,tap experience,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Dünnes Papier und NFC-Verbindung visuell erklären,marketing site,must,yes,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
+"Produkt-, Dienstleistungs- und Bundle-Szenarien",tap experience,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Klassischen Brief mit NFC-Mailing vergleichen,marketing site,must,partial,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
+Kampagnenwirkung als transparente Beispielrechnung,analytics,must,partial,skip,V5: zugunsten der klaren Produkt-/Marketingführung entfernt; keine Quotenregler
 Designfreiheit und gemeinsames Kampagnenziel erklären,marketing site,must,yes,yes,Eigenes Kuvert-/Kartenmotiv; ein gemeinsames Erlebnis pro Kampagne
-Frühe Zahlenleiste vor Prozess und Anwendungen,marketing site,must,yes,yes,V4: 78/65/24 als ausdrücklich illustrative Beispielwerte mit offener Einordnung
-Weiche fotografische Gestaltung ohne Produktsimulation,design,must,yes,yes,V4: fünf neue generierte Fotos; große Schrift; runde Flächen; kein Canvas oder Video auf den Seiten
+Frühe Zahlenleiste vor Prozess und Anwendungen,marketing site,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang
+Weiche fotografische Gestaltung ohne Produktsimulation,design,must,yes,yes,V5: Produktorientierte Bildsprache; statische Bilder; siehe README für aktuellen Umfang

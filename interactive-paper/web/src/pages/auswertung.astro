@@ -1,31 +1,11 @@
 ---
 import Layout from '../layouts/Layout.astro';
-const taps = [18, 26, 22, 39, 28, 41, 52];
-const labels = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+import CampaignDashboard from '../components/CampaignDashboard.astro';
 ---
-<Layout title="Eine Kampagne als Beispiel" compact>
-  <main id="main" class="dashboard shell">
-    <div class="dashboard-heading"><div><p class="eyebrow">Beispiel-Auswertung</p><h1>Was aus Ihrer<br />Post werden kann.</h1><p>Ein möglicher Blick auf eine NFC-Kampagne – mit frei gewählten Beispieldaten.</p></div><div class="range-control" role="group" aria-label="Beispielzeitraum"><button type="button" aria-pressed="true" data-range="7">7 Tage</button><button type="button" aria-pressed="false" data-range="30">30 Tage</button></div></div>
-    <p class="dashboard-notice">Alle Zahlen sind Beispieldaten. Es gibt hier kein Tracking, kein Kundenkonto und keine echten Kampagnendaten.</p>
-    <div class="metrics" aria-live="polite"><article class="metric"><p>Erlebnis geöffnet</p><strong data-metric="taps">226</strong><span>Beispielinteraktionen</span></article><article class="metric"><p>Nächster Schritt gewählt</p><strong data-metric="actions">37</strong><span>Kaufen, ansehen oder buchen</span></article><article class="metric"><p>Anteil nächster Schritte</p><strong data-metric="rate">16,4 %</strong><span>Gewählte Aktionen / geöffnete Erlebnisse</span></article></div>
-    <div class="dashboard-charts"><section class="chart-panel" aria-labelledby="chart-title"><h2 id="chart-title">Erlebnis-Aufrufe</h2><p data-chart-period>Beispielwoche · Montag bis Sonntag</p><div class="bar-chart" role="img" aria-label="Beispiel-Aufrufe pro Tag; die Werte stehen auch in der Datentabelle." data-chart>{taps.map(n => <div class="chart-bar"><span>{n}</span><div style={`height:${n / 60 * 85}%`}></div></div>)}</div><div class="chart-labels" aria-hidden="true" data-chart-labels>{labels.map(label => <span>{label}</span>)}</div></section><section class="chart-panel" aria-labelledby="funnel-title"><h2 id="funnel-title">Vom Erlebnis zur Aktion</h2><p>Die nächsten Schritte einer Beispielkampagne.</p><ol class="funnel"><li><div><span>Erlebnis geöffnet</span><strong data-funnel-value="0">226</strong></div><div class="funnel-track"><span data-funnel-bar="0" style="width:100%"></span></div></li><li><div><span>Aktion gewählt</span><strong data-funnel-value="1">37</strong></div><div class="funnel-track"><span data-funnel-bar="1" style="width:16.4%"></span></div></li><li><div><span>Beispielkontakt</span><strong data-funnel-value="2">14</strong></div><div class="funnel-track"><span data-funnel-bar="2" style="width:6.2%"></span></div></li></ol></section></div>
-    <details class="data-disclosure"><summary>Beispieldaten als Tabelle ansehen<span aria-hidden="true">＋</span></summary><table><thead><tr><th scope="col">Tag</th><th scope="col">Erlebnis-Aufrufe</th></tr></thead><tbody data-data-table>{taps.map((n,i) => <tr><th scope="row">{labels[i]}</th><td>{n}</td></tr>)}</tbody></table></details>
-  </main>
-</Layout>
+<Layout title="Impulse Kampagnen-Dashboard" compact pageClass="dashboard-v5"><main id="main" class="launch-shell dashboard-page"><p class="launch-label">Kontaktstoff Impulse · Analytics</p><h1>Jede Interaktion<br />im Blick.</h1><p class="dashboard-page-intro">Erlebnis-Aufrufe, Website-Besuche und Conversions: Das Dashboard zeigt die Wirkung Ihrer Kampagne an einem Ort.</p><CampaignDashboard /><div class="dashboard-context"><div><h2>Was wird gemessen?</h2><p>Der geöffnete Kampagnen-Link zählt als Tap. Website-Besuche sind Weiterklicks zum Angebot. Conversions wie Käufe oder Buchungen benötigen eine angebundene Messung auf der Zielseite.</p></div><div><h2>Was zeigt dieser Prototyp?</h2><p>Eine Dashboard-Vorschau mit Beispieldaten. Eine echte Datenerfassung oder ein Kundenkonto ist hier noch nicht angebunden.</p><button class="launch-link" type="button" data-download-report>Beispielreport herunterladen <span aria-hidden="true">↓</span></button></div></div></main></Layout>
 <script>
-  const examples = {
-    '7': { values: [18,26,22,39,28,41,52], labels: ['Mo','Di','Mi','Do','Fr','Sa','So'], actions: 37, leads: 14, period: 'Beispielwoche · Montag bis Sonntag' },
-    '30': { values: [106,138,167,205], labels: ['Woche 1','Woche 2','Woche 3','Woche 4'], actions: 92, leads: 35, period: 'Beispielmonat · vier Zeitabschnitte' },
-  };
-  document.querySelectorAll<HTMLButtonElement>('[data-range]').forEach(button => button.addEventListener('click', () => {
-    const data = examples[button.dataset.range === '30' ? '30' : '7']; const total = data.values.reduce((sum,n) => sum+n,0);
-    document.querySelectorAll('[data-range]').forEach(other => other.setAttribute('aria-pressed',String(other===button)));
-    document.querySelector('[data-metric="taps"]')!.textContent = String(total); document.querySelector('[data-metric="actions"]')!.textContent = String(data.actions);
-    document.querySelector('[data-metric="rate"]')!.textContent = new Intl.NumberFormat('de-DE',{style:'percent',maximumFractionDigits:1}).format(data.actions/total);
-    const chart=document.querySelector('[data-chart]')!; const labels=document.querySelector('[data-chart-labels]')!; const table=document.querySelector('[data-data-table]')!;
-    chart.replaceChildren(); labels.replaceChildren(); table.replaceChildren(); const maximum = Math.max(...data.values)*1.15;
-    data.values.forEach((n,i)=>{const group=document.createElement('div');group.className='chart-bar';const number=document.createElement('span');number.textContent=String(n);const bar=document.createElement('div');bar.style.height=`${n/maximum*85}%`;group.append(number,bar);chart.append(group);const label=document.createElement('span');label.textContent=data.labels[i];labels.append(label);const row=document.createElement('tr');const th=document.createElement('th');th.scope='row';th.textContent=data.labels[i];const td=document.createElement('td');td.textContent=String(n);row.append(th,td);table.append(row);});
-    document.querySelector('[data-chart-period]')!.textContent=data.period;
-    [total,data.actions,data.leads].forEach((n,i)=>{document.querySelector(`[data-funnel-value="${i}"]`)!.textContent=String(n);(document.querySelector(`[data-funnel-bar="${i}"]`) as HTMLElement).style.width=`${n/total*100}%`;});
-  }));
+ document.querySelector('[data-download-report]')?.addEventListener('click',()=>{
+  const csv='\uFEFFKennzahl;Beispielwert;Einordnung\nInteraktion;78%;Illustrativ - keine Kontaktstoff-Ergebnisse\nWebsite-Besuche;65%;Illustrativ - keine Kontaktstoff-Ergebnisse\nConversion;24%;Illustrativ - keine Kontaktstoff-Ergebnisse\nQuelle;https://interactivepaper.com/tap;Dashboard-Darstellung\n';
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='impulse-dashboard-beispiel.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ });
 </script>

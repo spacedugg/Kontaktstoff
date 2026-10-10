@@ -1,0 +1,12 @@
+---
+const bars=[62,104,88,144,112,166,104];
+const days=['Mo','Di','Mi','Do','Fr','Sa','So'];
+const metrics=[{label:'Interaktion',value:78,count:'780',color:'lime'},{label:'Website-Besuche',value:65,count:'650',color:'blue'},{label:'Conversion',value:24,count:'240',color:'coral'}];
+---
+<div class="campaign-dashboard" aria-label="Impulse Dashboard-Vorschau mit Beispieldaten">
+ <div class="dash-top"><span class="dash-brand">Impulse<span>Dashboard</span></span><span class="dash-demo">Vorschau · Beispieldaten</span></div>
+ <div class="dash-content"><div class="dash-heading"><div><p>Kampagnenübersicht</p><h3>Ihr nächster Produktlaunch</h3></div><span>Beispielkampagne</span></div>
+ <div class="dash-metrics">{metrics.map(m=><div data-tone={m.color}><p>{m.label}</p><strong>{m.value}<span>%</span></strong></div>)}</div>
+ <div class="dash-panels"><div class="dash-chart"><h4>Erlebnis-Aufrufe</h4><p>Beispielwoche</p><div class="dash-bars" role="img" aria-label="Beispielwoche: Montag 62, Dienstag 104, Mittwoch 88, Donnerstag 144, Freitag 112, Samstag 166, Sonntag 104 geöffnete Erlebnisse.">{bars.map((n,i)=><div><span class="dash-bar-track"><span style={'height:'+Math.round(n/180*100)+'%'}></span></span><span>{days[i]}</span></div>)}</div></div><div class="dash-funnel"><h4>Vom Tap zur Conversion</h4><p>Ein Weg. Drei messbare Schritte.</p><ol>{metrics.map(m=><li data-tone={m.color}><div><span>{m.label}</span><strong>{m.value}%</strong></div><span class="dash-track"><span style={'width:'+m.value+'%'}></span></span></li>)}</ol></div></div>
+ <p class="dash-disclosure">Illustrative Werte, keine Kontaktstoff-Kampagnendaten. 78 / 65 / 24 % aus der Dashboard-Darstellung von Interactive Paper TAP; Verlauf beispielhaft.</p></div>
+</div>
