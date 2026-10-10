@@ -1,8 +1,20 @@
-# Kontaktstoff Impulse – V7
+# Kontaktstoff Impulse – V8
 
 Eigenständiger Prototyp im Branch `claude/interactive-paper-rebuild-owvx7s`. Die Live-Website und ihre Deployment-Konfiguration bleiben unverändert.
 
-## Aktueller Umfang
+## V8 – Präzisierung nach Screenshots · 10.10.2026
+
+Vier neue Bildassets: NordVPN-Karte nahezu kantenparallel in der Hand, PrepMyMeal-Druckdetail, transparenter HOLY-Freisteller mit Alphakanal und grünes True-Nature-Produkt. Die drei HOLY-Schritte bleiben zusammenhängend; Wow-Moment zeigt Revolut, Material/NFC verwenden NordVPN, PrepMyMeal und 116 Media.
+
+Das Logo erhält einen abgerundeten gelben Quadratpunkt mit halbtransparenter äußerer Kontur. Die drei markierten Texte wurden entfernt. Abschnittseinstiege stehen zentriert, Bild-/Textstrecken bleiben auf großen Bildschirmen zweispaltig. Unternehmens- und Produktseiten verwenden eigene Marken-Heros und Inhaltskacheln ohne linke Navigation; auch Artikel haben eine mittige Lesespalte.
+
+FAQ sind native, tastaturbedienbare Details/Summary-Elemente mit vollständig im ausgelieferten HTML enthaltenen Antworten. Gestaltung durch Kontaktstoff wird auf Produkt-, Preis- und Kontaktseiten sowie in FAQ und Design-Ratgeber ausdrücklich angeboten.
+
+Der Kennzahlen-Dialog entfällt. Die kleine Fußnote bezeichnet die 77/64/23 weiterhin als Beispielwerte; es liegt kein Nachweis vor, dass diese zuvor frei gewählten Zahlen aus eigenen Kundentests stammen. Keine erfundene Kundenattribution. Rechtsseiten bleiben Entwürfe.
+
+Prüfung: 30 statische Routen; Links, Assets, IDs/ARIA, native FAQ-Interaktion, entfernte Screenshot-Texte, Branding, Dashboard, Cookies und Journalfilter. Gerenderte Browserprüfung weiterhin nicht möglich: vorgeschriebenes control-browser-Werkzeug fehlt.
+
+## Umfang aus V7
 
 30 statische Seiten: Landingpage, Produkt, Technologie, Preise, acht bebilderte Journalartikel mit Suche und Kategorien, drei Vergleichsseiten, Alternativen, FAQ, Über uns, Karriere (keine offenen Stellen), Kontakt und rechtliche Entwürfe. Bestehende Demo-Zielseiten und das Portal bleiben erreichbar.
 
@@ -10,7 +22,7 @@ Eigenständiger Prototyp im Branch `claude/interactive-paper-rebuild-owvx7s`. Di
 
 Drei Schritte mit einer Karte, sichtbare NFC-Signale, flache Papierintegration, Druckoberfläche und geräteabhängige Rückmeldung. Der Vergleich verwendet einen grünen NFC-Balken und ein überlappendes Erlebnisbild. Das Portal zeigt eine Kampagne mit einem Design und sechs funktionierenden Ansichten.
 
-77/64/23 % sind klar bezeichnete Beispielquoten. 4,5 % QR / 35 % NFC ist ein vom Nutzer vorgegebenes Vergleichsszenario. Es liegen keine eigenen Messdaten oder belastbaren Preisvergleiche vor. Keine garantierten Reichweiten, Haptik- oder Erfolgsversprechen.
+77/64/23 % sind in einer kleinen Fußnote als Beispielwerte bezeichnet. 4,5 % QR / 35 % NFC ist ein vom Nutzer vorgegebenes Vergleichsszenario. Es liegen keine eigenen Messdaten oder belastbaren Preisvergleiche vor. Keine garantierten Reichweiten, Haptik- oder Erfolgsversprechen.
 
 ## Verhalten und Grenzen
 

@@ -42,3 +42,6 @@ Vergleichsseiten,content,should,yes,yes,3 Vergleiche ohne unbelegte Preis- oder 
 FAQ offen lesbar,content,must,yes,yes,12 Fragen; 6 auf der Startseite
 Cookie-Einstellungen,privacy,must,yes,yes,Lokale Auswahl; keine Marketing- oder Analysedienste
 Unternehmens- und Rechtsseiten,content,must,yes,partial,Unternehmensseiten umgesetzt; Rechtstexte als Entwurf bis Betreiberangaben vorliegen
+FAQ als Pill-Akkordeons V8,content,must,yes,yes,Native details/summary; vollständige Antworten im HTML
+Branded Unterseiten V8,marketing site,must,yes,yes,Zentrierte Marken-Heros und Inhaltskacheln ohne linke Navigation
+Transparentes Vergleichsmotiv V8,visual,must,yes,yes,Freigestelltes Produkt mit echtem Alpha und Schatten

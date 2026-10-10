@@ -42,3 +42,16 @@ Astro-Build und DOM-Prüfung aller 30 Seiten: interne Links/Assets, Überschrift
 Private Vorschau: https://kontaktstoff-nfc-colorway.temoa-3702.chatgpt.site
 
 Kein Merge in `main` oder den Live-Branch. PR #23 bleibt Entwurf.
+
+
+## V8 – Präzisierung nach Screenshots · 10.10.2026
+
+Vier neue Bildassets: NordVPN-Karte nahezu kantenparallel in der Hand, PrepMyMeal-Druckdetail, transparenter HOLY-Freisteller mit Alphakanal und grünes True-Nature-Produkt. Die drei HOLY-Schritte bleiben zusammenhängend; Wow-Moment zeigt Revolut, Material/NFC verwenden NordVPN, PrepMyMeal und 116 Media.
+
+Das Logo erhält einen abgerundeten gelben Quadratpunkt mit halbtransparenter äußerer Kontur. Die drei markierten Texte wurden entfernt. Abschnittseinstiege stehen zentriert, Bild-/Textstrecken bleiben auf großen Bildschirmen zweispaltig. Unternehmens- und Produktseiten verwenden eigene Marken-Heros und Inhaltskacheln ohne linke Navigation; auch Artikel haben eine mittige Lesespalte.
+
+FAQ sind native, tastaturbedienbare Details/Summary-Elemente mit vollständig im ausgelieferten HTML enthaltenen Antworten. Gestaltung durch Kontaktstoff wird auf Produkt-, Preis- und Kontaktseiten sowie in FAQ und Design-Ratgeber ausdrücklich angeboten.
+
+Der Kennzahlen-Dialog entfällt. Die kleine Fußnote bezeichnet die 77/64/23 weiterhin als Beispielwerte; es liegt kein Nachweis vor, dass diese zuvor frei gewählten Zahlen aus eigenen Kundentests stammen. Keine erfundene Kundenattribution. Rechtsseiten bleiben Entwürfe.
+
+Prüfung: 30 statische Routen; Links, Assets, IDs/ARIA, native FAQ-Interaktion, entfernte Screenshot-Texte, Branding, Dashboard, Cookies und Journalfilter. Gerenderte Browserprüfung weiterhin nicht möglich: vorgeschriebenes control-browser-Werkzeug fehlt.
